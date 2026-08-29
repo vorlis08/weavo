@@ -5,6 +5,7 @@ import {
   Bell,
   CalendarDays,
   ChevronLeft,
+  ExternalLink,
   GitBranch,
   MoreHorizontal,
   Plus,
@@ -14,6 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
+import { SourceBadge } from '@/components/items'
 import {
   Avatar,
   Button,
@@ -188,7 +190,30 @@ export function RecordDetail() {
                 </Chip>
               )}
               {item.unsorted && <Chip className="border-iris/25 bg-iris/12 text-iris-2">Unsorted</Chip>}
+              {item.source && (
+                <Chip>
+                  <SourceBadge source={item.source} size={12} />
+                  {item.source === 'gmail' ? 'From Gmail' : item.source === 'gcal' ? 'Google Calendar' : 'From Slack'}
+                </Chip>
+              )}
+              {item.externalUrl && (
+                <a
+                  href={item.externalUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2"
+                >
+                  open <ExternalLink size={11} />
+                </a>
+              )}
             </div>
+
+            {item.readOnlyExternal && (
+              <div className="mb-3 mt-1 rounded-lg bg-surface-2 px-3 py-2 text-[11.5px] text-ink-3">
+                Mirrored from Google Calendar. Local edits here are overwritten on the next sync —
+                change it in Google Calendar.
+              </div>
+            )}
 
             <InlineTitle value={item.title} onCommit={(v) => updateItem(item.id, { title: v })} />
 

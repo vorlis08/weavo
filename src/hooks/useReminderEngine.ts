@@ -20,7 +20,9 @@ export function useReminderEngine(navigate: NavigateFunction) {
         // fire if it came due within the last 12h (don't replay ancient reminders)
         if (dueMs <= nowMs && nowMs - dueMs < 12 * 3_600_000) {
           updateReminder(r.id, { firedAt: new Date().toISOString(), snoozedUntil: undefined })
-          showNotification(item.title, r.note || fmtDue(item.due)?.label || 'Reminder')
+          showNotification(item.title, r.note || fmtDue(item.due)?.label || 'Reminder', () =>
+            navigate(`/item/${item.id}`),
+          )
           toast(`Reminder — ${item.title}`, {
             label: 'Open',
             run: () => navigate(`/item/${item.id}`),

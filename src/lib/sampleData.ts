@@ -1,4 +1,4 @@
-import { DEFAULT_SETTINGS } from './store'
+import { DEFAULT_GOOGLE, DEFAULT_SETTINGS } from './store'
 import { addDays, startOfDay, startOfWeek } from './date'
 import type { Item, WeavoData } from './types'
 
@@ -110,5 +110,6 @@ export function makeSampleData(now = new Date()): WeavoData {
     contacts,
     reminders,
     settings: { ...DEFAULT_SETTINGS, displayName: 'You' },
+    google: { ...DEFAULT_GOOGLE },
   }
 }

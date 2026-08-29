@@ -1,5 +1,7 @@
 export type ItemKind = 'event' | 'task' | 'note'
 
+export type SourceKind = 'gmail' | 'gcal' | 'slack'
+
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done'
 
 export type AccentName = 'iris' | 'amber' | 'rose' | 'sage' | 'blue'
@@ -70,9 +72,30 @@ export interface Item {
   unsorted?: boolean
   boardOrder?: number
 
+  /** provenance for items pulled from a connected service */
+  source?: SourceKind
+  externalId?: string
+  externalUrl?: string
+  externalUpdatedAt?: string
+  /** calendar events imported from Google are treated as read-only mirrors */
+  readOnlyExternal?: boolean
+
   createdAt: string
   updatedAt: string
   completedAt?: string
+}
+
+export interface GoogleIntegration {
+  clientId: string
+  connected: boolean
+  email?: string
+  name?: string
+  picture?: string
+  scopes: string[]
+  gmailQuery: string
+  calendarSyncEnabled: boolean
+  lastCalendarSync?: string
+  lastError?: string
 }
 
 export interface Settings {
@@ -91,4 +114,5 @@ export interface WeavoData {
   contacts: Record<string, Contact>
   reminders: Record<string, Reminder>
   settings: Settings
+  google: GoogleIntegration
 }

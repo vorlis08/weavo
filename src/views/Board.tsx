@@ -16,7 +16,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { Plus } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { Avatar, Badge, Segmented, cn } from '@/components/ui'
-import { DueChip } from '@/components/items'
+import { DueChip, SourceBadge } from '@/components/items'
 import { useStore } from '@/lib/store'
 import type { Item, TaskStatus } from '@/lib/types'
 
@@ -54,11 +54,10 @@ function CardBody({ item }: { item: Item }) {
         ) : (
           <span className="capitalize">{item.kind}</span>
         )}
-        {assignee && (
-          <span className="ml-auto">
-            <Avatar name={assignee.name} size={16} />
-          </span>
-        )}
+        <span className="ml-auto flex items-center gap-1.5">
+          {item.source && <SourceBadge source={item.source} size={12} />}
+          {assignee && <Avatar name={assignee.name} size={16} />}
+        </span>
       </div>
       <div className={cn('text-[12.5px] leading-snug text-ink', done && 'text-ink-2 line-through')}>
         {item.title}

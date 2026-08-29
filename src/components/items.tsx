@@ -1,9 +1,24 @@
 import { useNavigate } from 'react-router-dom'
-import { CalendarDays, CircleCheck, FileText, ListChecks } from 'lucide-react'
+import { CalendarDays, CircleCheck, FileText, Hash, ListChecks, Mail } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { fmtDue } from '@/lib/date'
-import type { Item, ItemKind } from '@/lib/types'
+import type { Item, ItemKind, SourceKind } from '@/lib/types'
 import { Checkbox, Dot, cn } from './ui'
+
+const SOURCE_CFG: Record<SourceKind, { Icon: typeof Mail; cls: string; label: string }> = {
+  gmail: { Icon: Mail, cls: 'text-rose', label: 'Gmail' },
+  gcal: { Icon: CalendarDays, cls: 'text-iris-2', label: 'Google Calendar' },
+  slack: { Icon: Hash, cls: 'text-ink-2', label: 'Slack' },
+}
+
+export function SourceBadge({ source, size = 13 }: { source: SourceKind; size?: number }) {
+  const { Icon, cls, label } = SOURCE_CFG[source]
+  return (
+    <span title={`From ${label}`} className={cn('inline-flex shrink-0', cls)}>
+      <Icon size={size} strokeWidth={1.7} />
+    </span>
+  )
+}
 
 export function KindIcon({ kind, size = 14 }: { kind: ItemKind; size?: number }) {
   const Icon = kind === 'event' ? CalendarDays : kind === 'note' ? FileText : ListChecks
@@ -72,6 +87,7 @@ export function TaskRow({ item }: { item: Item }) {
         {item.title}
       </span>
       {isBlocked && <span className="mono shrink-0 text-[10px] text-rose">blocked</span>}
+      {item.source && <SourceBadge source={item.source} />}
       {project && <Dot color={project.color} />}
       <DueChip due={item.due} className="w-16 text-right" />
     </button>

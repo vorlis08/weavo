@@ -27,6 +27,14 @@ snooze or dismiss.
 free-slot suggestion on any open task that you can drop straight onto the
 calendar.
 
+**Google** — sign in with Google to mirror your Calendar (read-only) and turn
+starred emails into tasks/notes, entirely client-side with your own OAuth
+Client ID. Setup: [INTEGRATIONS.md](INTEGRATIONS.md). Slack needs a backend and
+comes later.
+
+**Installable** — it's a PWA; "Add to home screen" / "Install" works, with
+offline access to the app shell.
+
 **Views**
 
 | View | Route | |

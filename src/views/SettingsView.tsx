@@ -3,6 +3,7 @@ import { Bell, Download, Plus, Trash2, Upload } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { Button, SectionLabel, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
+import { GoogleConnect } from '@/components/GoogleConnect'
 import { useStore } from '@/lib/store'
 import { PROJECT_COLORS } from '@/lib/types'
 import type { WeavoData } from '@/lib/types'
@@ -157,6 +158,10 @@ export function SettingsView() {
                 {notifPerm === 'granted' ? 'Enabled' : 'Enable'}
               </Button>
             </Row>
+          </Group>
+
+          <Group title="Integrations">
+            <GoogleConnect />
           </Group>
 
           <Group title="Projects">

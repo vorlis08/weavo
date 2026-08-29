@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Inbox, Plus, Search, Settings } from 'lucide-react'
+import { Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
 import { views } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
@@ -18,6 +18,7 @@ export function Sidebar() {
   const setPalette = useStore((s) => s.setPalette)
   const projectsRec = useStore((s) => s.data.projects)
   const items = useStore((s) => s.data.items)
+  const googleConnected = useStore((s) => s.data.google.connected)
   const projects = useMemo(
     () => Object.values(projectsRec).filter((p) => !p.archived),
     [projectsRec],
@@ -66,6 +67,12 @@ export function Sidebar() {
             {v.label}
           </NavLink>
         ))}
+        {googleConnected && (
+          <NavLink to="/mail" className={navClass}>
+            <Mail size={16} strokeWidth={1.5} />
+            Mail
+          </NavLink>
+        )}
       </nav>
 
       <div className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]">

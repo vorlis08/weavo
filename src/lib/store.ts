@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
   Contact,
+  GoogleIntegration,
   Item,
   ItemKind,
   Project,
@@ -25,6 +26,14 @@ export const DEFAULT_SETTINGS: Settings = {
   notificationsAsked: false,
 }
 
+export const DEFAULT_GOOGLE: GoogleIntegration = {
+  clientId: '',
+  connected: false,
+  scopes: [],
+  gmailQuery: 'is:starred',
+  calendarSyncEnabled: true,
+}
+
 function emptyData(): WeavoData {
   return {
     version: 1,
@@ -33,6 +42,7 @@ function emptyData(): WeavoData {
     contacts: {},
     reminders: {},
     settings: { ...DEFAULT_SETTINGS },
+    google: { ...DEFAULT_GOOGLE },
   }
 }
 
@@ -79,6 +89,19 @@ interface Store {
   snoozeReminder: (id: string, minutes: number) => void
 
   updateSettings: (patch: Partial<Settings>) => void
+  updateGoogle: (patch: Partial<GoogleIntegration>) => void
+  upsertExternalEvents: (
+    events: {
+      externalId: string
+      title: string
+      start: string
+      end: string
+      allDay: boolean
+      url?: string
+      updated?: string
+    }[],
+    window: { start: string; end: string },
+  ) => void
   replaceAll: (data: WeavoData) => void
   clearAll: () => void
 }
@@ -289,13 +312,94 @@ export const useStore = create<Store>()(
       updateSettings: (patch) =>
         set((s) => ({ data: { ...s.data, settings: { ...s.data.settings, ...patch } } })),
 
+      updateGoogle: (patch) =>
+        set((s) => ({ data: { ...s.data, google: { ...s.data.google, ...patch } } })),
+
+      upsertExternalEvents: (events, window) =>
+        set((s) => {
+          const items = { ...s.data.items }
+          const byExternal = new Map<string, Item>()
+          for (const it of Object.values(items)) {
+            if (it.source === 'gcal' && it.externalId) byExternal.set(it.externalId, it)
+          }
+          const seen = new Set<string>()
+          for (const ev of events) {
+            seen.add(ev.externalId)
+            const existing = byExternal.get(ev.externalId)
+            if (existing) {
+              items[existing.id] = {
+                ...existing,
+                title: ev.title,
+                start: ev.start,
+                end: ev.end,
+                allDay: ev.allDay,
+                externalUrl: ev.url,
+                externalUpdatedAt: ev.updated,
+                updatedAt: now(),
+              }
+            } else {
+              const id = uid()
+              items[id] = {
+                id,
+                kind: 'event',
+                title: ev.title,
+                start: ev.start,
+                end: ev.end,
+                allDay: ev.allDay,
+                tags: [],
+                source: 'gcal',
+                externalId: ev.externalId,
+                externalUrl: ev.url,
+                externalUpdatedAt: ev.updated,
+                readOnlyExternal: true,
+                createdAt: now(),
+                updatedAt: now(),
+              }
+            }
+          }
+          // drop mirrored events that vanished from Google within the synced window
+          const winStart = new Date(window.start).getTime()
+          const winEnd = new Date(window.end).getTime()
+          for (const it of byExternal.values()) {
+            if (seen.has(it.externalId!)) continue
+            const t = it.start ? new Date(it.start).getTime() : 0
+            if (t >= winStart && t <= winEnd) delete items[it.id]
+          }
+          return {
+            data: {
+              ...s.data,
+              items,
+              google: { ...s.data.google, lastCalendarSync: now(), lastError: undefined },
+            },
+          }
+        }),
+
       replaceAll: (data) => set({ data: { ...emptyData(), ...data } }),
       clearAll: () => set({ data: emptyData() }),
     }),
     {
       name: 'weavo-v1',
-      version: 1,
+      version: 2,
       partialize: (s) => ({ data: s.data }),
+      migrate: (persisted, version) => {
+        const p = persisted as { data?: Partial<WeavoData> } | undefined
+        if (p?.data && version < 2 && !p.data.google) {
+          p.data.google = { ...DEFAULT_GOOGLE }
+        }
+        return p as { data: WeavoData }
+      },
+      merge: (persisted, current) => {
+        const p = persisted as { data?: Partial<WeavoData> } | undefined
+        return {
+          ...current,
+          data: {
+            ...emptyData(),
+            ...(p?.data ?? {}),
+            settings: { ...DEFAULT_SETTINGS, ...(p?.data?.settings ?? {}) },
+            google: { ...DEFAULT_GOOGLE, ...(p?.data?.google ?? {}) },
+          },
+        }
+      },
     },
   ),
 )

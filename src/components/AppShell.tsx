@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useStore } from '@/lib/store'
 import { useReminderEngine } from '@/hooks/useReminderEngine'
+import { useGoogleSync } from '@/hooks/useGoogleSync'
 import { Sidebar } from './Sidebar'
 import { QuickCapture } from './QuickCapture'
 import { CommandPalette } from './CommandPalette'
@@ -26,6 +27,7 @@ export function AppShell() {
   const { openCapture, setPalette, captureOpen, paletteOpen } = useStore()
   const [helpOpen, setHelpOpen] = useState(false)
   useReminderEngine(navigate)
+  useGoogleSync()
 
   useEffect(() => {
     let g = 0
