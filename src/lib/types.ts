@@ -105,6 +105,7 @@ export interface Settings {
   dayEndHour: number
   defaultView: string
   notificationsAsked: boolean
+  tourSeen: boolean
 }
 
 export interface WeavoData {

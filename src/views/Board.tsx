@@ -99,10 +99,12 @@ function Column({
   col,
   items,
   onAdd,
+  tourAnchor,
 }: {
   col: (typeof COLUMNS)[number]
   items: Item[]
   onAdd: (title: string) => void
+  tourAnchor?: boolean
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: col.key })
   const [adding, setAdding] = useState(false)
@@ -117,7 +119,10 @@ function Column({
       )}
       style={{ borderTop: `2px solid ${col.accent ?? 'var(--color-line-2)'}` }}
     >
-      <div className="flex items-center gap-2 px-[13px] pb-2.5 pt-3">
+      <div
+        data-tour={tourAnchor ? 'board-col' : undefined}
+        className="flex items-center gap-2 px-[13px] pb-2.5 pt-3"
+      >
         <span
           className={cn('text-[12.5px] font-semibold', col.key === 'done' && 'text-ink-2')}
           style={{ color: col.accent ?? undefined }}
@@ -283,10 +288,11 @@ export function Board() {
         onDragCancel={() => setDragId(null)}
       >
         <div className="flex flex-1 gap-3.5 overflow-x-auto p-4 px-5">
-          {COLUMNS.map((col) => (
+          {COLUMNS.map((col, i) => (
             <Column
               key={col.key}
               col={col}
+              tourAnchor={i === 1}
               items={columnItems(col.key)}
               onAdd={(title) =>
                 createItem({

@@ -52,6 +52,10 @@ offline access to the app shell.
 **Keyboard** — `C` capture · `⌘/Ctrl-K` command palette · `G` then
 `D`/`C`/`B`/`T`/`N` to jump between views · `?` for the full list.
 
+**Learn it** — an in-app [`/guide`](https://vorlis08.github.io/weavo/guide) with a
+live quick-capture playground, plus a short coach-mark **tour** that walks over
+the real UI (offered on first run, replayable from Settings or `⌘K`).
+
 ## Stack
 
 - [Vite](https://vite.dev/) + React 19 + TypeScript

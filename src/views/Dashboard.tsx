@@ -49,6 +49,7 @@ export function Dashboard() {
   const data = useStore((s) => s.data)
   const replaceAll = useStore((s) => s.replaceAll)
   const openCapture = useStore((s) => s.openCapture)
+  const startTour = useStore((s) => s.startTour)
   const snoozeReminder = useStore((s) => s.snoozeReminder)
   const updateReminder = useStore((s) => s.updateReminder)
 
@@ -114,12 +115,19 @@ export function Dashboard() {
               type something like “Call plumber tomorrow 9am”.
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             <Button variant="accent" onClick={() => openCapture()}>
               Quick capture
             </Button>
+            <Button onClick={startTour}>
+              <Sparkles size={13} />
+              Take the tour
+            </Button>
             <Button onClick={() => replaceAll(makeSampleData())}>Load example data</Button>
           </div>
+          <Link to="/guide" className="text-[12px] text-iris-2 hover:underline">
+            or read the guide →
+          </Link>
         </div>
       </>
     )

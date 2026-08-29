@@ -109,7 +109,7 @@ export function makeSampleData(now = new Date()): WeavoData {
     projects,
     contacts,
     reminders,
-    settings: { ...DEFAULT_SETTINGS, displayName: 'You' },
+    settings: { ...DEFAULT_SETTINGS, displayName: 'You', tourSeen: true },
     google: { ...DEFAULT_GOOGLE },
   }
 }

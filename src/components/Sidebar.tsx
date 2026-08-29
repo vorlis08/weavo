@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
+import { BookOpen, Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
 import { views } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
@@ -42,6 +42,7 @@ export function Sidebar() {
       </div>
 
       <button
+        data-tour="capture"
         onClick={() => openCapture()}
         className="mb-[7px] flex h-8 w-full items-center gap-[7px] rounded-lg bg-iris px-[13px] text-[12.5px] font-semibold text-[#0b0c0e] transition-colors hover:bg-iris-2"
       >
@@ -51,6 +52,7 @@ export function Sidebar() {
       </button>
 
       <button
+        data-tour="search"
         onClick={() => setPalette(true)}
         className="mb-4 flex h-8 items-center gap-2.5 rounded-lg border border-line px-2.5 text-ink-3 transition-colors hover:border-line-2 hover:text-ink-2"
       >
@@ -60,7 +62,7 @@ export function Sidebar() {
       </button>
 
       <SectionLabel className="px-2.5 pb-[7px]">Views</SectionLabel>
-      <nav>
+      <nav data-tour="views">
         {views.map((v) => (
           <NavLink key={v.id} to={v.path} end={v.path === '/'} className={navClass}>
             <v.icon size={16} strokeWidth={1.5} />
@@ -75,7 +77,10 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]">
+      <div
+        data-tour="projects"
+        className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]"
+      >
         <SectionLabel>Projects</SectionLabel>
         <button
           onClick={() => navigate('/settings')}
@@ -115,7 +120,11 @@ export function Sidebar() {
           Unsorted
           {unsortedCount > 0 && <Badge tone="accent">{unsortedCount}</Badge>}
         </NavLink>
-        <NavLink to="/settings" className={navClass}>
+        <NavLink to="/guide" className={navClass}>
+          <BookOpen size={16} strokeWidth={1.5} />
+          Guide
+        </NavLink>
+        <NavLink to="/settings" className={navClass} data-tour="settings">
           <Settings size={16} strokeWidth={1.5} />
           Settings
         </NavLink>

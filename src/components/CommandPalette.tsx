@@ -82,17 +82,24 @@ export function CommandPalette() {
         },
       }))
 
-    const settingsRow: Row = {
-      id: 'settings',
-      label: 'Go to Settings',
-      icon: <ArrowRight size={14} />,
-      run: () => {
-        close()
-        navigate('/settings')
-      },
-    }
+    const extraRows: Row[] = [
+      { id: 'nav-guide', label: 'Go to Guide', to: '/guide' },
+      { id: 'nav-settings', label: 'Go to Settings', to: '/settings' },
+      { id: 'act-tour', label: 'Take the tour', to: '__tour' },
+    ]
+      .filter((r) => !needle || r.label.toLowerCase().includes(needle))
+      .map((r) => ({
+        id: r.id,
+        label: r.label,
+        icon: <ArrowRight size={14} />,
+        run: () => {
+          close()
+          if (r.to === '__tour') useStore.getState().startTour()
+          else navigate(r.to)
+        },
+      }))
 
-    return [...itemRows, ...actionRows, ...viewRows, settingsRow]
+    return [...itemRows, ...actionRows, ...viewRows, ...extraRows]
   }, [q, items, navigate, openCapture, setPalette])
 
   useEffect(() => {

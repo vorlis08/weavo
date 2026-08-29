@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
-import { Bell, Download, Plus, Trash2, Upload } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Bell, BookOpen, Download, Plus, Sparkles, Trash2, Upload } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { Button, SectionLabel, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
@@ -35,6 +36,7 @@ export function SettingsView() {
   const data = useStore((s) => s.data)
   const {
     updateSettings,
+    startTour,
     addProject,
     updateProject,
     deleteProject,
@@ -93,6 +95,23 @@ export function SettingsView() {
                 onBlur={(e) => updateSettings({ displayName: e.target.value.trim() })}
                 className="w-[180px]"
               />
+            </Row>
+          </Group>
+
+          <Group title="Getting started">
+            <Row label="Product tour" hint="A short walkthrough of the sidebar, capture, and the board.">
+              <Button onClick={startTour}>
+                <Sparkles size={13} />
+                Start tour
+              </Button>
+            </Row>
+            <Row label="Full guide" hint="Every part of Weavo, with a live quick-capture demo.">
+              <Link to="/guide">
+                <Button>
+                  <BookOpen size={13} />
+                  Open guide
+                </Button>
+              </Link>
             </Row>
           </Group>
 

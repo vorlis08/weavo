@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS: Settings = {
   dayEndHour: 20,
   defaultView: '/',
   notificationsAsked: false,
+  tourSeen: false,
 }
 
 export const DEFAULT_GOOGLE: GoogleIntegration = {
@@ -59,6 +60,7 @@ interface Store {
   captureKind: ItemKind
   captureText: string
   paletteOpen: boolean
+  tourOpen: boolean
   toasts: Toast[]
 
   openCapture: (kind?: ItemKind, text?: string) => void
@@ -66,6 +68,8 @@ interface Store {
   setCaptureKind: (k: ItemKind) => void
   setCaptureText: (t: string) => void
   setPalette: (open: boolean) => void
+  startTour: () => void
+  endTour: () => void
   toast: (message: string, action?: Toast['action']) => void
   dismissToast: (id: string) => void
 
@@ -117,6 +121,7 @@ export const useStore = create<Store>()(
       captureKind: 'task',
       captureText: '',
       paletteOpen: false,
+      tourOpen: false,
       toasts: [],
 
       openCapture: (kind, text) =>
@@ -129,6 +134,12 @@ export const useStore = create<Store>()(
       setCaptureKind: (k) => set({ captureKind: k }),
       setCaptureText: (t) => set({ captureText: t }),
       setPalette: (open) => set({ paletteOpen: open }),
+      startTour: () => set({ tourOpen: true, captureOpen: false, paletteOpen: false }),
+      endTour: () =>
+        set((s) => ({
+          tourOpen: false,
+          data: { ...s.data, settings: { ...s.data.settings, tourSeen: true } },
+        })),
 
       toast: (message, action) => {
         const id = uid()

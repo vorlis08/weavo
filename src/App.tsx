@@ -7,6 +7,7 @@ import { Timeline } from './views/Timeline'
 import { NotesMap } from './views/NotesMap'
 import { Digest } from './views/Digest'
 import { Triage } from './views/Triage'
+import { Guide } from './views/Guide'
 import { MailView } from './views/MailView'
 import { ProjectView } from './views/ProjectView'
 import { RecordDetail } from './views/RecordDetail'
@@ -23,6 +24,7 @@ export default function App() {
         <Route path="notes" element={<NotesMap />} />
         <Route path="digest" element={<Digest />} />
         <Route path="triage" element={<Triage />} />
+        <Route path="guide" element={<Guide />} />
         <Route path="mail" element={<MailView />} />
         <Route path="project/:id" element={<ProjectView />} />
         <Route path="item/:id" element={<RecordDetail />} />
