@@ -1,0 +1,81 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-bg: #0a0b0d;
+  --color-surface: #131418;
+  --color-surface-2: #1a1c21;
+  --color-surface-3: #23262d;
+
+  --color-line: #ffffff10;
+  --color-line-2: #ffffff1c;
+
+  --color-ink: #eaebee;
+  --color-ink-2: #969ba5;
+  --color-ink-3: #61656e;
+
+  --color-iris: #8d93ef;
+  --color-iris-2: #a6abf4;
+  --color-amber: #dfa871;
+  --color-rose: #de8892;
+  --color-sage: #83c79d;
+
+  --font-sans: 'Hanken Grotesk', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+    letter-spacing: -0.021em;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-iris) 40%, transparent);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface-3) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: var(--color-surface-3);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+}
+
+@utility mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
