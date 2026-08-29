@@ -119,21 +119,30 @@ export function Checkbox({
   className?: string
 }) {
   return (
-    <button
-      type="button"
+    <span
+      role="checkbox"
+      aria-checked={checked}
+      tabIndex={0}
       onClick={(e) => {
         e.stopPropagation()
         e.preventDefault()
         onChange?.()
       }}
+      onKeyDown={(e) => {
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault()
+          e.stopPropagation()
+          onChange?.()
+        }
+      }}
       className={cn(
-        'flex h-4 w-4 shrink-0 items-center justify-center rounded-[5px] border-[1.5px] transition-colors',
+        'flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-[5px] border-[1.5px] transition-colors',
         checked ? 'border-iris bg-iris text-[#0b0c0e]' : 'border-line-2 hover:border-iris',
         className,
       )}
     >
       {checked && <Check size={11} strokeWidth={3} />}
-    </button>
+    </span>
   )
 }
 
