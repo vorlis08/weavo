@@ -3,38 +3,53 @@
 **Live:** https://vorlis08.github.io/weavo/
 
 A calm, dark-mode **calendar that unifies events, tasks, and notes** — and the
-links between them. Weavo is a productivity tool built around four ideas:
+links between them. Weavo is a local-first productivity tool: no account, no
+server, everything lives in your browser (`localStorage`). Export/import as JSON
+to move or back up your data.
 
-1. **Capture anything, fast** — one modal for an event, a task, or a stray
-   thought, with the option to leave it *unsorted* for later triage.
-2. **Relationships are first-class** — tasks depend on other tasks, notes
-   backlink each other, contacts hang off events, everything ties to a project.
-3. **Reminders that think** — context triggers (not just clock time),
-   escalation when ignored, a daily / weekly digest.
-4. **Many views of one dataset** — calendar, kanban, timeline, a notes graph,
-   and a digest.
+## What works
 
-This repository is the **front-end**, implemented from the approved design.
-Integrations (Gmail, Slack, Notion, Google Drive / Calendar) are represented
-visually; there is no backend yet — all data lives in `src/lib/mockData.ts`.
+**Capture** — one modal (`C`) for an event, task, or thought, with live
+natural-language parsing: `Call plumber tomorrow 9am #home`, `Design review
+Thu 2–3pm @alex`, `Ship v2 in 3 days`. `#name` files it under a project
+(created on the fly); `@name` attaches a person. Leave anything *unsorted* for
+later.
 
-## Screens implemented
+**Relationships** — tasks depend on other tasks (blocked by / blocks), notes
+link each other with `[[wiki-links]]` and show backlinks, contacts hang off
+events, everything ties to a project.
 
-| View | Route | Status |
+**Reminders** — time-based or offset-based ("2 hours before due"). A background
+engine fires a desktop notification and an in-app toast when one comes due;
+snooze or dismiss.
+
+**Smart layer** — live time-conflict detection across the calendar; a
+free-slot suggestion on any open task that you can drop straight onto the
+calendar.
+
+**Views**
+
+| View | Route | |
 | --- | --- | --- |
-| Dashboard (week calendar + today / reminders / unsorted rail) | `/` | ✅ |
-| Record detail (task with dependencies, backlinks, reminders) | `/item/:id` | ✅ |
-| Kanban board | `/kanban` | ✅ |
-| Quick capture (modal, `C` to open) | — | ✅ |
-| Calendar · Timeline · Notes map · Digest | `/calendar` … | placeholder |
+| Dashboard | `/` | week/day calendar + today, reminders, unsorted, stale rails |
+| Calendar | `/calendar` | week and month; click a slot to add |
+| Board | `/board` | drag-and-drop kanban; All/Mine and per-project filters |
+| Timeline | `/timeline` | per-project lanes over a date axis |
+| Notes map | `/notes` | force-directed graph of notes and their links |
+| Digest | `/digest` | today / overdue / this week / inbox / deferred / done |
+| Triage | `/triage` | fast pass over the unsorted inbox |
+| Record detail | `/item/:id` | fully editable |
+| Settings | `/settings` | name, week/day hours, projects, people, data |
+
+**Keyboard** — `C` capture · `⌘/Ctrl-K` command palette · `G` then
+`D`/`C`/`B`/`T`/`N` to jump between views · `?` for the full list.
 
 ## Stack
 
 - [Vite](https://vite.dev/) + React 19 + TypeScript
-- [Tailwind CSS v4](https://tailwindcss.com/) (theme tokens in `src/index.css`)
-- [React Router](https://reactrouter.com/) for view routing
-- [Zustand](https://zustand.docs.pmnd.rs/) for the small amount of shared UI state
-- [lucide-react](https://lucide.dev/) icons, self-hosted Hanken Grotesk + JetBrains Mono
+- [Tailwind CSS v4](https://tailwindcss.com/) — theme tokens in `src/index.css`
+- [React Router](https://reactrouter.com/) · [Zustand](https://zustand.docs.pmnd.rs/) (persisted) · [@dnd-kit](https://dndkit.com/) · [lucide-react](https://lucide.dev/)
+- Self-hosted Hanken Grotesk + JetBrains Mono
 
 ## Develop
 
@@ -45,25 +60,20 @@ npm run build    # type-check + production build
 npm run deploy   # build + publish dist to the gh-pages branch
 ```
 
-Deploy is manual (`npm run deploy`, via the `gh-pages` package) — the auth token
-here lacks the `workflow` scope, so there is no GitHub Actions pipeline yet.
-GitHub Pages serves the `gh-pages` branch at the URL above; `dist/404.html` is a
-copy of `index.html` so client-side routes survive a hard refresh.
+Deploy is manual (`npm run deploy`, via the `gh-pages` package) — the auth
+token used here lacks the `workflow` scope, so there is no GitHub Actions
+pipeline yet. `dist/404.html` is a copy of `index.html` so client-side routes
+survive a hard refresh.
 
-## Project layout
+## Layout
 
 ```
 src/
-  components/     shell, sidebar, quick-capture, shared UI primitives
-  views/          Dashboard, Kanban, RecordDetail, Placeholder
-    dashboard/    WeekCalendar
-  lib/            types, mock data, zustand store, nav config
+  components/   shell, sidebar, quick-capture, command palette, week grid,
+                inline editors, shared UI primitives
+  views/        Dashboard, CalendarView, Board, Timeline, NotesMap, Digest,
+                Triage, ProjectView, RecordDetail, SettingsView
+  lib/          types, store (zustand + persist), date/parse/selectors utils,
+                sample data
+  hooks/        useReminderEngine
 ```
-
-## Design tokens
-
-The whole palette is defined once as CSS custom properties in
-`src/index.css` (`@theme`) and consumed through Tailwind utilities
-(`bg-surface`, `text-ink-2`, `border-line`, `text-iris`, …). One accent
-(iris) carries interaction; a warm amber is reserved for reminders and
-escalation; rose flags conflicts; sage marks done / focus.
