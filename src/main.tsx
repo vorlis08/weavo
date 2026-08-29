@@ -10,9 +10,11 @@ import '@fontsource/jetbrains-mono/500.css'
 import './index.css'
 import App from './App.tsx'
 
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '')
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <App />
     </BrowserRouter>
   </StrictMode>,
