@@ -1,5 +1,7 @@
 # Weavo
 
+**Live:** https://vorlis08.github.io/weavo/
+
 A calm, dark-mode **calendar that unifies events, tasks, and notes** — and the
 links between them. Weavo is a productivity tool built around four ideas:
 
@@ -40,7 +42,13 @@ visually; there is no backend yet — all data lives in `src/lib/mockData.ts`.
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check + production build
+npm run deploy   # build + publish dist to the gh-pages branch
 ```
+
+Deploy is manual (`npm run deploy`, via the `gh-pages` package) — the auth token
+here lacks the `workflow` scope, so there is no GitHub Actions pipeline yet.
+GitHub Pages serves the `gh-pages` branch at the URL above; `dist/404.html` is a
+copy of `index.html` so client-side routes survive a hard refresh.
 
 ## Project layout
 
