@@ -1,92 +1,94 @@
 export type ItemKind = 'event' | 'task' | 'note'
 
-export type SourceKind = 'gmail' | 'slack' | 'notion' | 'drive' | 'gcal'
-
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done'
 
-export type AccentName = 'iris' | 'amber' | 'rose' | 'sage' | 'ink'
+export type AccentName = 'iris' | 'amber' | 'rose' | 'sage' | 'blue'
+
+export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
+  { name: 'iris', value: '#8d93ef' },
+  { name: 'amber', value: '#dfa871' },
+  { name: 'sage', value: '#83c79d' },
+  { name: 'rose', value: '#de8892' },
+  { name: 'blue', value: '#7cc1e8' },
+]
 
 export interface Project {
   id: string
   name: string
   color: string
+  archived?: boolean
 }
 
 export interface Contact {
   id: string
   name: string
-  initials: string
+  email?: string
   role?: string
-  tintBg: string
-  tintFg: string
 }
 
-export type ReminderKind = 'time' | 'context' | 'escalation'
-export type ReminderState = 'active' | 'overdue' | 'snoozed' | 'upcoming'
+/** minutes before the reference time, or an absolute ISO instant */
+export type ReminderTrigger =
+  | { type: 'before_due'; minutes: number }
+  | { type: 'before_start'; minutes: number }
+  | { type: 'at'; at: string }
 
 export interface Reminder {
   id: string
-  kind: ReminderKind
-  label: string
-  detail: string
-  state: ReminderState
+  itemId: string
+  trigger: ReminderTrigger
+  note?: string
+  /** ISO instant it last fired, if it has */
+  firedAt?: string
+  /** ISO instant to re-arm after a snooze */
+  snoozedUntil?: string
+  done?: boolean
 }
 
-interface ItemBase {
+export interface Item {
   id: string
+  kind: ItemKind
   title: string
+  body?: string
   projectId?: string
-  source?: SourceKind
-  tags: string[]
-  suggestedTags?: string[]
-  unsorted?: boolean
-  capturedAgo?: string
-}
 
-export interface TaskItem extends ItemBase {
-  kind: 'task'
-  status: TaskStatus
-  code?: string
-  start?: string
+  /** task */
+  status?: TaskStatus
+  /** ISO datetime (may be date-only at midnight) */
   due?: string
-  description?: string
-  blockedBy: string[]
-  blocks: string[]
-  linkedNoteIds: string[]
-  contactIds: string[]
-  reminders: Reminder[]
-  checklist?: { done: number; total: number }
-  activity?: { at: string; text: string }[]
-  suggestedTime?: { label: string; reason: string }
-  conflict?: string
+  assigneeId?: string
+  blockedBy?: string[]
+  checklist?: { id: string; text: string; done: boolean }[]
+
+  /** event — ISO datetimes */
+  start?: string
+  end?: string
+  allDay?: boolean
+  contactIds?: string[]
+
+  /** shared */
+  tags: string[]
+  unsorted?: boolean
+  boardOrder?: number
+
+  createdAt: string
+  updatedAt: string
+  completedAt?: string
 }
 
-export interface EventItem extends ItemBase {
-  kind: 'event'
-  /** 0 = Monday … 4 = Friday of the shown week */
-  day: number
-  startH: number
-  endH: number
-  contactIds: string[]
-  milestone?: boolean
-  conflict?: string
-  needsTime?: boolean
-  accent?: AccentName
+export interface Settings {
+  displayName: string
+  weekStartsMonday: boolean
+  dayStartHour: number
+  dayEndHour: number
+  defaultView: string
+  notificationsAsked: boolean
 }
 
-export interface NoteItem extends ItemBase {
-  kind: 'note'
-  snippet: string
-  /** ids of items this note links out to */
-  links: string[]
-  /** ids of items that link back to this note */
-  backlinks: string[]
-}
-
-export type Item = TaskItem | EventItem | NoteItem
-
-export interface NavView {
-  id: string
-  label: string
-  path: string
+export interface WeavoData {
+  version: number
+  items: Record<string, Item>
+  projects: Record<string, Project>
+  contacts: Record<string, Contact>
+  reminders: Record<string, Reminder>
+  settings: Settings
 }

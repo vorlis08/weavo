@@ -1,21 +1,33 @@
-import { NavLink } from 'react-router-dom'
-import { Inbox, Plus, Search, SlidersHorizontal } from 'lucide-react'
+import { useMemo } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { Inbox, Plus, Search, Settings } from 'lucide-react'
 import { views } from '@/lib/nav'
-import { projects, projectCounts } from '@/lib/mockData'
-import { useUI } from '@/lib/store'
-import { Badge, Dot, SectionLabel, cn } from './ui'
+import { useStore } from '@/lib/store'
+import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
 
 function navClass({ isActive }: { isActive: boolean }) {
   return cn(
     'flex h-[31px] items-center gap-2.5 rounded-md px-2.5 text-[12.75px] font-medium transition-colors',
-    isActive
-      ? 'bg-iris/12 text-iris-2'
-      : 'text-ink-2 hover:bg-surface-2 hover:text-ink',
+    isActive ? 'bg-iris/12 text-iris-2' : 'text-ink-2 hover:bg-surface-2 hover:text-ink',
   )
 }
 
 export function Sidebar() {
-  const openCapture = useUI((s) => s.openCapture)
+  const navigate = useNavigate()
+  const openCapture = useStore((s) => s.openCapture)
+  const setPalette = useStore((s) => s.setPalette)
+  const projectsRec = useStore((s) => s.data.projects)
+  const items = useStore((s) => s.data.items)
+  const projects = useMemo(
+    () => Object.values(projectsRec).filter((p) => !p.archived),
+    [projectsRec],
+  )
+
+  const countFor = (projectId: string) =>
+    Object.values(items).filter(
+      (it) => it.projectId === projectId && it.status !== 'done',
+    ).length
+  const unsortedCount = Object.values(items).filter((it) => it.unsorted).length
 
   return (
     <aside className="flex w-[232px] shrink-0 flex-col border-r border-line bg-[#0c0d10] px-3.5 py-[18px]">
@@ -37,44 +49,73 @@ export function Sidebar() {
         <span className="mono ml-auto text-[10px] opacity-55">C</span>
       </button>
 
-      <div className="mb-4 flex h-8 items-center gap-2.5 rounded-lg border border-line px-2.5 text-ink-3">
+      <button
+        onClick={() => setPalette(true)}
+        className="mb-4 flex h-8 items-center gap-2.5 rounded-lg border border-line px-2.5 text-ink-3 transition-colors hover:border-line-2 hover:text-ink-2"
+      >
         <Search size={13} strokeWidth={1.6} />
         <span className="text-[12px]">Search</span>
-        <span className="mono ml-auto text-[10px]">K</span>
-      </div>
+        <span className="mono ml-auto text-[10px]">⌘K</span>
+      </button>
 
       <SectionLabel className="px-2.5 pb-[7px]">Views</SectionLabel>
-      {views.map((v) => (
-        <NavLink key={v.id} to={v.path} end={v.path === '/'} className={navClass}>
-          <v.icon size={16} strokeWidth={1.5} />
-          {v.label}
-          {!v.implemented && (
-            <span className="mono ml-auto text-[9px] text-ink-3">soon</span>
+      <nav>
+        {views.map((v) => (
+          <NavLink key={v.id} to={v.path} end={v.path === '/'} className={navClass}>
+            <v.icon size={16} strokeWidth={1.5} />
+            {v.label}
+          </NavLink>
+        ))}
+      </nav>
+
+      <div className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]">
+        <SectionLabel>Projects</SectionLabel>
+        <button
+          onClick={() => navigate('/settings')}
+          className="text-ink-3 transition-colors hover:text-ink-2"
+          title="Manage projects"
+        >
+          <Plus size={13} />
+        </button>
+      </div>
+      {projects.length === 0 && (
+        <p className="px-2.5 pb-1 text-[11px] leading-relaxed text-ink-3">
+          Add one with <span className="mono">#name</span> in quick capture.
+        </p>
+      )}
+      {projects.map((p) => (
+        <NavLink
+          key={p.id}
+          to={`/project/${p.id}`}
+          className={({ isActive }) =>
+            cn(
+              'flex h-[31px] items-center gap-2.5 rounded-md px-2.5 text-[12.75px] font-medium transition-colors',
+              isActive ? 'bg-iris/12 text-iris-2' : 'text-ink-2 hover:bg-surface-2 hover:text-ink',
+            )
+          }
+        >
+          <Dot color={p.color} />
+          <span className="truncate">{p.name}</span>
+          {countFor(p.id) > 0 && (
+            <span className="mono ml-auto text-[11px] text-ink-3">{countFor(p.id)}</span>
           )}
         </NavLink>
       ))}
 
-      <SectionLabel className="px-2.5 pb-[7px] pt-[17px]">Projects</SectionLabel>
-      {projects.map((p) => (
-        <div key={p.id} className="flex h-[31px] items-center gap-2.5 rounded-md px-2.5 text-[12.75px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
-          <Dot color={p.color} />
-          {p.name}
-          <span className="mono ml-auto text-[11px] text-ink-3">{projectCounts[p.id]}</span>
-        </div>
-      ))}
-
       <div className="mt-auto border-t border-line pt-3">
-        <div className="flex h-[31px] items-center justify-between rounded-md px-2.5 text-[12.75px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
-          <span className="flex items-center gap-2.5">
-            <Inbox size={16} strokeWidth={1.5} />
-            Unsorted
-          </span>
-          <Badge tone="accent">7</Badge>
-        </div>
-        <div className="flex h-[31px] items-center gap-2.5 rounded-md px-2.5 text-[12.75px] font-medium text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink">
-          <SlidersHorizontal size={16} strokeWidth={1.5} />
+        <NavLink to="/triage" className={navClass}>
+          <Inbox size={16} strokeWidth={1.5} />
+          Unsorted
+          {unsortedCount > 0 && <Badge tone="accent">{unsortedCount}</Badge>}
+        </NavLink>
+        <NavLink to="/settings" className={navClass}>
+          <Settings size={16} strokeWidth={1.5} />
           Settings
-        </div>
+        </NavLink>
+      </div>
+
+      <div className="px-2.5 pt-2">
+        <Kbd>?</Kbd> <span className="text-[10px] text-ink-3">shortcuts</span>
       </div>
     </aside>
   )

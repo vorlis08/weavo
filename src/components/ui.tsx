@@ -1,24 +1,15 @@
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react'
 import { Check } from 'lucide-react'
-import type { AccentName, Contact } from '@/lib/types'
+import { initials, tintFor } from '@/lib/util'
 
 export function cn(...parts: (string | false | null | undefined)[]) {
   return parts.filter(Boolean).join(' ')
-}
-
-export const accentText: Record<AccentName, string> = {
-  iris: 'text-iris-2',
-  amber: 'text-amber',
-  rose: 'text-rose',
-  sage: 'text-sage',
-  ink: 'text-ink-2',
-}
-export const accentBar: Record<AccentName, string> = {
-  iris: 'border-l-iris bg-iris/12',
-  amber: 'border-l-amber bg-amber/12',
-  rose: 'border-l-rose bg-rose/12',
-  sage: 'border-l-sage bg-sage/12',
-  ink: 'border-l-ink-3 bg-white/5',
 }
 
 export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
@@ -43,12 +34,13 @@ export function Badge({
   tone = 'default',
 }: {
   children: ReactNode
-  tone?: 'default' | 'accent' | 'rose'
+  tone?: 'default' | 'accent' | 'rose' | 'amber'
 }) {
   const tones = {
     default: 'bg-surface-3 text-ink-2',
     accent: 'bg-iris text-[#0b0c0e]',
-    rose: 'bg-rose/12 text-rose',
+    rose: 'bg-rose/15 text-rose',
+    amber: 'bg-amber/15 text-amber',
   }
   return (
     <span
@@ -66,26 +58,34 @@ export function Chip({
   children,
   className,
   style,
+  onClick,
+  title,
 }: {
   children: ReactNode
   className?: string
   style?: React.CSSProperties
+  onClick?: () => void
+  title?: string
 }) {
+  const Tag = onClick ? 'button' : 'span'
   return (
-    <span
+    <Tag
+      onClick={onClick}
+      title={title}
       className={cn(
         'inline-flex h-[23px] items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-surface-2 px-[9px] text-[11.5px] text-ink-2',
+        onClick && 'transition-colors hover:border-line-2 hover:text-ink',
         className,
       )}
       style={style}
     >
       {children}
-    </span>
+    </Tag>
   )
 }
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'default' | 'accent' | 'ghost'
+  variant?: 'default' | 'accent' | 'ghost' | 'danger'
   square?: boolean
 }
 export function Button({ variant = 'default', square, className, children, ...rest }: BtnProps) {
@@ -93,11 +93,12 @@ export function Button({ variant = 'default', square, className, children, ...re
     default: 'border-line-2 bg-surface-2 text-ink hover:bg-surface-3',
     accent: 'border-transparent bg-iris text-[#0b0c0e] font-semibold hover:bg-iris-2',
     ghost: 'border-transparent bg-transparent text-ink-2 hover:bg-surface-2 hover:text-ink',
+    danger: 'border-transparent bg-rose/15 text-rose hover:bg-rose/25',
   }
   return (
     <button
       className={cn(
-        'inline-flex h-8 items-center justify-center gap-[7px] rounded-lg border px-[13px] text-[12.5px] font-medium transition-colors active:translate-y-px',
+        'inline-flex h-8 items-center justify-center gap-[7px] rounded-lg border px-[13px] text-[12.5px] font-medium transition-colors active:translate-y-px disabled:pointer-events-none disabled:opacity-40',
         square && 'w-8 px-0',
         variants[variant],
         className,
@@ -146,20 +147,29 @@ export function Checkbox({
   )
 }
 
-export function Avatar({ contact, size = 22 }: { contact: Contact; size?: number }) {
+export function Avatar({
+  name,
+  size = 22,
+  title,
+}: {
+  name: string
+  size?: number
+  title?: string
+}) {
+  const tint = tintFor(name || '?')
   return (
     <span
       className="flex shrink-0 items-center justify-center rounded-full font-semibold"
       style={{
         width: size,
         height: size,
-        background: contact.tintBg,
-        color: contact.tintFg,
+        background: tint.bg,
+        color: tint.fg,
         fontSize: Math.round(size * 0.4),
       }}
-      title={contact.name}
+      title={title ?? name}
     >
-      {contact.initials}
+      {initials(name || '?')}
     </span>
   )
 }
@@ -184,9 +194,7 @@ export function Segmented<T extends string>({
           className={cn(
             'flex items-center gap-1.5 rounded-md px-[11px] font-medium transition-colors',
             size === 'sm' ? 'h-6 text-[11.5px]' : 'h-7 text-[12px]',
-            value === o.value
-              ? 'bg-surface-3 text-ink'
-              : 'text-ink-2 hover:text-ink',
+            value === o.value ? 'bg-surface-3 text-ink' : 'text-ink-2 hover:text-ink',
           )}
         >
           {o.label}
@@ -201,5 +209,77 @@ export function Kbd({ children }: { children: ReactNode }) {
     <span className="mono rounded border border-line px-1.5 py-px text-[10px] text-ink-3">
       {children}
     </span>
+  )
+}
+
+const fieldCls =
+  'h-8 w-full rounded-lg border border-line bg-surface-2 px-2.5 text-[12.5px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-iris/50'
+
+export function TextField(props: InputHTMLAttributes<HTMLInputElement>) {
+  return <input {...props} className={cn(fieldCls, props.className)} />
+}
+
+export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className={cn(
+        fieldCls,
+        'h-auto min-h-[72px] resize-y py-2 leading-relaxed',
+        props.className,
+      )}
+    />
+  )
+}
+
+export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select
+      {...props}
+      className={cn(
+        fieldCls,
+        'cursor-pointer appearance-none bg-[length:12px] bg-[right_8px_center] bg-no-repeat pr-7',
+        props.className,
+      )}
+      style={{
+        backgroundImage:
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2361656e' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+        ...props.style,
+      }}
+    />
+  )
+}
+
+export function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="flex flex-col gap-1.5">
+      <SectionLabel>{label}</SectionLabel>
+      {children}
+    </label>
+  )
+}
+
+export function EmptyState({
+  icon,
+  title,
+  hint,
+  action,
+}: {
+  icon?: ReactNode
+  title: string
+  hint?: string
+  action?: ReactNode
+}) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center p-10 text-center">
+      {icon && (
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-surface text-ink-3">
+          {icon}
+        </div>
+      )}
+      <h2 className="text-[15px]">{title}</h2>
+      {hint && <p className="mt-1.5 max-w-[320px] text-[12.5px] leading-relaxed text-ink-2">{hint}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
   )
 }

@@ -9,8 +9,12 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/weavo/' : '/',
   plugins: [react(), tailwindcss()],
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
+  },
+  optimizeDeps: {
+    include: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
   },
 }))
