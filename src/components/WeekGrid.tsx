@@ -2,7 +2,8 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { TriangleAlert } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { decimalHours, fmtTime, isSameDay } from '@/lib/date'
+import { useT } from '@/lib/i18n'
+import { dateLocale, decimalHours, fmtTime, isSameDay } from '@/lib/date'
 import { eventConflicts } from '@/lib/selectors'
 import type { Item } from '@/lib/types'
 import { cn } from './ui'
@@ -38,6 +39,7 @@ export function WeekGrid({
   days: Date[]
   now?: Date
 }) {
+  const t = useT()
   const navigate = useNavigate()
   const items = useStore((s) => s.data.items)
   const projects = useStore((s) => s.data.projects)
@@ -62,7 +64,7 @@ export function WeekGrid({
     const end = new Date(start.getTime() + 3_600_000)
     const it = createItem({
       kind: 'event',
-      title: 'New event',
+      title: t.calendar.addEventTitle,
       start: start.toISOString(),
       end: end.toISOString(),
     })
@@ -81,7 +83,7 @@ export function WeekGrid({
               className={cn('flex-1 border-l border-line py-2 text-center', today && 'bg-iris/[0.05]')}
             >
               <div className={cn('text-[11px] tracking-[0.04em]', today ? 'text-iris-2' : 'text-ink-3')}>
-                {d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}
+                {d.toLocaleDateString(dateLocale(), { weekday: 'short' }).toUpperCase()}
               </div>
               {today ? (
                 <span className="mt-0.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-iris text-[12px] font-bold text-[#0b0c0e]">

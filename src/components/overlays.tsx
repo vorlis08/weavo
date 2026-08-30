@@ -6,6 +6,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
+import { useT } from '@/lib/i18n'
 import { cn } from './ui'
 
 export function useEscape(active: boolean, onEscape: () => void) {
@@ -141,7 +142,7 @@ export function ConfirmDialog({
   open,
   title,
   body,
-  confirmLabel = 'Delete',
+  confirmLabel,
   onConfirm,
   onCancel,
 }: {
@@ -152,6 +153,7 @@ export function ConfirmDialog({
   onConfirm: () => void
   onCancel: () => void
 }) {
+  const t = useT()
   return (
     <Modal open={open} onClose={onCancel} width={380}>
       <div className="p-5">
@@ -162,13 +164,13 @@ export function ConfirmDialog({
             onClick={onCancel}
             className="h-8 rounded-lg border border-line-2 bg-surface-2 px-3 text-[12.5px] font-medium hover:bg-surface-3"
           >
-            Cancel
+            {t.common.cancel}
           </button>
           <button
             onClick={onConfirm}
             className="h-8 rounded-lg bg-rose/15 px-3 text-[12.5px] font-semibold text-rose hover:bg-rose/25"
           >
-            {confirmLabel}
+            {confirmLabel ?? t.common.delete}
           </button>
         </div>
       </div>

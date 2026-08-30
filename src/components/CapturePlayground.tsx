@@ -8,16 +8,26 @@ import {
 } from 'lucide-react'
 import { parseCapture } from '@/lib/parse'
 import { fmtDayMonth, fmtTime, fmtWeekday } from '@/lib/date'
+import { useT, useLang } from '@/lib/i18n'
 import type { ItemKind } from '@/lib/types'
 import { Segmented, cn } from './ui'
 
-const EXAMPLES = [
-  'Draft pricing deck for finance review Thursday 2pm #launch',
-  'Call the plumber tomorrow 9am',
-  'Design review Fri 2–3pm @alex #website',
-  'Ship the newsletter in 3 days',
-  'Idea: bundle onboarding into the Pro tier',
-]
+const EXAMPLES: Record<'cs' | 'en', string[]> = {
+  cs: [
+    'Návrh ceníku na review ve čtvrtek 14:00 #launch',
+    'Zavolat instalatérovi zítra 9:00',
+    'Design review v pátek 14–15 @alex #web',
+    'Odeslat newsletter za 3 dny',
+    'Nápad: přidat onboarding do tarifu Pro',
+  ],
+  en: [
+    'Draft pricing deck for finance review Thursday 2pm #launch',
+    'Call the plumber tomorrow 9am',
+    'Design review Fri 2–3pm @alex #website',
+    'Ship the newsletter in 3 days',
+    'Idea: bundle onboarding into the Pro tier',
+  ],
+}
 
 function Chip({
   children,
@@ -41,7 +51,10 @@ function Chip({
 }
 
 export function CapturePlayground() {
-  const [text, setText] = useState(EXAMPLES[0])
+  const t = useT()
+  const lang = useLang()
+  const examples = EXAMPLES[lang] ?? EXAMPLES.en
+  const [text, setText] = useState(examples[0])
   const [kind, setKind] = useState<ItemKind>('task')
 
   const parsed = useMemo(() => parseCapture(text), [text])
@@ -57,10 +70,8 @@ export function CapturePlayground() {
   return (
     <div className="my-5 overflow-hidden rounded-2xl border border-line-2 bg-surface">
       <div className="mono flex items-center gap-2 border-b border-line px-4 py-2.5 text-[10px] uppercase tracking-[0.13em] text-ink-3">
-        <span className="text-iris">✦</span> Quick capture — try it
-        <span className="ml-auto normal-case tracking-normal text-ink-3">
-          sandbox · nothing is created
-        </span>
+        <span className="text-iris">✦</span> {t.playground.header}
+        <span className="ml-auto normal-case tracking-normal text-ink-3">{t.playground.sandbox}</span>
       </div>
 
       <div className="px-4 pb-3 pt-4">
@@ -77,9 +88,9 @@ export function CapturePlayground() {
           <Segmented
             size="md"
             options={[
-              { value: 'event', label: <><CalendarIcon size={13} strokeWidth={1.7} />Event</> },
-              { value: 'task', label: <><ListChecks size={13} strokeWidth={1.7} />Task</> },
-              { value: 'note', label: <><FileText size={13} strokeWidth={1.7} />Note</> },
+              { value: 'event', label: <><CalendarIcon size={13} strokeWidth={1.7} />{t.kind.event}</> },
+              { value: 'task', label: <><ListChecks size={13} strokeWidth={1.7} />{t.kind.task}</> },
+              { value: 'note', label: <><FileText size={13} strokeWidth={1.7} />{t.kind.note}</> },
             ]}
             value={kind}
             onChange={setKind}
@@ -91,7 +102,7 @@ export function CapturePlayground() {
             <Chip on>
               <CalendarIcon size={11} strokeWidth={1.7} />
               {whenLabel}
-              {kind === 'task' && ' · due'}
+              {kind === 'task' && ` · ${t.capture.due}`}
             </Chip>
           )}
           {parsed.projectName && (
@@ -108,14 +119,14 @@ export function CapturePlayground() {
           ))}
           {!whenLabel && !parsed.projectName && parsed.contactNames.length === 0 && (
             <span className="text-[11.5px] text-ink-3">
-              No date, project, or person detected — it’ll just be titled “{parsed.title}”.
+              {t.playground.nothingDetected(parsed.title)}
             </span>
           )}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-1.5 border-t border-line bg-surface-2 px-4 py-2.5">
-        {EXAMPLES.map((ex) => (
+        {examples.map((ex) => (
           <button
             key={ex}
             onClick={() => setText(ex)}

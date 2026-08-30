@@ -10,6 +10,7 @@ import {
   User,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { parseCapture } from '@/lib/parse'
 import { fmtDayMonth, fmtTime, fmtWeekday } from '@/lib/date'
 import type { Item, ItemKind } from '@/lib/types'
@@ -39,6 +40,7 @@ function Pill({
 }
 
 export function QuickCapture() {
+  const t = useT()
   const {
     captureOpen,
     captureKind,
@@ -53,6 +55,8 @@ export function QuickCapture() {
     toast,
   } = useStore()
   const navigate = useNavigate()
+  const kindLabel = (k: ItemKind) =>
+    k === 'event' ? t.kind.eventLower : k === 'task' ? t.kind.taskLower : t.kind.noteLower
   const areaRef = useRef<HTMLTextAreaElement>(null)
   const [leaveUnsorted, setLeaveUnsorted] = useState(false)
 
@@ -148,16 +152,16 @@ export function QuickCapture() {
     closeCapture()
     if (openAfter) navigate(`/item/${item.id}`)
     else
-      toast(`Captured ${captureKind}`, {
-        label: 'Open',
+      toast(t.capture.toastCaptured(kindLabel(captureKind)), {
+        label: t.common.open,
         run: () => navigate(`/item/${item.id}`),
       })
   }
 
   const kindOptions: { value: ItemKind; label: React.ReactNode }[] = [
-    { value: 'event', label: <><CalendarIcon size={13} strokeWidth={1.7} />Event</> },
-    { value: 'task', label: <><ListChecks size={13} strokeWidth={1.7} />Task</> },
-    { value: 'note', label: <><FileText size={13} strokeWidth={1.7} />Note</> },
+    { value: 'event', label: <><CalendarIcon size={13} strokeWidth={1.7} />{t.kind.event}</> },
+    { value: 'task', label: <><ListChecks size={13} strokeWidth={1.7} />{t.kind.task}</> },
+    { value: 'note', label: <><FileText size={13} strokeWidth={1.7} />{t.kind.note}</> },
   ]
 
   return (
@@ -174,7 +178,7 @@ export function QuickCapture() {
             }
           }}
           rows={2}
-          placeholder="Draft pricing deck for review tomorrow 2pm #launch"
+          placeholder={t.capture.placeholder}
           className="w-full resize-none bg-transparent text-[16px] leading-[1.5] text-ink outline-none placeholder:text-ink-3"
         />
 
@@ -188,7 +192,7 @@ export function QuickCapture() {
               <Pill tone="iris">
                 <CalendarIcon size={11} strokeWidth={1.7} />
                 {whenLabel}
-                {captureKind === 'task' && ' · due'}
+                {captureKind === 'task' && ` · ${t.capture.due}`}
               </Pill>
             )}
             {parsed.projectName && (
@@ -198,7 +202,7 @@ export function QuickCapture() {
                 ) : (
                   <FolderPlus size={11} strokeWidth={1.7} />
                 )}
-                {existingProject ? existingProject.name : `New project “${parsed.projectName}”`}
+                {existingProject ? existingProject.name : t.capture.newProject(parsed.projectName)}
               </Pill>
             )}
             {parsed.contactNames.map((n) => (
@@ -214,8 +218,7 @@ export function QuickCapture() {
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose/12 px-2.5 py-[9px]">
             <TriangleAlert size={13} strokeWidth={1.7} className="shrink-0 text-rose" />
             <span className="text-[11.5px] text-ink-2">
-              Overlaps <span className="text-ink">{conflict.title}</span>
-              {conflict.start ? ` at ${fmtTime(conflict.start)}` : ''}.
+              {t.capture.overlaps(conflict.title, conflict.start ? fmtTime(conflict.start) : '')}
             </span>
           </div>
         )}
@@ -229,14 +232,14 @@ export function QuickCapture() {
             className="flex items-center gap-2 text-[12.5px] text-ink-2"
           >
             <Checkbox checked={leaveUnsorted} onChange={() => setLeaveUnsorted((v) => !v)} />
-            Leave unsorted
+            {t.capture.leaveUnsorted}
           </button>
           <div className="ml-auto flex gap-2">
             <Button variant="ghost" onClick={() => capture(true)} disabled={!parsed.title.trim()}>
-              Add details
+              {t.capture.addDetails}
             </Button>
             <Button variant="accent" onClick={() => capture(false)} disabled={!parsed.title.trim()}>
-              Capture {captureKind}
+              {t.capture.submit(kindLabel(captureKind))}
             </Button>
           </div>
         </div>
@@ -244,9 +247,9 @@ export function QuickCapture() {
 
       <div className="flex items-center gap-4 border-t border-line bg-surface-2 px-[18px] py-[9px]">
         <span className="text-[10px] text-ink-3">
-          <Kbd>↵</Kbd> capture&nbsp;·&nbsp;<Kbd>⇧↵</Kbd> newline&nbsp;·&nbsp;<Kbd>esc</Kbd> close
+          <Kbd>↵</Kbd> {t.capture.hintCapture}&nbsp;·&nbsp;<Kbd>⇧↵</Kbd> {t.capture.hintNewline}&nbsp;·&nbsp;<Kbd>esc</Kbd> {t.capture.hintClose}
         </span>
-        <span className="mono ml-auto text-[10px] text-ink-3">parsed live</span>
+        <span className="mono ml-auto text-[10px] text-ink-3">{t.capture.parsedLive}</span>
       </div>
     </Modal>
   )

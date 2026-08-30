@@ -14,6 +14,7 @@ import { Avatar, Button, Badge, Chip, Segmented } from '@/components/ui'
 import { CompletedRow, KindIcon, TaskRow } from '@/components/items'
 import { WeekGrid } from '@/components/WeekGrid'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { addDays, fmtDayMonth, fmtLongDate, fmtTime, startOfWeek } from '@/lib/date'
 import { buildDigest, eventConflicts, reminderDueAt } from '@/lib/selectors'
 import { makeSampleData } from '@/lib/sampleData'
@@ -45,6 +46,7 @@ function Card({
 }
 
 export function Dashboard() {
+  const t = useT()
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
   const replaceAll = useStore((s) => s.replaceAll)
@@ -96,37 +98,36 @@ export function Dashboard() {
 
   const title = mode === 'day'
     ? fmtLongDate(days[0])
-    : `${fmtDayMonth(days[0])} – ${fmtDayMonth(days[days.length - 1])}`
+    : t.topbar.weekLabel(fmtDayMonth(days[0]), fmtDayMonth(days[days.length - 1]))
 
   if (itemCount === 0) {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">Dashboard</h1>
+          <h1 className="text-[16px]">{t.nav.dashboard}</h1>
         </TopBar>
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-10 text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-iris/12 text-iris">
             <Sparkles size={24} strokeWidth={1.5} />
           </div>
           <div>
-            <h2 className="text-[17px]">Nothing captured yet</h2>
+            <h2 className="text-[17px]">{t.dashboard.emptyTitle}</h2>
             <p className="mt-1.5 max-w-[360px] text-[13px] leading-relaxed text-ink-2">
-              Weavo keeps events, tasks, and notes in one place. Capture your first thing —
-              type something like “Call plumber tomorrow 9am”.
+              {t.dashboard.emptyBody}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="accent" onClick={() => openCapture()}>
-              Quick capture
+              {t.dashboard.quickCapture}
             </Button>
             <Button onClick={startTour}>
               <Sparkles size={13} />
-              Take the tour
+              {t.dashboard.takeTour}
             </Button>
-            <Button onClick={() => replaceAll(makeSampleData())}>Load example data</Button>
+            <Button onClick={() => replaceAll(makeSampleData(new Date(), data.settings.lang))}>{t.dashboard.loadExample}</Button>
           </div>
           <Link to="/guide" className="text-[12px] text-iris-2 hover:underline">
-            or read the guide →
+            {t.dashboard.orReadGuide}
           </Link>
         </div>
       </>
@@ -144,7 +145,7 @@ export function Dashboard() {
             <ChevronRight size={16} />
           </Button>
           <Button className="h-[30px] text-[12px]" onClick={() => setWeekOffset(0)}>
-            Today
+            {t.common.today}
           </Button>
         </div>
         <h1 className="text-[16px]">{title}</h1>
@@ -152,13 +153,13 @@ export function Dashboard() {
           {conflictCount > 0 && (
             <Chip className="border-rose/25 bg-rose/12 text-rose" onClick={() => navigate('/calendar')}>
               <TriangleAlert size={12} strokeWidth={1.7} />
-              {conflictCount} time conflict{conflictCount > 1 ? 's' : ''}
+              {t.dashboard.conflicts(conflictCount)}
             </Chip>
           )}
           <Segmented
             options={[
-              { value: 'day', label: 'Day' },
-              { value: 'week', label: 'Week' },
+              { value: 'day', label: t.common.day },
+              { value: 'week', label: t.common.week },
             ]}
             value={mode}
             onChange={setMode}
@@ -172,11 +173,11 @@ export function Dashboard() {
 
         <div className="flex w-[344px] shrink-0 flex-col gap-3.5 overflow-y-auto">
           <Card
-            title="Today"
+            title={t.dashboard.today}
             count={<Badge>{digest.dueToday.length + digest.overdue.length}</Badge>}
           >
             {digest.overdue.length === 0 && digest.dueToday.length === 0 && (
-              <p className="px-1.5 py-3 text-[12px] text-ink-3">Nothing due today. Nice.</p>
+              <p className="px-1.5 py-3 text-[12px] text-ink-3">{t.dashboard.nothingDue}</p>
             )}
             {digest.overdue.map((it) => (
               <TaskRow key={it.id} item={it} />
@@ -194,7 +195,7 @@ export function Dashboard() {
           </Card>
 
           {(ringing.length > 0 || upcomingReminders.length > 0) && (
-            <Card title="Reminders" icon={Bell}>
+            <Card title={t.dashboard.reminders} icon={Bell}>
               {ringing.map(({ r, item }) => (
                 <div key={r.id} className="mb-[7px] rounded-lg border-l-2 border-l-amber bg-amber/12 px-2.5 py-2.5">
                   <button
@@ -203,19 +204,19 @@ export function Dashboard() {
                   >
                     {item.title}
                   </button>
-                  <div className="mt-0.5 text-[10.5px] text-ink-2">{r.note || 'Reminder'}</div>
+                  <div className="mt-0.5 text-[10.5px] text-ink-2">{r.note || t.dashboard.reminderFallback}</div>
                   <div className="mt-1.5 flex gap-1.5">
                     <button
                       onClick={() => snoozeReminder(r.id, 60)}
                       className="rounded-md bg-surface-3 px-2 py-1 text-[10.5px] text-ink-2 hover:text-ink"
                     >
-                      Snooze 1h
+                      {t.dashboard.snooze1h}
                     </button>
                     <button
                       onClick={() => updateReminder(r.id, { done: true })}
                       className="rounded-md bg-surface-3 px-2 py-1 text-[10.5px] text-ink-2 hover:text-ink"
                     >
-                      Dismiss
+                      {t.dashboard.dismiss}
                     </button>
                   </div>
                 </div>
@@ -230,7 +231,7 @@ export function Dashboard() {
                   <div>
                     <div className="text-[12px] text-ink">{item.title}</div>
                     <div className="mt-px text-[10.5px] text-ink-3">
-                      {at && fmtTime(new Date(at))} · {r.note || 'reminder'}
+                      {at && fmtTime(new Date(at))} · {r.note || t.dashboard.reminderFallback}
                     </div>
                   </div>
                 </button>
@@ -239,18 +240,18 @@ export function Dashboard() {
           )}
 
           <Card
-            title="Unsorted"
+            title={t.dashboard.unsorted}
             count={digest.unsorted.length > 0 ? <Badge tone="accent">{digest.unsorted.length}</Badge> : undefined}
             action={
               digest.unsorted.length > 0 && (
                 <Link to="/triage" className="flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2">
-                  Triage <ChevronRight size={12} />
+                  {t.dashboard.triage} <ChevronRight size={12} />
                 </Link>
               )
             }
           >
             {digest.unsorted.length === 0 ? (
-              <p className="px-1.5 py-2 text-[12px] text-ink-3">Inbox zero.</p>
+              <p className="px-1.5 py-2 text-[12px] text-ink-3">{t.dashboard.inboxZero}</p>
             ) : (
               digest.unsorted.slice(0, 4).map((it) => (
                 <button
@@ -268,10 +269,8 @@ export function Dashboard() {
           </Card>
 
           {digest.stale.length > 0 && (
-            <Card title="Stale" icon={Inbox}>
-              <p className="mb-1.5 px-1.5 text-[11px] text-ink-3">
-                Open, no due date, untouched for a week.
-              </p>
+            <Card title={t.dashboard.stale} icon={Inbox}>
+              <p className="mb-1.5 px-1.5 text-[11px] text-ink-3">{t.dashboard.staleHint}</p>
               {digest.stale.slice(0, 4).map((it) => (
                 <TaskRow key={it.id} item={it} />
               ))}

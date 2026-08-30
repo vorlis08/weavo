@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Check, ExternalLink, LogOut, RefreshCw } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import {
   connectGoogle,
   currentScopes,
@@ -17,6 +18,7 @@ const SETUP_URL =
   'https://console.cloud.google.com/apis/credentials/oauthclient'
 
 export function GoogleConnect() {
+  const t = useT()
   const google = useStore((s) => s.data.google)
   const updateGoogle = useStore((s) => s.updateGoogle)
   const upsertExternalEvents = useStore((s) => s.upsertExternalEvents)
@@ -42,10 +44,10 @@ export function GoogleConnect() {
         scopes: currentScopes(),
         lastError: undefined,
       })
-      toast(`Connected as ${profile.email}`)
+      toast(t.google.connectedAs(profile.email))
     } catch (e) {
       updateGoogle({ lastError: e instanceof Error ? e.message : String(e) })
-      toast('Could not connect to Google')
+      toast(t.google.couldNotConnect)
     } finally {
       setBusy(null)
     }
@@ -59,10 +61,10 @@ export function GoogleConnect() {
       const end = addDays(new Date(), 45)
       const events = await listCalendarEvents(start, end)
       upsertExternalEvents(events, { start: start.toISOString(), end: end.toISOString() })
-      toast(`Synced ${events.length} calendar events`)
+      toast(t.google.syncedEvents(events.length))
     } catch (e) {
       updateGoogle({ lastError: e instanceof Error ? e.message : String(e) })
-      toast('Calendar sync failed')
+      toast(t.google.syncFailed)
     } finally {
       setBusy(null)
     }
@@ -78,16 +80,13 @@ export function GoogleConnect() {
       scopes: [],
       lastError: undefined,
     })
-    toast('Google disconnected')
+    toast(t.google.disconnected)
   }
 
   if (!google.connected) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-[12.5px] leading-relaxed text-ink-2">
-          Sign in with Google to mirror your Calendar and turn starred emails into tasks.
-          Runs entirely in your browser — you provide your own OAuth Client ID.
-        </p>
+        <p className="text-[12.5px] leading-relaxed text-ink-2">{t.google.intro}</p>
         <TextField
           value={clientId}
           onChange={(e) => setClientId(e.target.value)}
@@ -96,7 +95,7 @@ export function GoogleConnect() {
         />
         <div className="flex items-center gap-2">
           <Button variant="accent" onClick={connect} disabled={!clientId.trim() || busy === 'connect'}>
-            {busy === 'connect' ? 'Opening Google…' : 'Connect Google'}
+            {busy === 'connect' ? t.google.connecting : t.google.connect}
           </Button>
           <a
             href={SETUP_URL}
@@ -104,16 +103,13 @@ export function GoogleConnect() {
             rel="noreferrer"
             className="flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2"
           >
-            Get a Client ID <ExternalLink size={11} />
+            {t.google.getClientId} <ExternalLink size={11} />
           </a>
         </div>
         {google.lastError && (
           <p className="rounded-lg bg-rose/10 px-3 py-2 text-[11.5px] text-rose">{google.lastError}</p>
         )}
-        <p className="text-[11px] leading-relaxed text-ink-3">
-          Add <span className="mono">{location.origin}</span> as an authorised JavaScript origin.
-          An unverified app shows a warning screen — that is expected for personal use.
-        </p>
+        <p className="text-[11px] leading-relaxed text-ink-3">{t.google.originHint(location.origin)}</p>
       </div>
     )
   }
@@ -134,13 +130,13 @@ export function GoogleConnect() {
         </div>
         <Button variant="ghost" onClick={disconnect}>
           <LogOut size={13} />
-          Disconnect
+          {t.google.disconnect}
         </Button>
       </div>
 
       <div className="flex flex-wrap gap-1.5">
         {[
-          ['calendar', 'Calendar'],
+          ['calendar', t.nav.calendar],
           ['gmail', 'Gmail'],
         ].map(([scope, label]) => (
           <span
@@ -161,21 +157,21 @@ export function GoogleConnect() {
           checked={google.calendarSyncEnabled}
           onChange={() => updateGoogle({ calendarSyncEnabled: !google.calendarSyncEnabled })}
         />
-        Mirror Google Calendar events (−7 to +45 days)
+        {t.google.mirrorLabel}
       </label>
 
       <div className="flex items-center gap-2">
         <Button onClick={syncNow} disabled={busy === 'sync'}>
           <RefreshCw size={13} className={busy === 'sync' ? 'animate-spin' : ''} />
-          Sync calendar now
+          {t.google.syncNow}
         </Button>
         {google.lastCalendarSync && (
-          <span className="text-[11px] text-ink-3">synced {fmtAgo(google.lastCalendarSync)} ago</span>
+          <span className="text-[11px] text-ink-3">{t.google.syncedAgo(fmtAgo(google.lastCalendarSync))}</span>
         )}
       </div>
 
       <div className="border-t border-line pt-3">
-        <div className="mb-1.5 text-[12px]">Gmail search for the inbox view</div>
+        <div className="mb-1.5 text-[12px]">{t.google.gmailQueryLabel}</div>
         <TextField
           defaultValue={google.gmailQuery}
           onBlur={(e) => updateGoogle({ gmailQuery: e.target.value.trim() || 'is:starred' })}
@@ -183,7 +179,7 @@ export function GoogleConnect() {
           spellCheck={false}
         />
         <Link to="/mail" className="mt-2 inline-flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2">
-          Open the Mail view →
+          {t.google.openMail}
         </Link>
       </div>
 

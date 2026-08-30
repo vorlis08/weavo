@@ -18,17 +18,24 @@ import { TopBar } from '@/components/TopBar'
 import { Avatar, Badge, Segmented, cn } from '@/components/ui'
 import { DueChip, SourceBadge } from '@/components/items'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import type { Item, TaskStatus } from '@/lib/types'
 
-const COLUMNS: { key: TaskStatus | 'unsorted'; label: string; accent?: string }[] = [
-  { key: 'unsorted', label: 'Unsorted', accent: 'var(--color-iris)' },
-  { key: 'todo', label: 'To do' },
-  { key: 'in_progress', label: 'In progress' },
-  { key: 'blocked', label: 'Blocked', accent: 'var(--color-rose)' },
-  { key: 'done', label: 'Done' },
+type ColKey = TaskStatus | 'unsorted'
+const COLUMNS: { key: ColKey; accent?: string }[] = [
+  { key: 'unsorted', accent: 'var(--color-iris)' },
+  { key: 'todo' },
+  { key: 'in_progress' },
+  { key: 'blocked', accent: 'var(--color-rose)' },
+  { key: 'done' },
 ]
+const colLabel = (
+  t: ReturnType<typeof useT>,
+  key: ColKey,
+): string => (key === 'unsorted' ? t.board.unsorted : t.status[key])
 
 function CardBody({ item }: { item: Item }) {
+  const t = useT()
   const project = useStore((s) => (item.projectId ? s.data.projects[item.projectId] : undefined))
   const assignee = useStore((s) => (item.assigneeId ? s.data.contacts[item.assigneeId] : undefined))
   const allItems = useStore((s) => s.data.items)
@@ -52,7 +59,7 @@ function CardBody({ item }: { item: Item }) {
             <span className="truncate">{project.name}</span>
           </>
         ) : (
-          <span className="capitalize">{item.kind}</span>
+          <span>{t.kind[item.kind]}</span>
         )}
         <span className="ml-auto flex items-center gap-1.5">
           {item.source && <SourceBadge source={item.source} size={12} />}
@@ -65,7 +72,7 @@ function CardBody({ item }: { item: Item }) {
       <div className="mt-2 flex items-center gap-2.5 empty:hidden">
         {openBlockerCount > 0 && (
           <span className="mono text-[10px] text-rose">
-            blocked{openBlockerCount > 1 ? ` ×${openBlockerCount}` : ''}
+            {t.board.blocked}{openBlockerCount > 1 ? ` ×${openBlockerCount}` : ''}
           </span>
         )}
         {item.checklist && item.checklist.length > 0 && (
@@ -106,6 +113,7 @@ function Column({
   onAdd: (title: string) => void
   tourAnchor?: boolean
 }) {
+  const t = useT()
   const { setNodeRef, isOver } = useDroppable({ id: col.key })
   const [adding, setAdding] = useState(false)
   const [draft, setDraft] = useState('')
@@ -127,7 +135,7 @@ function Column({
           className={cn('text-[12.5px] font-semibold', col.key === 'done' && 'text-ink-2')}
           style={{ color: col.accent ?? undefined }}
         >
-          {col.label}
+          {colLabel(t, col.key)}
         </span>
         <Badge tone={col.key === 'blocked' ? 'rose' : 'default'}>{items.length}</Badge>
         <button
@@ -166,7 +174,7 @@ function Column({
               }
             }}
             rows={2}
-            placeholder="New task…"
+            placeholder={t.board.newTask}
             className="resize-none rounded-lg border border-line bg-surface-2 px-2.5 py-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
           />
         )}
@@ -177,7 +185,7 @@ function Column({
             className="flex items-center gap-1.5 px-0.5 py-1 text-[11.5px] text-ink-3 hover:text-ink-2"
           >
             <Plus size={12} />
-            Add task
+            {t.board.addTask}
           </button>
         )}
       </div>
@@ -186,6 +194,7 @@ function Column({
 }
 
 export function Board() {
+  const t = useT()
   const [params, setParams] = useSearchParams()
   const projectFilter = params.get('project') ?? undefined
   const data = useStore((s) => s.data)
@@ -235,7 +244,7 @@ export function Board() {
     const id = String(e.active.id)
     const target = e.over ? String(e.over.id) : null
     if (!target) return
-    const maxOrder = Math.max(0, ...cards.map((t) => t.boardOrder ?? 0)) + 1
+    const maxOrder = Math.max(0, ...cards.map((c) => c.boardOrder ?? 0)) + 1
     if (target === 'unsorted') updateItem(id, { unsorted: true, boardOrder: maxOrder })
     else if (COLUMNS.some((c) => c.key === target))
       setStatus(id, target as TaskStatus, maxOrder)
@@ -254,30 +263,30 @@ export function Board() {
                 className="h-[7px] w-[7px] rounded-full"
                 style={{ background: data.projects[projectFilter!]?.color }}
               />
-              {projectName} board
+              {t.board.boardSuffix(projectName)}
             </>
           ) : (
-            'Board'
+            t.board.title
           )}
         </h1>
         {projectFilter && (
           <button onClick={() => setParams({})} className="text-[11.5px] text-ink-3 hover:text-ink-2">
-            clear filter
+            {t.common.clearFilter}
           </button>
         )}
         {data.settings.displayName && (
           <div className="ml-2">
             <Segmented
               options={[
-                { value: 'all', label: 'All' },
-                { value: 'mine', label: 'Mine' },
+                { value: 'all', label: t.common.all },
+                { value: 'mine', label: t.common.mine },
               ]}
               value={scope}
               onChange={setScope}
             />
           </div>
         )}
-        <span className="mono ml-auto text-[11px] text-ink-3">drag cards between columns</span>
+        <span className="mono ml-auto text-[11px] text-ink-3">{t.board.dragHint}</span>
       </TopBar>
 
       <DndContext

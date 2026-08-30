@@ -6,8 +6,9 @@ import { Button, SectionLabel, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
 import { GoogleConnect } from '@/components/GoogleConnect'
 import { useStore } from '@/lib/store'
+import { LANGS, useT } from '@/lib/i18n'
 import { PROJECT_COLORS } from '@/lib/types'
-import type { WeavoData } from '@/lib/types'
+import type { Lang, WeavoData } from '@/lib/types'
 import { makeSampleData } from '@/lib/sampleData'
 import { ensureNotificationPermission } from '@/lib/notify'
 
@@ -33,6 +34,7 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 }
 
 export function SettingsView() {
+  const t = useT()
   const data = useStore((s) => s.data)
   const {
     updateSettings,
@@ -71,9 +73,9 @@ export function SettingsView() {
         const parsed = JSON.parse(String(reader.result)) as WeavoData
         if (!parsed.items || !parsed.settings) throw new Error('bad shape')
         replaceAll(parsed)
-        toast('Data imported')
+        toast(t.settings.dataImported)
       } catch {
-        toast('Could not read that file')
+        toast(t.settings.importFailed)
       }
     }
     reader.readAsText(file)
@@ -82,51 +84,67 @@ export function SettingsView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Settings</h1>
+        <h1 className="text-[16px]">{t.settings.title}</h1>
       </TopBar>
 
       <div className="flex-1 overflow-y-auto px-8 py-7">
         <div className="mx-auto max-w-[600px]">
-          <Group title="You">
-            <Row label="Display name" hint="Used for the “Mine” board filter and as the default assignee.">
+          <Group title={t.settings.gLang}>
+            <Row label={t.settings.langRow} hint={t.settings.langHint}>
+              <Select
+                value={data.settings.lang}
+                onChange={(e) => updateSettings({ lang: e.target.value as Lang })}
+                className="w-[130px]"
+              >
+                {LANGS.map((l) => (
+                  <option key={l.value} value={l.value}>
+                    {l.label}
+                  </option>
+                ))}
+              </Select>
+            </Row>
+          </Group>
+
+          <Group title={t.settings.gYou}>
+            <Row label={t.settings.displayName} hint={t.settings.displayNameHint}>
               <TextField
                 defaultValue={data.settings.displayName}
-                placeholder="Your name"
+                placeholder={t.settings.displayNamePh}
                 onBlur={(e) => updateSettings({ displayName: e.target.value.trim() })}
                 className="w-[180px]"
               />
             </Row>
           </Group>
 
-          <Group title="Getting started">
-            <Row label="Product tour" hint="A short walkthrough of the sidebar, capture, and the board.">
+          <Group title={t.settings.gStart}>
+            <Row label={t.settings.tourRow} hint={t.settings.tourRowHint}>
               <Button onClick={startTour}>
                 <Sparkles size={13} />
-                Start tour
+                {t.settings.startTour}
               </Button>
             </Row>
-            <Row label="Full guide" hint="Every part of Weavo, with a live quick-capture demo.">
+            <Row label={t.settings.fullGuideRow} hint={t.settings.fullGuideHint}>
               <Link to="/guide">
                 <Button>
                   <BookOpen size={13} />
-                  Open guide
+                  {t.settings.openGuide}
                 </Button>
               </Link>
             </Row>
           </Group>
 
-          <Group title="Calendar">
-            <Row label="Week starts on">
+          <Group title={t.settings.gCalendar}>
+            <Row label={t.settings.weekStarts}>
               <Select
                 value={data.settings.weekStartsMonday ? 'mon' : 'sun'}
                 onChange={(e) => updateSettings({ weekStartsMonday: e.target.value === 'mon' })}
                 className="w-[130px]"
               >
-                <option value="mon">Monday</option>
-                <option value="sun">Sunday</option>
+                <option value="mon">{t.settings.monday}</option>
+                <option value="sun">{t.settings.sunday}</option>
               </Select>
             </Row>
-            <Row label="Day starts at">
+            <Row label={t.settings.dayStarts}>
               <Select
                 value={data.settings.dayStartHour}
                 onChange={(e) => updateSettings({ dayStartHour: Number(e.target.value) })}
@@ -139,7 +157,7 @@ export function SettingsView() {
                 ))}
               </Select>
             </Row>
-            <Row label="Day ends at">
+            <Row label={t.settings.dayEnds}>
               <Select
                 value={data.settings.dayEndHour}
                 onChange={(e) => updateSettings({ dayEndHour: Number(e.target.value) })}
@@ -154,15 +172,15 @@ export function SettingsView() {
             </Row>
           </Group>
 
-          <Group title="Reminders">
+          <Group title={t.settings.gReminders}>
             <Row
-              label="Desktop notifications"
+              label={t.settings.desktopNotifs}
               hint={
                 notifPerm === 'granted'
-                  ? 'On — reminders pop up while Weavo is open.'
+                  ? t.settings.notifsOn
                   : notifPerm === 'denied'
-                    ? 'Blocked in your browser settings.'
-                    : 'Get a notification when a reminder comes due.'
+                    ? t.settings.notifsBlocked
+                    : t.settings.notifsOff
               }
             >
               <Button
@@ -170,20 +188,20 @@ export function SettingsView() {
                 onClick={async () => {
                   const ok = await ensureNotificationPermission()
                   updateSettings({ notificationsAsked: true })
-                  toast(ok ? 'Notifications enabled' : 'Permission not granted')
+                  toast(ok ? t.settings.notifsEnabledToast : t.settings.notifsDeniedToast)
                 }}
               >
                 <Bell size={13} />
-                {notifPerm === 'granted' ? 'Enabled' : 'Enable'}
+                {notifPerm === 'granted' ? t.settings.enabled : t.settings.enable}
               </Button>
             </Row>
           </Group>
 
-          <Group title="Integrations">
+          <Group title={t.settings.gIntegrations}>
             <GoogleConnect />
           </Group>
 
-          <Group title="Projects">
+          <Group title={t.settings.gProjects}>
             {Object.values(data.projects).map((p) => (
               <Row key={p.id} label={p.name}>
                 <div className="flex items-center gap-2">
@@ -222,7 +240,7 @@ export function SettingsView() {
                     setNewProject('')
                   }
                 }}
-                placeholder="New project name"
+                placeholder={t.settings.newProjectPh}
               />
               <Button
                 onClick={() => {
@@ -236,18 +254,18 @@ export function SettingsView() {
                 }}
               >
                 <Plus size={13} />
-                Add
+                {t.common.add}
               </Button>
             </div>
           </Group>
 
-          <Group title="People">
+          <Group title={t.settings.gPeople}>
             {Object.values(data.contacts).map((c) => (
               <Row key={c.id} label={c.name} hint={c.email}>
                 <div className="flex items-center gap-2">
                   <TextField
                     defaultValue={c.role ?? ''}
-                    placeholder="Role"
+                    placeholder={t.settings.rolePh}
                     onBlur={(e) => updateContact(c.id, { role: e.target.value.trim() || undefined })}
                     className="w-[130px]"
                   />
@@ -267,7 +285,7 @@ export function SettingsView() {
                     setNewContact('')
                   }
                 }}
-                placeholder="New person's name"
+                placeholder={t.settings.newPersonPh}
               />
               <Button
                 onClick={() => {
@@ -278,21 +296,21 @@ export function SettingsView() {
                 }}
               >
                 <Plus size={13} />
-                Add
+                {t.common.add}
               </Button>
             </div>
           </Group>
 
-          <Group title="Your data">
-            <Row label="Everything is stored in this browser" hint="No account, no server. Export to move it or back it up.">
+          <Group title={t.settings.gData}>
+            <Row label={t.settings.dataRow} hint={t.settings.dataHint}>
               <div className="flex gap-2">
                 <Button onClick={exportData}>
                   <Download size={13} />
-                  Export
+                  {t.settings.export}
                 </Button>
                 <Button onClick={() => fileRef.current?.click()}>
                   <Upload size={13} />
-                  Import
+                  {t.settings.import}
                 </Button>
                 <input
                   ref={fileRef}
@@ -303,32 +321,34 @@ export function SettingsView() {
                 />
               </div>
             </Row>
-            <Row label="Example data" hint="Replace everything with a demo dataset anchored to this week.">
-              <Button onClick={() => replaceAll(makeSampleData())}>Load example</Button>
+            <Row label={t.settings.exampleRow} hint={t.settings.exampleHint}>
+              <Button onClick={() => replaceAll(makeSampleData(new Date(), data.settings.lang))}>
+                {t.settings.loadExample}
+              </Button>
             </Row>
-            <Row label="Start over" hint="Delete all items, projects, and people.">
+            <Row label={t.settings.startOverRow} hint={t.settings.startOverHint}>
               <Button variant="danger" onClick={() => setConfirmClear(true)}>
                 <Trash2 size={13} />
-                Clear all
+                {t.settings.clearAll}
               </Button>
             </Row>
           </Group>
 
           <p className="pb-4 text-center text-[11px] text-ink-3">
-            Weavo · <a href="https://github.com/vorlis08/weavo" target="_blank" rel="noreferrer">source on GitHub</a>
+            Weavo · <a href="https://github.com/vorlis08/weavo" target="_blank" rel="noreferrer">{t.settings.sourceLink}</a>
           </p>
         </div>
       </div>
 
       <ConfirmDialog
         open={confirmClear}
-        title="Clear everything?"
-        body="This removes all your items, projects, and people from this browser. Export first if you want a copy."
-        confirmLabel="Clear all"
+        title={t.settings.clearConfirmTitle}
+        body={t.settings.clearConfirmBody}
+        confirmLabel={t.settings.clearAll}
         onConfirm={() => {
           clearAll()
           setConfirmClear(false)
-          toast('Cleared')
+          toast(t.settings.cleared)
         }}
         onCancel={() => setConfirmClear(false)}
       />

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Plus, Search } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { views } from '@/lib/nav'
 import type { ItemKind } from '@/lib/types'
 import { Modal } from './overlays'
@@ -17,6 +18,7 @@ interface Row {
 }
 
 export function CommandPalette() {
+  const t = useT()
   const open = useStore((s) => s.paletteOpen)
   const setPalette = useStore((s) => s.setPalette)
   const openCapture = useStore((s) => s.openCapture)
@@ -44,7 +46,7 @@ export function CommandPalette() {
       .map((it) => ({
         id: it.id,
         label: it.title,
-        hint: it.kind,
+        hint: t.kind[it.kind],
         icon: <KindIcon kind={it.kind} />,
         run: () => {
           close()
@@ -54,9 +56,9 @@ export function CommandPalette() {
 
     const actionRows: Row[] = (
       [
-        ['New task', 'task'],
-        ['New event', 'event'],
-        ['New note', 'note'],
+        [t.palette.newTask, 'task'],
+        [t.palette.newEvent, 'event'],
+        [t.palette.newNote, 'note'],
       ] as [string, ItemKind][]
     )
       .filter(([l]) => !needle || l.toLowerCase().includes(needle))
@@ -71,10 +73,11 @@ export function CommandPalette() {
       }))
 
     const viewRows: Row[] = views
-      .filter((v) => !needle || v.label.toLowerCase().includes(needle) || 'go to'.includes(needle))
-      .map((v) => ({
+      .map((v) => ({ v, name: t.nav[v.id] }))
+      .filter(({ name }) => !needle || name.toLowerCase().includes(needle))
+      .map(({ v, name }) => ({
         id: 'view-' + v.id,
-        label: `Go to ${v.label}`,
+        label: t.palette.goTo(name),
         icon: <ArrowRight size={14} />,
         run: () => {
           close()
@@ -83,9 +86,9 @@ export function CommandPalette() {
       }))
 
     const extraRows: Row[] = [
-      { id: 'nav-guide', label: 'Go to Guide', to: '/guide' },
-      { id: 'nav-settings', label: 'Go to Settings', to: '/settings' },
-      { id: 'act-tour', label: 'Take the tour', to: '__tour' },
+      { id: 'nav-guide', label: t.palette.goTo(t.nav.guide), to: '/guide' },
+      { id: 'nav-settings', label: t.palette.goTo(t.nav.settings), to: '/settings' },
+      { id: 'act-tour', label: t.palette.takeTour, to: '__tour' },
     ]
       .filter((r) => !needle || r.label.toLowerCase().includes(needle))
       .map((r) => ({
@@ -100,7 +103,7 @@ export function CommandPalette() {
       }))
 
     return [...itemRows, ...actionRows, ...viewRows, ...extraRows]
-  }, [q, items, navigate, openCapture, setPalette])
+  }, [q, items, navigate, openCapture, setPalette, t])
 
   useEffect(() => {
     setSel((s) => Math.min(s, Math.max(0, rows.length - 1)))
@@ -126,7 +129,7 @@ export function CommandPalette() {
               rows[sel]?.run()
             }
           }}
-          placeholder="Search tasks, notes, events — or jump to a view…"
+          placeholder={t.palette.placeholder}
           className="w-full bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
         />
       </div>
@@ -147,7 +150,7 @@ export function CommandPalette() {
           </button>
         ))}
         {rows.length === 0 && (
-          <p className="px-3 py-6 text-center text-[12.5px] text-ink-3">No matches.</p>
+          <p className="px-3 py-6 text-center text-[12.5px] text-ink-3">{t.palette.noMatches}</p>
         )}
       </div>
     </Modal>

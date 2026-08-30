@@ -35,6 +35,10 @@ comes later.
 **Installable** — it's a PWA; "Add to home screen" / "Install" works, with
 offline access to the app shell.
 
+**Bilingual** — Czech by default, English toggle in Settings. Covers the whole
+UI, date formatting, and the natural-language capture parser (`zítra 9:00`,
+`ve čtvrtek 14–15`, `za 3 dny` work alongside the English forms).
+
 **Views**
 
 | View | Route | |

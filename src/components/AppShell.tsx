@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { useReminderEngine } from '@/hooks/useReminderEngine'
 import { useGoogleSync } from '@/hooks/useGoogleSync'
+import { setDateLang } from '@/lib/date'
 import { Sidebar } from './Sidebar'
 import { QuickCapture } from './QuickCapture'
 import { CommandPalette } from './CommandPalette'
@@ -17,14 +19,8 @@ function isTyping(el: EventTarget | null) {
   return !!n && (n.tagName === 'INPUT' || n.tagName === 'TEXTAREA' || n.isContentEditable)
 }
 
-const SHORTCUTS: [string, string][] = [
-  ['C', 'Quick capture'],
-  ['⌘ / Ctrl + K', 'Search everything'],
-  ['G then D / C / B / T / N', 'Go to a view'],
-  ['?', 'This list'],
-]
-
 function TourNudge() {
+  const t = useT()
   const tourSeen = useStore((s) => s.data.settings.tourSeen)
   const tourOpen = useStore((s) => s.tourOpen)
   const startTour = useStore((s) => s.startTour)
@@ -32,8 +28,8 @@ function TourNudge() {
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setReady(true), 1200)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => setReady(true), 1200)
+    return () => clearTimeout(timer)
   }, [])
 
   if (tourSeen || tourOpen || !ready) return null
@@ -44,15 +40,13 @@ function TourNudge() {
           <Sparkles size={14} />
         </span>
         <div>
-          <div className="text-[13px] font-medium">New to Weavo?</div>
-          <p className="mt-0.5 text-[12px] leading-snug text-ink-2">
-            A 40-second tour of how it all fits together.
-          </p>
+          <div className="text-[13px] font-medium">{t.tour.nudgeTitle}</div>
+          <p className="mt-0.5 text-[12px] leading-snug text-ink-2">{t.tour.nudgeBody}</p>
         </div>
         <button
           onClick={endTour}
           className="ml-auto -mr-1 -mt-1 flex h-6 w-6 items-center justify-center rounded-md text-ink-3 hover:text-ink"
-          aria-label="Dismiss"
+          aria-label={t.common.cancel}
         >
           <X size={13} />
         </button>
@@ -62,13 +56,13 @@ function TourNudge() {
           onClick={startTour}
           className="h-8 flex-1 rounded-lg bg-iris text-[12.5px] font-semibold text-[#0b0c0e] hover:bg-iris-2"
         >
-          Take the tour
+          {t.tour.take}
         </button>
         <button
           onClick={endTour}
           className="h-8 rounded-lg px-3 text-[12px] text-ink-3 hover:text-ink-2"
         >
-          Later
+          {t.tour.later}
         </button>
       </div>
     </div>
@@ -76,11 +70,18 @@ function TourNudge() {
 }
 
 export function AppShell() {
+  const t = useT()
   const navigate = useNavigate()
   const { openCapture, setPalette, captureOpen, paletteOpen, tourOpen } = useStore()
   const [helpOpen, setHelpOpen] = useState(false)
+  const lang = useStore((s) => s.data.settings.lang)
   useReminderEngine(navigate)
   useGoogleSync()
+
+  useEffect(() => {
+    setDateLang(lang)
+    document.documentElement.lang = lang
+  }, [lang])
 
   useEffect(() => {
     if (tourOpen) return
@@ -131,9 +132,16 @@ export function AppShell() {
       <Toaster />
       <TourNudge />
       <Tour />
-      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="Keyboard shortcuts" width={360}>
+      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title={t.shortcutsModal.title} width={360}>
         <div className="flex flex-col gap-2 p-4">
-          {SHORTCUTS.map(([k, label]) => (
+          {(
+            [
+              ['C', t.shortcutsModal.capture],
+              ['⌘ / Ctrl + K', t.shortcutsModal.search],
+              ['G → D / C / B / T / N', t.shortcutsModal.goto],
+              ['?', t.shortcutsModal.thisList],
+            ] as [string, string][]
+          ).map(([k, label]) => (
             <div key={k} className="flex items-center justify-between text-[12.5px]">
               <span className="text-ink-2">{label}</span>
               <Kbd>{k}</Kbd>

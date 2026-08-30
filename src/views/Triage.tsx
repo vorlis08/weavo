@@ -5,8 +5,10 @@ import { TopBar } from '@/components/TopBar'
 import { EmptyState, Select, cn } from '@/components/ui'
 import { KindIcon } from '@/components/items'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 
 export function Triage() {
+  const t = useT()
   const navigate = useNavigate()
   const itemsRec = useStore((s) => s.data.items)
   const projectsRec = useStore((s) => s.data.projects)
@@ -24,21 +26,23 @@ export function Triage() {
 
   function file(id: string) {
     updateItem(id, { unsorted: undefined })
-    toast('Filed')
+    toast(t.triage.filed)
   }
 
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Unsorted</h1>
-        {unsorted.length > 0 && <span className="mono text-ink-3">{unsorted.length} to process</span>}
+        <h1 className="text-[16px]">{t.triage.title}</h1>
+        {unsorted.length > 0 && (
+          <span className="mono text-ink-3">{t.triage.toProcess(unsorted.length)}</span>
+        )}
       </TopBar>
 
       {unsorted.length === 0 ? (
         <EmptyState
           icon={<Inbox size={22} strokeWidth={1.5} />}
-          title="Inbox zero"
-          hint="Anything you capture without a home lands here for a quick sort later."
+          title={t.triage.emptyTitle}
+          hint={t.triage.emptyHint}
         />
       ) : (
         <div className="flex-1 overflow-y-auto px-6 py-6">
@@ -63,7 +67,7 @@ export function Triage() {
                   onChange={(e) => updateItem(it.id, { projectId: e.target.value || undefined })}
                   className={cn('h-7 w-[140px] text-[11.5px]')}
                 >
-                  <option value="">No project</option>
+                  <option value="">{t.common.noProject}</option>
                   {projects.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -73,14 +77,14 @@ export function Triage() {
 
                 <button
                   onClick={() => navigate(`/item/${it.id}`)}
-                  title="Open to add details"
+                  title={t.triage.openDetails}
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 text-ink-3 hover:text-ink"
                 >
                   <ArrowRight size={13} />
                 </button>
                 <button
                   onClick={() => file(it.id)}
-                  title="File (remove from unsorted)"
+                  title={t.triage.file}
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 text-ink-3 hover:border-sage/40 hover:text-sage"
                 >
                   <Check size={13} />
@@ -88,9 +92,9 @@ export function Triage() {
                 <button
                   onClick={() => {
                     deleteItem(it.id)
-                    toast('Deleted')
+                    toast(t.triage.deleted)
                   }}
-                  title="Delete"
+                  title={t.triage.deleteTip}
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 text-ink-3 hover:border-rose/40 hover:text-rose"
                 >
                   <Trash2 size={13} />

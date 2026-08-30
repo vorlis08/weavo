@@ -4,6 +4,7 @@ import { Network } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { EmptyState } from '@/components/ui'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { noteLinks } from '@/lib/selectors'
 
 interface Node {
@@ -16,6 +17,7 @@ interface Node {
 }
 
 export function NotesMap() {
+  const t = useT()
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
   const [hover, setHover] = useState<string | null>(null)
@@ -105,12 +107,12 @@ export function NotesMap() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">Notes map</h1>
+          <h1 className="text-[16px]">{t.notesMap.title}</h1>
         </TopBar>
         <EmptyState
           icon={<Network size={22} strokeWidth={1.5} />}
-          title="No notes yet"
-          hint="Write notes and link them with [[title]] — the connections show up here."
+          title={t.notesMap.emptyTitle}
+          hint={t.notesMap.emptyHint}
         />
       </>
     )
@@ -124,9 +126,9 @@ export function NotesMap() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Notes map</h1>
+        <h1 className="text-[16px]">{t.notesMap.title}</h1>
         <span className="mono text-ink-3">
-          {graph.nodes.length} notes · {graph.edges.length} links
+          {t.notesMap.stats(graph.nodes.length, graph.edges.length)}
         </span>
       </TopBar>
       <div ref={wrap} className="flex flex-1 items-center justify-center overflow-auto p-6">

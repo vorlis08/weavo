@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Plus, Search } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import type { Item, ItemKind } from '@/lib/types'
 import { Modal } from './overlays'
 import { KindIcon } from './items'
@@ -21,6 +22,7 @@ export function ItemPicker({
   onPick: (item: Item) => void
   onClose: () => void
 }) {
+  const t = useT()
   const items = useStore((s) => s.data.items)
   const createItem = useStore((s) => s.createItem)
   const [q, setQ] = useState('')
@@ -47,7 +49,7 @@ export function ItemPicker({
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search or type to create…"
+          placeholder={t.picker.searchOrCreate}
           className="w-full bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
         />
       </div>
@@ -62,7 +64,7 @@ export function ItemPicker({
             className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[12.5px] text-iris-2 hover:bg-iris/10"
           >
             <Plus size={14} />
-            Create {kinds[0]} “{q.trim()}”
+            {t.picker.create(t.kind[kinds[0]].toLowerCase(), q.trim())}
           </button>
         )}
         {matches.map((it) => (
@@ -83,7 +85,7 @@ export function ItemPicker({
           </button>
         ))}
         {matches.length === 0 && !q.trim() && (
-          <p className="px-2.5 py-6 text-center text-[12px] text-ink-3">Nothing to pick yet.</p>
+          <p className="px-2.5 py-6 text-center text-[12px] text-ink-3">{t.picker.nothingToPick}</p>
         )}
       </div>
     </Modal>

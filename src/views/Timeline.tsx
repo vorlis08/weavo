@@ -4,13 +4,15 @@ import { TopBar } from '@/components/TopBar'
 import { EmptyState } from '@/components/ui'
 import { GanttChartSquare } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { addDays, isSameDay, startOfDay } from '@/lib/date'
+import { useT } from '@/lib/i18n'
+import { addDays, dateLocale, isSameDay, startOfDay } from '@/lib/date'
 import type { Item } from '@/lib/types'
 
 const DAY_W = 34
 const ROW_H = 30
 
 export function Timeline() {
+  const t = useT()
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
 
@@ -53,12 +55,12 @@ export function Timeline() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">Timeline</h1>
+          <h1 className="text-[16px]">{t.timeline.title}</h1>
         </TopBar>
         <EmptyState
           icon={<GanttChartSquare size={22} strokeWidth={1.5} />}
-          title="Nothing scheduled"
-          hint="Tasks with a due date and events show up here on a per-project lane."
+          title={t.timeline.emptyTitle}
+          hint={t.timeline.emptyHint}
         />
       </>
     )
@@ -70,8 +72,8 @@ export function Timeline() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Timeline</h1>
-        <span className="mono text-ink-3">{lanes.length} lanes</span>
+        <h1 className="text-[16px]">{t.timeline.title}</h1>
+        <span className="mono text-ink-3">{t.timeline.lanes(lanes.length)}</span>
       </TopBar>
 
       <div className="flex-1 overflow-auto p-[18px]">
@@ -88,7 +90,7 @@ export function Timeline() {
                   style={{ width: DAY_W }}
                 >
                   <div className={`text-[9px] ${today ? 'text-iris-2' : 'text-ink-3'}`}>
-                    {d.toLocaleDateString('en-US', { weekday: 'narrow' })}
+                    {d.toLocaleDateString(dateLocale(), { weekday: 'narrow' })}
                   </div>
                   <div className={`text-[10px] font-medium ${today ? 'text-iris-2' : 'text-ink-2'}`}>
                     {d.getDate()}
@@ -110,7 +112,7 @@ export function Timeline() {
               <div key={key} className="mt-3">
                 <div className="mb-1 flex items-center gap-2 pl-1 text-[11px] font-semibold">
                   <span className="h-2 w-2 rounded-full" style={{ background: color }} />
-                  {project?.name ?? 'No project'}
+                  {project?.name ?? t.common.noProject}
                 </div>
                 {rows.map((it) => {
                   const endIso = (it.due ?? it.end ?? it.start)!

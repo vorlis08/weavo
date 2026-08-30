@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useT } from '@/lib/i18n'
 import { cn } from './ui'
 
 export function InlineTitle({
   value,
   onCommit,
-  placeholder = 'Untitled',
+  placeholder,
 }: {
   value: string
   onCommit: (v: string) => void
   placeholder?: string
 }) {
+  const t = useT()
   const [draft, setDraft] = useState(value)
   const ref = useRef<HTMLTextAreaElement>(null)
   useEffect(() => setDraft(value), [value])
@@ -26,7 +28,7 @@ export function InlineTitle({
       ref={ref}
       value={draft}
       rows={1}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t.editors.untitled}
       onChange={(e) => setDraft(e.target.value)}
       onBlur={() => draft.trim() !== value && onCommit(draft.trim() || value)}
       onKeyDown={(e) => {
@@ -44,13 +46,15 @@ export function InlineBody({
   value,
   onCommit,
   onFollow,
-  placeholder = 'Add a description… use [[title]] to link another item.',
+  placeholder,
 }: {
   value: string
   onCommit: (v: string) => void
   onFollow?: (title: string) => void
   placeholder?: string
 }) {
+  const t = useT()
+  const ph = placeholder ?? t.editors.bodyPlaceholder
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState(value)
   const ref = useRef<HTMLTextAreaElement>(null)
@@ -69,7 +73,7 @@ export function InlineBody({
       <textarea
         ref={ref}
         value={draft}
-        placeholder={placeholder}
+        placeholder={ph}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={() => {
           setEditing(false)
@@ -87,7 +91,7 @@ export function InlineBody({
       {value ? (
         <LinkifiedText text={value} onFollow={onFollow ?? (() => {})} />
       ) : (
-        <span className="text-ink-3">{placeholder}</span>
+        <span className="text-ink-3">{ph}</span>
       )}
     </div>
   )
@@ -109,6 +113,7 @@ export function TagEditor({
   tags: string[]
   onChange: (t: string[]) => void
 }) {
+  const tr = useT()
   const [draft, setDraft] = useState('')
   function add() {
     const v = draft.trim().replace(/^#/, '')
@@ -117,14 +122,14 @@ export function TagEditor({
   }
   return (
     <span className="flex flex-wrap items-center gap-1.5">
-      {tags.map((t) => (
+      {tags.map((tag) => (
         <span
-          key={t}
+          key={tag}
           className="inline-flex h-[22px] items-center gap-1 rounded-md bg-surface-3 pl-2 pr-1 text-[11px] text-ink-2"
         >
-          {t}
+          {tag}
           <button
-            onClick={() => onChange(tags.filter((x) => x !== t))}
+            onClick={() => onChange(tags.filter((x) => x !== tag))}
             className="text-ink-3 hover:text-rose"
           >
             <X size={11} />
@@ -143,7 +148,7 @@ export function TagEditor({
           }
         }}
         onBlur={add}
-        placeholder={tags.length ? '' : 'Add tag…'}
+        placeholder={tags.length ? '' : tr.editors.addTag}
         className="h-[22px] w-20 min-w-[60px] flex-1 bg-transparent text-[11.5px] text-ink outline-none placeholder:text-ink-3"
       />
     </span>

@@ -5,6 +5,7 @@ import { TopBar } from '@/components/TopBar'
 import { WeekGrid } from '@/components/WeekGrid'
 import { Button, Dot, Segmented, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
+import { useT, useLang } from '@/lib/i18n'
 import {
   addDays,
   endOfMonth,
@@ -16,6 +17,8 @@ import {
 } from '@/lib/date'
 
 export function CalendarView() {
+  const t = useT()
+  const lang = useLang()
   const navigate = useNavigate()
   const items = useStore((s) => s.data.items)
   const projects = useStore((s) => s.data.projects)
@@ -74,15 +77,15 @@ export function CalendarView() {
             <ChevronRight size={16} />
           </Button>
           <Button className="h-[30px] text-[12px]" onClick={() => setAnchor(new Date())}>
-            Today
+            {t.common.today}
           </Button>
         </div>
         <h1 className="text-[16px]">{heading}</h1>
         <div className="ml-auto">
           <Segmented
             options={[
-              { value: 'week', label: 'Week' },
-              { value: 'month', label: 'Month' },
+              { value: 'week', label: t.common.week },
+              { value: 'month', label: t.common.month },
             ]}
             value={mode}
             onChange={setMode}
@@ -99,7 +102,7 @@ export function CalendarView() {
           <div className="grid grid-cols-7 border-b border-line pb-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
             {weekDays.map((d) => (
               <div key={d.toISOString()} className="text-center">
-                {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                {d.toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-US', { weekday: 'short' })}
               </div>
             ))}
           </div>
@@ -118,7 +121,7 @@ export function CalendarView() {
                     start.setHours(9, 0, 0, 0)
                     const it = createItem({
                       kind: 'event',
-                      title: 'New event',
+                      title: t.calendar.addEventTitle,
                       start: start.toISOString(),
                       end: new Date(start.getTime() + 3_600_000).toISOString(),
                     })
@@ -166,7 +169,9 @@ export function CalendarView() {
                     </span>
                   ))}
                   {dayEvents.length > 3 && (
-                    <span className="px-1 text-[10px] text-ink-3">+{dayEvents.length - 3} more</span>
+                    <span className="px-1 text-[10px] text-ink-3">
+                      +{dayEvents.length - 3} {lang === 'cs' ? 'dalších' : 'more'}
+                    </span>
                   )}
                 </button>
               )

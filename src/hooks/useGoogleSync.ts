@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useStore } from '@/lib/store'
+import { dict } from '@/lib/i18n'
 import { initGoogle, getAccessToken } from '@/lib/google'
 import { listCalendarEvents } from '@/lib/gcal'
 import { addDays, startOfDay } from '@/lib/date'
@@ -17,7 +18,8 @@ export function useGoogleSync() {
     let cancelled = false
 
     async function sync() {
-      const { updateGoogle, upsertExternalEvents, toast } = useStore.getState()
+      const { updateGoogle, upsertExternalEvents, toast, data } = useStore.getState()
+      const t = dict(data.settings.lang)
       try {
         await initGoogle(clientId)
         await getAccessToken() // silent refresh; throws if re-consent needed
@@ -34,8 +36,8 @@ export function useGoogleSync() {
         if (cancelled) return
         const msg = e instanceof Error ? e.message : String(e)
         if (/auth|token|consent|popup|401|invalid_grant/i.test(msg)) {
-          updateGoogle({ connected: false, lastError: 'Google session expired — reconnect.' })
-          toast('Google disconnected — reconnect in Settings')
+          updateGoogle({ connected: false, lastError: t.google.sessionExpired })
+          toast(t.google.disconnectedToast)
         } else {
           updateGoogle({ lastError: msg })
         }

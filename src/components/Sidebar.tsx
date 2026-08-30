@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { BookOpen, Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
 import { views } from '@/lib/nav'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -13,6 +14,7 @@ function navClass({ isActive }: { isActive: boolean }) {
 }
 
 export function Sidebar() {
+  const t = useT()
   const navigate = useNavigate()
   const openCapture = useStore((s) => s.openCapture)
   const setPalette = useStore((s) => s.setPalette)
@@ -47,7 +49,7 @@ export function Sidebar() {
         className="mb-[7px] flex h-8 w-full items-center gap-[7px] rounded-lg bg-iris px-[13px] text-[12.5px] font-semibold text-[#0b0c0e] transition-colors hover:bg-iris-2"
       >
         <Plus size={16} strokeWidth={1.7} />
-        Quick capture
+        {t.capture.title}
         <span className="mono ml-auto text-[10px] opacity-55">C</span>
       </button>
 
@@ -57,22 +59,22 @@ export function Sidebar() {
         className="mb-4 flex h-8 items-center gap-2.5 rounded-lg border border-line px-2.5 text-ink-3 transition-colors hover:border-line-2 hover:text-ink-2"
       >
         <Search size={13} strokeWidth={1.6} />
-        <span className="text-[12px]">Search</span>
+        <span className="text-[12px]">{t.common.search}</span>
         <span className="mono ml-auto text-[10px]">⌘K</span>
       </button>
 
-      <SectionLabel className="px-2.5 pb-[7px]">Views</SectionLabel>
+      <SectionLabel className="px-2.5 pb-[7px]">{t.nav.views}</SectionLabel>
       <nav data-tour="views">
         {views.map((v) => (
           <NavLink key={v.id} to={v.path} end={v.path === '/'} className={navClass}>
             <v.icon size={16} strokeWidth={1.5} />
-            {v.label}
+            {t.nav[v.id]}
           </NavLink>
         ))}
         {googleConnected && (
           <NavLink to="/mail" className={navClass}>
             <Mail size={16} strokeWidth={1.5} />
-            Mail
+            {t.nav.mail}
           </NavLink>
         )}
       </nav>
@@ -81,18 +83,18 @@ export function Sidebar() {
         data-tour="projects"
         className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]"
       >
-        <SectionLabel>Projects</SectionLabel>
+        <SectionLabel>{t.nav.projects}</SectionLabel>
         <button
           onClick={() => navigate('/settings')}
           className="text-ink-3 transition-colors hover:text-ink-2"
-          title="Manage projects"
+          title={t.nav.manageProjects}
         >
           <Plus size={13} />
         </button>
       </div>
       {projects.length === 0 && (
         <p className="px-2.5 pb-1 text-[11px] leading-relaxed text-ink-3">
-          Add one with <span className="mono">#name</span> in quick capture.
+          {t.nav.addProjectHint}
         </p>
       )}
       {projects.map((p) => (
@@ -117,21 +119,21 @@ export function Sidebar() {
       <div className="mt-auto border-t border-line pt-3">
         <NavLink to="/triage" className={navClass}>
           <Inbox size={16} strokeWidth={1.5} />
-          Unsorted
+          {t.nav.unsorted}
           {unsortedCount > 0 && <Badge tone="accent">{unsortedCount}</Badge>}
         </NavLink>
         <NavLink to="/guide" className={navClass}>
           <BookOpen size={16} strokeWidth={1.5} />
-          Guide
+          {t.nav.guide}
         </NavLink>
         <NavLink to="/settings" className={navClass} data-tour="settings">
           <Settings size={16} strokeWidth={1.5} />
-          Settings
+          {t.nav.settings}
         </NavLink>
       </div>
 
       <div className="px-2.5 pt-2">
-        <Kbd>?</Kbd> <span className="text-[10px] text-ink-3">shortcuts</span>
+        <Kbd>?</Kbd> <span className="text-[10px] text-ink-3">{t.nav.shortcuts}</span>
       </div>
     </aside>
   )

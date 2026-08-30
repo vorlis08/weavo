@@ -4,11 +4,13 @@ import { ExternalLink, FileText, ListChecks, Mail, RefreshCw } from 'lucide-reac
 import { TopBar } from '@/components/TopBar'
 import { Button, EmptyState } from '@/components/ui'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { initGoogle } from '@/lib/google'
 import { listMail, type MailSummary } from '@/lib/gmail'
 import { fmtAgo } from '@/lib/date'
 
 export function MailView() {
+  const t = useT()
   const navigate = useNavigate()
   const google = useStore((s) => s.data.google)
   const createItem = useStore((s) => s.createItem)
@@ -30,12 +32,12 @@ export function MailView() {
       const msg = e instanceof Error ? e.message : String(e)
       setError(msg)
       if (/auth|token|consent|401/i.test(msg)) {
-        updateGoogle({ connected: false, lastError: 'Google session expired — reconnect.' })
+        updateGoogle({ connected: false, lastError: t.google.sessionExpired })
       }
     } finally {
       setLoading(false)
     }
-  }, [google.connected, google.clientId, google.gmailQuery, updateGoogle])
+  }, [google.connected, google.clientId, google.gmailQuery, updateGoogle, t])
 
   useEffect(() => {
     load()
@@ -45,29 +47,32 @@ export function MailView() {
     const it = createItem({
       kind,
       title: m.subject,
-      body: `From ${m.fromName} <${m.from}>\n\n${m.snippet}\n\n${m.url}`,
+      body: `${t.mail.fromLine(m.fromName, m.from)}\n\n${m.snippet}\n\n${m.url}`,
       source: 'gmail',
       externalId: m.id,
       externalUrl: m.url,
       unsorted: true,
       status: kind === 'task' ? 'todo' : undefined,
     })
-    toast(`Added ${kind}`, { label: 'Open', run: () => navigate(`/item/${it.id}`) })
+    toast(t.mail.added(kind === 'task' ? t.kind.taskLower : t.kind.noteLower), {
+      label: t.common.open,
+      run: () => navigate(`/item/${it.id}`),
+    })
   }
 
   if (!google.connected) {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">Mail</h1>
+          <h1 className="text-[16px]">{t.mail.title}</h1>
         </TopBar>
         <EmptyState
           icon={<Mail size={22} strokeWidth={1.5} />}
-          title="Gmail isn’t connected"
-          hint="Connect a Google account in Settings to pull starred emails in here."
+          title={t.mail.notConnectedTitle}
+          hint={t.mail.notConnectedHint}
           action={
             <Link to="/settings">
-              <Button variant="accent">Open Settings</Button>
+              <Button variant="accent">{t.mail.openSettings}</Button>
             </Link>
           }
         />
@@ -78,11 +83,11 @@ export function MailView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Mail</h1>
+        <h1 className="text-[16px]">{t.mail.title}</h1>
         <span className="mono text-ink-3">{google.gmailQuery}</span>
         <Button variant="ghost" className="ml-auto text-[12px]" onClick={load} disabled={loading}>
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-          Refresh
+          {t.mail.refresh}
         </Button>
       </TopBar>
 
@@ -94,8 +99,8 @@ export function MailView() {
           {!loading && mail.length === 0 && !error && (
             <EmptyState
               icon={<Mail size={22} strokeWidth={1.5} />}
-              title="No matching mail"
-              hint={`Nothing matches “${google.gmailQuery}”. Change the search in Settings.`}
+              title={t.mail.noMailTitle}
+              hint={t.mail.noMailHint(google.gmailQuery)}
             />
           )}
           <div className="flex flex-col gap-2">
@@ -118,14 +123,14 @@ export function MailView() {
                     className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-[11px] text-ink-2 hover:text-ink"
                   >
                     <ListChecks size={12} />
-                    Task
+                    {t.mail.toTask}
                   </button>
                   <button
                     onClick={() => convert(m, 'note')}
                     className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-[11px] text-ink-2 hover:text-ink"
                   >
                     <FileText size={12} />
-                    Note
+                    {t.mail.toNote}
                   </button>
                   <a
                     href={m.url}

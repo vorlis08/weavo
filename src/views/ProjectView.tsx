@@ -6,11 +6,13 @@ import { Button, EmptyState, SectionLabel, TextField, cn } from '@/components/ui
 import { Menu, ConfirmDialog } from '@/components/overlays'
 import { CompletedRow, TaskRow } from '@/components/items'
 import { useStore } from '@/lib/store'
-import { fmtTime, isSameDay } from '@/lib/date'
+import { useT } from '@/lib/i18n'
+import { dateLocale, fmtTime, isSameDay } from '@/lib/date'
 import { PROJECT_COLORS } from '@/lib/types'
 import type { Item } from '@/lib/types'
 
 export function ProjectView() {
+  const t = useT()
   const { id } = useParams()
   const navigate = useNavigate()
   const project = useStore((s) => (id ? s.data.projects[id] : undefined))
@@ -41,9 +43,9 @@ export function ProjectView() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">Project not found</h1>
+          <h1 className="text-[16px]">{t.project.notFoundTitle}</h1>
         </TopBar>
-        <EmptyState title="That project is gone" hint="It may have been deleted." />
+        <EmptyState title={t.project.notFoundTitle} hint={t.project.notFoundBody} />
       </>
     )
   }
@@ -76,7 +78,7 @@ export function ProjectView() {
         <div className="ml-auto flex items-center gap-2">
           <Button variant="ghost" className="text-[12px]" onClick={() => navigate(`/board?project=${project.id}`)}>
             <Columns3 size={13} />
-            Board
+            {t.project.board}
           </Button>
           <Menu
             align="right"
@@ -87,7 +89,7 @@ export function ProjectView() {
             )}
             items={[
               {
-                label: 'Rename',
+                label: t.project.rename,
                 icon: <Pencil size={13} />,
                 onSelect: () => {
                   setName(project.name)
@@ -99,14 +101,14 @@ export function ProjectView() {
                 label: (
                   <span className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.value }} />
-                    <span className="capitalize">{c.name}</span>
+                    <span>{t.project.colors[c.name]}</span>
                   </span>
                 ),
                 onSelect: () => updateProject(project.id, { color: c.value }),
               })),
               'separator',
               {
-                label: 'Delete project',
+                label: t.project.deleteProject,
                 icon: <Trash2 size={13} />,
                 danger: true,
                 onSelect: () => setConfirmDel(true),
@@ -118,17 +120,17 @@ export function ProjectView() {
 
       {empty ? (
         <EmptyState
-          title="Nothing in this project yet"
-          hint={`Capture with #${project.name.split(' ')[0].toLowerCase()} to file things here.`}
-          action={<Button variant="accent" onClick={() => openCapture()}>Quick capture</Button>}
+          title={t.project.emptyTitle}
+          hint={t.project.emptyHint(project.name.split(' ')[0].toLowerCase())}
+          action={<Button variant="accent" onClick={() => openCapture()}>{t.capture.title}</Button>}
         />
       ) : (
         <div className="flex-1 overflow-y-auto px-8 py-7">
           <div className="mx-auto max-w-[640px]">
-            <Bucket label={`Open tasks · ${buckets.tasks.length}`} items={buckets.tasks} render={(it) => <TaskRow key={it.id} item={it} />} />
+            <Bucket label={`${t.project.openTasks} · ${buckets.tasks.length}`} items={buckets.tasks} render={(it) => <TaskRow key={it.id} item={it} />} />
             {buckets.events.length > 0 && (
               <div className="mb-6">
-                <SectionLabel className="mb-2">Upcoming events · {buckets.events.length}</SectionLabel>
+                <SectionLabel className="mb-2">{t.project.upcomingEvents} · {buckets.events.length}</SectionLabel>
                 <div className="rounded-xl border border-line bg-surface p-1.5">
                   {buckets.events.map((it) => (
                     <Link
@@ -137,7 +139,7 @@ export function ProjectView() {
                       className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"
                     >
                       <span className="mono w-24 shrink-0 text-[11px] text-ink-3">
-                        {new Date(it.start!).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' })}
+                        {new Date(it.start!).toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric' })}
                         {!it.allDay && ` ${fmtTime(it.start!)}`}
                         {isSameDay(it.start!, new Date()) && ' ·'}
                       </span>
@@ -147,10 +149,10 @@ export function ProjectView() {
                 </div>
               </div>
             )}
-            <Bucket label={`Notes · ${buckets.notes.length}`} items={buckets.notes} render={(it) => <TaskRow key={it.id} item={it} />} />
+            <Bucket label={`${t.project.notes} · ${buckets.notes.length}`} items={buckets.notes} render={(it) => <TaskRow key={it.id} item={it} />} />
             {buckets.done.length > 0 && (
               <div className="mb-6">
-                <SectionLabel className="mb-2">Done · {buckets.done.length}</SectionLabel>
+                <SectionLabel className="mb-2">{t.project.done} · {buckets.done.length}</SectionLabel>
                 <div className="rounded-xl border border-line bg-surface p-1.5">
                   {buckets.done.map((it) => (
                     <CompletedRow key={it.id} item={it} />
@@ -164,8 +166,8 @@ export function ProjectView() {
 
       <ConfirmDialog
         open={confirmDel}
-        title={`Delete “${project.name}”?`}
-        body="Items in this project are kept — they just lose the project label."
+        title={t.project.deleteConfirmTitle(project.name)}
+        body={t.project.deleteConfirmBody}
         onConfirm={() => {
           deleteProject(project.id)
           navigate('/')

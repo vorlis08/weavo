@@ -98,7 +98,10 @@ export interface GoogleIntegration {
   lastError?: string
 }
 
+export type Lang = 'cs' | 'en'
+
 export interface Settings {
+  lang: Lang
   displayName: string
   weekStartsMonday: boolean
   dayStartHour: number

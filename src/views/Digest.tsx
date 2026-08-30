@@ -5,7 +5,8 @@ import { TopBar } from '@/components/TopBar'
 import { Badge, EmptyState } from '@/components/ui'
 import { CompletedRow, TaskRow } from '@/components/items'
 import { useStore } from '@/lib/store'
-import { fmtTime } from '@/lib/date'
+import { useT } from '@/lib/i18n'
+import { dateLocale, fmtTime } from '@/lib/date'
 import { buildDigest } from '@/lib/selectors'
 import type { Item } from '@/lib/types'
 
@@ -40,14 +41,15 @@ function Section({
 }
 
 function EventRow({ item }: { item: Item }) {
+  const t = useT()
   const navigate = useNavigate()
   return (
     <button
       onClick={() => navigate(`/item/${item.id}`)}
       className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left hover:bg-surface-2"
     >
-      <span className="mono w-12 shrink-0 text-[11px] text-ink-3">
-        {item.allDay ? 'all day' : fmtTime(item.start!)}
+      <span className="mono w-14 shrink-0 text-[11px] text-ink-3">
+        {item.allDay ? t.digest.allDay : fmtTime(item.start!)}
       </span>
       <span className="min-w-0 flex-1 truncate text-[12.5px]">{item.title}</span>
     </button>
@@ -55,6 +57,7 @@ function EventRow({ item }: { item: Item }) {
 }
 
 export function Digest() {
+  const t = useT()
   const data = useStore((s) => s.data)
   const digest = useMemo(() => buildDigest(data), [data])
 
@@ -70,9 +73,9 @@ export function Digest() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">Digest</h1>
+        <h1 className="text-[16px]">{t.digest.title}</h1>
         <span className="mono text-ink-3">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long' })}
+          {new Date().toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}
         </span>
       </TopBar>
 
@@ -81,42 +84,42 @@ export function Digest() {
           {total === 0 ? (
             <EmptyState
               icon={<CalendarClock size={22} strokeWidth={1.5} />}
-              title="Clear runway"
-              hint="Nothing scheduled, due, or waiting. Capture something to get started."
+              title={t.digest.emptyTitle}
+              hint={t.digest.emptyHint}
             />
           ) : (
             <>
-              <Section icon={CalendarClock} title="On the calendar today" count={digest.todayEvents.length}>
+              <Section icon={CalendarClock} title={t.digest.sTodayEvents} count={digest.todayEvents.length}>
                 {digest.todayEvents.map((it) => (
                   <EventRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={TriangleAlert} title="Overdue" count={digest.overdue.length} tone="rose">
+              <Section icon={TriangleAlert} title={t.digest.sOverdue} count={digest.overdue.length} tone="rose">
                 {digest.overdue.map((it) => (
                   <TaskRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={Clock3} title="Due today" count={digest.dueToday.length} tone="amber">
+              <Section icon={Clock3} title={t.digest.sDueToday} count={digest.dueToday.length} tone="amber">
                 {digest.dueToday.map((it) => (
                   <TaskRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={CalendarClock} title="Coming up this week" count={digest.upcoming.length}>
+              <Section icon={CalendarClock} title={t.digest.sUpcoming} count={digest.upcoming.length}>
                 {digest.upcoming.map((it) => (
                   <TaskRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={Inbox} title="Waiting in your inbox" count={digest.unsorted.length}>
+              <Section icon={Inbox} title={t.digest.sInbox} count={digest.unsorted.length}>
                 {digest.unsorted.map((it) => (
                   <TaskRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={Clock3} title="Deferred — no date, gone quiet" count={digest.stale.length}>
+              <Section icon={Clock3} title={t.digest.sStale} count={digest.stale.length}>
                 {digest.stale.map((it) => (
                   <TaskRow key={it.id} item={it} />
                 ))}
               </Section>
-              <Section icon={CheckCircle2} title="Done today" count={digest.completedToday.length}>
+              <Section icon={CheckCircle2} title={t.digest.sDoneToday} count={digest.completedToday.length}>
                 {digest.completedToday.map((it) => (
                   <CompletedRow key={it.id} item={it} />
                 ))}

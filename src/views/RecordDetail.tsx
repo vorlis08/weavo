@@ -30,22 +30,25 @@ import { ConfirmDialog, Menu } from '@/components/overlays'
 import { ItemPicker } from '@/components/ItemPicker'
 import { InlineBody, InlineTitle, PropRow, TagEditor } from '@/components/editors'
 import { useStore } from '@/lib/store'
+import { useT } from '@/lib/i18n'
 import { eventConflicts, noteLinks, suggestSlot } from '@/lib/selectors'
-import { fmtDue, fmtTime, toLocalInput } from '@/lib/date'
+import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
 import type { TaskStatus } from '@/lib/types'
 
-const STATUS_OPTS: { value: TaskStatus; label: string; color: string }[] = [
-  { value: 'todo', label: 'To do', color: 'var(--color-ink-2)' },
-  { value: 'in_progress', label: 'In progress', color: 'var(--color-amber)' },
-  { value: 'blocked', label: 'Blocked', color: 'var(--color-rose)' },
-  { value: 'done', label: 'Done', color: 'var(--color-sage)' },
-]
+const STATUS_COLOR: Record<TaskStatus, string> = {
+  todo: 'var(--color-ink-2)',
+  in_progress: 'var(--color-amber)',
+  blocked: 'var(--color-rose)',
+  done: 'var(--color-sage)',
+}
+const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'done']
 
 function uid() {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
 }
 
 export function RecordDetail() {
+  const t = useT()
   const { id } = useParams()
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
@@ -56,7 +59,7 @@ export function RecordDetail() {
   const [confirmDel, setConfirmDel] = useState(false)
 
   const blocks = useMemo(
-    () => (item ? Object.values(data.items).filter((t) => t.blockedBy?.includes(item.id)) : []),
+    () => (item ? Object.values(data.items).filter((x) => x.blockedBy?.includes(item.id)) : []),
     [data.items, item],
   )
   const links = useMemo(() => (item ? noteLinks(data, item) : { linkedFrom: [], linksTo: [] }), [data, item])
@@ -86,7 +89,7 @@ export function RecordDetail() {
 
   function followLink(title: string) {
     const target = Object.values(data.items).find(
-      (t) => t.title.toLowerCase() === title.toLowerCase(),
+      (x) => x.title.toLowerCase() === title.toLowerCase(),
     )
     if (target) navigate(`/item/${target.id}`)
     else {
@@ -102,17 +105,20 @@ export function RecordDetail() {
           <Button variant="ghost" square onClick={() => navigate(-1)}>
             <ChevronLeft size={16} />
           </Button>
-          <h1 className="text-[16px]">Not found</h1>
+          <h1 className="text-[16px]">{t.detail.notFoundTitle}</h1>
         </TopBar>
         <div className="flex flex-1 items-center justify-center text-[13px] text-ink-2">
-          Nothing here. It may have been deleted.
+          {t.detail.notFoundBody}
         </div>
       </>
     )
   }
 
   const project = item.projectId ? data.projects[item.projectId] : undefined
-  const status = item.kind === 'task' ? STATUS_OPTS.find((o) => o.value === item.status)! : null
+  const status =
+    item.kind === 'task' && item.status
+      ? { label: t.status[item.status], color: STATUS_COLOR[item.status] }
+      : null
   const due = fmtDue(item.due)
   const done = item.kind === 'task' ? item.status === 'done' : !!item.completedAt
 
@@ -129,14 +135,14 @@ export function RecordDetail() {
               {project.name}
             </Link>
           ) : (
-            <span className="capitalize">{item.kind}</span>
+            <span>{t.kind[item.kind]}</span>
           )}
         </div>
         <div className="ml-auto flex items-center gap-2">
           {(item.due || item.start) && (
             <Button variant="ghost" className="text-[12px]" onClick={() => navigate('/calendar')}>
               <CalendarDays size={13} />
-              Calendar
+              {t.nav.calendar}
             </Button>
           )}
           <Menu
@@ -149,19 +155,19 @@ export function RecordDetail() {
             items={[
               item.kind !== 'task'
                 ? {
-                    label: 'Turn into task',
+                    label: t.detail.menuToTask,
                     onSelect: () => updateItem(item.id, { kind: 'task', status: 'todo' }),
                   }
                 : {
-                    label: 'Turn into note',
+                    label: t.detail.menuToNote,
                     onSelect: () => updateItem(item.id, { kind: 'note', status: undefined }),
                   },
               {
-                label: item.unsorted ? 'Remove from unsorted' : 'Move to unsorted',
+                label: item.unsorted ? t.detail.menuFromUnsorted : t.detail.menuToUnsorted,
                 onSelect: () => updateItem(item.id, { unsorted: !item.unsorted || undefined }),
               },
               'separator',
-              { label: 'Delete', icon: <Trash2 size={13} />, danger: true, onSelect: () => setConfirmDel(true) },
+              { label: t.common.delete, icon: <Trash2 size={13} />, danger: true, onSelect: () => setConfirmDel(true) },
             ]}
           />
         </div>
@@ -186,14 +192,14 @@ export function RecordDetail() {
               )}
               {item.kind !== 'task' && (
                 <Chip>
-                  <span className="capitalize">{item.kind}</span>
+                  <span>{t.kind[item.kind]}</span>
                 </Chip>
               )}
-              {item.unsorted && <Chip className="border-iris/25 bg-iris/12 text-iris-2">Unsorted</Chip>}
+              {item.unsorted && <Chip className="border-iris/25 bg-iris/12 text-iris-2">{t.detail.unsorted}</Chip>}
               {item.source && (
                 <Chip>
                   <SourceBadge source={item.source} size={12} />
-                  {item.source === 'gmail' ? 'From Gmail' : item.source === 'gcal' ? 'Google Calendar' : 'From Slack'}
+                  {item.source === 'gmail' ? t.detail.fromGmail : item.source === 'gcal' ? t.detail.fromCalendar : t.detail.fromSlack}
                 </Chip>
               )}
               {item.externalUrl && (
@@ -203,15 +209,14 @@ export function RecordDetail() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2"
                 >
-                  open <ExternalLink size={11} />
+                  {t.detail.openExternal} <ExternalLink size={11} />
                 </a>
               )}
             </div>
 
             {item.readOnlyExternal && (
               <div className="mb-3 mt-1 rounded-lg bg-surface-2 px-3 py-2 text-[11.5px] text-ink-3">
-                Mirrored from Google Calendar. Local edits here are overwritten on the next sync —
-                change it in Google Calendar.
+                {t.detail.mirrorBanner}
               </div>
             )}
 
@@ -221,12 +226,12 @@ export function RecordDetail() {
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-2">
                 {item.kind === 'event' && item.start && (
                   <span className="mono">
-                    {new Date(item.start).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })}
+                    {new Date(item.start).toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' })}
                     {!item.allDay && ` · ${fmtTime(item.start)}${item.end ? `–${fmtTime(item.end)}` : ''}`}
                   </span>
                 )}
                 {due && (
-                  <span className={due.overdue ? 'text-rose' : ''}>Due {due.label}</span>
+                  <span className={due.overdue ? 'text-rose' : ''}>{t.detail.dueLabel(due.label)}</span>
                 )}
               </div>
             )}
@@ -235,7 +240,7 @@ export function RecordDetail() {
               <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose/12 px-3 py-2">
                 <TriangleAlert size={13} strokeWidth={1.7} className="shrink-0 text-rose" />
                 <span className="text-[12px] text-ink-2">
-                  Overlaps{' '}
+                  {t.detail.overlapsPrefix}{' '}
                   {conflictIds.map((c, i) => (
                     <span key={c.id}>
                       {i > 0 && ', '}
@@ -255,11 +260,11 @@ export function RecordDetail() {
                 <div className="flex-1">
                   <div className="text-[12.75px] leading-normal text-ink">
                     <b className="font-semibold">
-                      Free slot — {suggestion.slot.start.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })} {fmtTime(suggestion.slot.start.toISOString())}–{fmtTime(suggestion.slot.end.toISOString())}.
+                      {t.detail.freeSlot(
+                        `${suggestion.slot.start.toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' })} ${fmtTime(suggestion.slot.start.toISOString())}–${fmtTime(suggestion.slot.end.toISOString())}`,
+                      )}
                     </b>{' '}
-                    {suggestion.blocked
-                      ? 'This task is still blocked, but the time is open.'
-                      : 'Nothing else is booked then.'}
+                    {suggestion.blocked ? t.detail.freeSlotBlocked : t.detail.freeSlotOpen}
                   </div>
                   <div className="mt-2.5 flex gap-2">
                     <Button
@@ -273,24 +278,24 @@ export function RecordDetail() {
                           start: suggestion.slot.start.toISOString(),
                           end: suggestion.slot.end.toISOString(),
                         })
-                        toast('Scheduled on the calendar')
+                        toast(t.detail.scheduledToast)
                       }}
                     >
-                      Put it on the calendar
+                      {t.detail.schedule}
                     </Button>
                     <Button
                       variant="ghost"
                       className="h-7 text-[11.5px]"
                       onClick={() => updateItem(item.id, { due: suggestion.slot.end.toISOString() })}
                     >
-                      Set as due
+                      {t.detail.setAsDue}
                     </Button>
                   </div>
                 </div>
               </div>
             )}
 
-            <SectionLabel className="mt-6">{item.kind === 'note' ? 'Note' : 'Description'}</SectionLabel>
+            <SectionLabel className="mt-6">{item.kind === 'note' ? t.detail.noteLabel : t.detail.description}</SectionLabel>
             <div className="mt-2">
               <InlineBody
                 value={item.body ?? ''}
@@ -302,7 +307,7 @@ export function RecordDetail() {
             {item.kind === 'task' && (
               <>
                 <div className="mt-6 flex items-center gap-2">
-                  <SectionLabel>Checklist</SectionLabel>
+                  <SectionLabel>{t.detail.checklist}</SectionLabel>
                   {item.checklist && item.checklist.length > 0 && (
                     <span className="mono text-[10px] text-ink-3">
                       {item.checklist.filter((c) => c.done).length}/{item.checklist.length}
@@ -345,30 +350,30 @@ export function RecordDetail() {
                   <button
                     onClick={() =>
                       updateItem(item.id, {
-                        checklist: [...(item.checklist ?? []), { id: uid(), text: 'New item', done: false }],
+                        checklist: [...(item.checklist ?? []), { id: uid(), text: t.detail.newChecklistItem, done: false }],
                       })
                     }
                     className="flex items-center gap-1.5 px-1 py-1 text-[11.5px] text-ink-3 hover:text-ink-2"
                   >
                     <Plus size={12} />
-                    Add item
+                    {t.detail.addItem}
                   </button>
                 </div>
 
                 <div className="mt-6 flex items-center gap-2">
-                  <SectionLabel>Dependencies</SectionLabel>
+                  <SectionLabel>{t.detail.dependencies}</SectionLabel>
                   <button
                     onClick={() => setPickDep(true)}
                     className="flex items-center gap-1 text-[11px] text-iris hover:text-iris-2"
                   >
                     <Plus size={11} />
-                    blocked by
+                    {t.detail.addBlockedBy}
                   </button>
                 </div>
                 <div className="mt-2.5 flex flex-col gap-3">
                   {(item.blockedBy ?? []).length > 0 && (
                     <div>
-                      <SectionLabel className="mb-1.5 text-[9.5px]">Blocked by</SectionLabel>
+                      <SectionLabel className="mb-1.5 text-[9.5px]">{t.detail.blockedBy}</SectionLabel>
                       <div className="flex flex-col gap-2">
                         {(item.blockedBy ?? []).map((bid) => {
                           const b = data.items[bid]
@@ -380,7 +385,7 @@ export function RecordDetail() {
                                 {b.title}
                               </Link>
                               <span className="mono text-[10px] text-ink-3">
-                                {b.status === 'done' ? 'done' : 'open'}
+                                {b.status === 'done' ? t.detail.doneState : t.detail.openState}
                               </span>
                               <button
                                 onClick={() =>
@@ -400,7 +405,7 @@ export function RecordDetail() {
                   )}
                   {blocks.length > 0 && (
                     <div>
-                      <SectionLabel className="mb-1.5 text-[9.5px]">Blocks · {blocks.length}</SectionLabel>
+                      <SectionLabel className="mb-1.5 text-[9.5px]">{t.detail.blocks(blocks.length)}</SectionLabel>
                       <div className="flex flex-col gap-2">
                         {blocks.map((b) => (
                           <Link
@@ -416,7 +421,7 @@ export function RecordDetail() {
                     </div>
                   )}
                   {(item.blockedBy ?? []).length === 0 && blocks.length === 0 && (
-                    <p className="text-[11.5px] text-ink-3">No dependencies.</p>
+                    <p className="text-[11.5px] text-ink-3">{t.detail.noDependencies}</p>
                   )}
                 </div>
               </>
@@ -424,14 +429,14 @@ export function RecordDetail() {
 
             {(links.linkedFrom.length > 0 || links.linksTo.length > 0) && (
               <>
-                <SectionLabel className="mt-6">Linked notes</SectionLabel>
+                <SectionLabel className="mt-6">{t.detail.linkedNotes}</SectionLabel>
                 <div className="mt-2.5 flex flex-col gap-2">
                   {links.linksTo.map((n) => (
                     <Link key={n.id} to={`/item/${n.id}`} className="rounded-lg border border-line bg-surface-2 px-3 py-2.5 hover:border-line-2">
                       <div className="flex items-center gap-2">
                         <ArrowRight size={13} className="text-ink-3" />
                         <span className="text-[12.5px] font-medium">{n.title}</span>
-                        <span className="ml-auto text-[10px] text-ink-3">links to</span>
+                        <span className="ml-auto text-[10px] text-ink-3">{t.detail.linksTo}</span>
                       </div>
                     </Link>
                   ))}
@@ -439,7 +444,7 @@ export function RecordDetail() {
                     <Link key={n.id} to={`/item/${n.id}`} className="rounded-lg border border-line bg-surface-2 px-3 py-2.5 hover:border-line-2">
                       <div className="flex items-center gap-2">
                         <span className="text-[12.5px] font-medium">{n.title}</span>
-                        <span className="ml-auto text-[10px] text-ink-3">mentions this</span>
+                        <span className="ml-auto text-[10px] text-ink-3">{t.detail.mentionsThis}</span>
                       </div>
                       {n.body && (
                         <p className="mt-1 line-clamp-2 text-[11.5px] text-ink-2">{n.body}</p>
@@ -456,15 +461,15 @@ export function RecordDetail() {
             <div className="rounded-xl border border-line bg-surface px-[15px] py-2.5">
               {item.kind === 'task' && (
                 <>
-                  <PropRow label="Status">
+                  <PropRow label={t.detail.propStatus}>
                     <Select
                       value={item.status}
                       onChange={(e) => useStore.getState().setStatus(item.id, e.target.value as TaskStatus)}
                       className="h-7"
                     >
-                      {STATUS_OPTS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
+                      {STATUS_ORDER.map((s) => (
+                        <option key={s} value={s}>
+                          {t.status[s]}
                         </option>
                       ))}
                     </Select>
@@ -472,13 +477,13 @@ export function RecordDetail() {
                   <Divider />
                 </>
               )}
-              <PropRow label="Project">
+              <PropRow label={t.detail.propProject}>
                 <Select
                   value={item.projectId ?? ''}
                   onChange={(e) => updateItem(item.id, { projectId: e.target.value || undefined })}
                   className="h-7"
                 >
-                  <option value="">No project</option>
+                  <option value="">{t.common.noProject}</option>
                   {Object.values(data.projects).map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -489,13 +494,13 @@ export function RecordDetail() {
               <Divider />
               {item.kind === 'task' ? (
                 <>
-                  <PropRow label="Assignee">
+                  <PropRow label={t.detail.propAssignee}>
                     <Select
                       value={item.assigneeId ?? ''}
                       onChange={(e) => updateItem(item.id, { assigneeId: e.target.value || undefined })}
                       className="h-7"
                     >
-                      <option value="">Unassigned</option>
+                      <option value="">{t.detail.propUnassigned}</option>
                       {Object.values(data.contacts).map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
@@ -504,7 +509,7 @@ export function RecordDetail() {
                     </Select>
                   </PropRow>
                   <Divider />
-                  <PropRow label="Due">
+                  <PropRow label={t.detail.propDue}>
                     <input
                       type="datetime-local"
                       value={item.due ? toLocalInput(item.due) : ''}
@@ -519,7 +524,7 @@ export function RecordDetail() {
                 </>
               ) : item.kind === 'event' ? (
                 <>
-                  <PropRow label="Starts">
+                  <PropRow label={t.detail.propStarts}>
                     <input
                       type="datetime-local"
                       value={item.start ? toLocalInput(item.start) : ''}
@@ -528,7 +533,7 @@ export function RecordDetail() {
                     />
                   </PropRow>
                   <Divider />
-                  <PropRow label="Ends">
+                  <PropRow label={t.detail.propEnds}>
                     <input
                       type="datetime-local"
                       value={item.end ? toLocalInput(item.end) : ''}
@@ -537,7 +542,7 @@ export function RecordDetail() {
                     />
                   </PropRow>
                   <Divider />
-                  <PropRow label="All day">
+                  <PropRow label={t.detail.propAllDay}>
                     <Checkbox
                       checked={!!item.allDay}
                       onChange={() => updateItem(item.id, { allDay: !item.allDay })}
@@ -546,8 +551,8 @@ export function RecordDetail() {
                 </>
               ) : null}
               <Divider />
-              <PropRow label="Tags">
-                <TagEditor tags={item.tags} onChange={(t) => updateItem(item.id, { tags: t })} />
+              <PropRow label={t.detail.propTags}>
+                <TagEditor tags={item.tags} onChange={(tg) => updateItem(item.id, { tags: tg })} />
               </PropRow>
             </div>
 
@@ -555,17 +560,17 @@ export function RecordDetail() {
               <div className="rounded-xl border border-line bg-surface px-[15px] py-3.5">
                 <div className="mb-1 flex items-center gap-2">
                   <Bell size={13} strokeWidth={1.6} className="text-ink-2" />
-                  <h3 className="text-[14px]">Reminders</h3>
+                  <h3 className="text-[14px]">{t.detail.reminders}</h3>
                 </div>
                 {reminders.map((r) => (
                   <div key={r.id} className="group flex items-center gap-2 border-t border-line py-2 first:border-0">
                     <span className="flex-1 text-[12px] text-ink">
                       {r.trigger.type === 'at'
-                        ? `At ${new Date(r.trigger.at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                        ? t.detail.remAt(new Date(r.trigger.at).toLocaleString(dateLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))
                         : r.trigger.type === 'before_due'
-                          ? `${humanMinutes(r.trigger.minutes)} before due`
-                          : `${humanMinutes(r.trigger.minutes)} before start`}
-                      {r.firedAt && <span className="mono ml-1.5 text-[10px] text-amber">fired</span>}
+                          ? t.detail.remBeforeDue(humanMinutes(t, r.trigger.minutes))
+                          : t.detail.remBeforeStart(humanMinutes(t, r.trigger.minutes))}
+                      {r.firedAt && <span className="mono ml-1.5 text-[10px] text-amber">{t.detail.remFired}</span>}
                     </span>
                     <button
                       onClick={() => deleteReminder(r.id)}
@@ -579,13 +584,16 @@ export function RecordDetail() {
                   trigger={({ toggle }) => (
                     <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-[11px] text-iris hover:text-iris-2">
                       <Plus size={11} />
-                      Add reminder
+                      {t.detail.addReminder}
                     </button>
                   )}
                   items={[
                     ...(item.due || item.start
                       ? [10, 60, 120, 1440].map((m) => ({
-                          label: `${humanMinutes(m)} before ${item.kind === 'event' ? 'start' : 'due'}`,
+                          label:
+                            item.kind === 'event'
+                              ? t.detail.remBeforeStart(humanMinutes(t, m))
+                              : t.detail.remBeforeDue(humanMinutes(t, m)),
                           onSelect: () =>
                             addReminder({
                               itemId: item.id,
@@ -593,18 +601,21 @@ export function RecordDetail() {
                                 type: item.kind === 'event' ? 'before_start' : 'before_due',
                                 minutes: m,
                               },
-                              note: `${humanMinutes(m)} before`,
+                              note:
+                                item.kind === 'event'
+                                  ? t.detail.remBeforeStart(humanMinutes(t, m))
+                                  : t.detail.remBeforeDue(humanMinutes(t, m)),
                             }),
                         }))
                       : []),
                     {
-                      label: 'At a specific time…',
+                      label: t.detail.remCustom,
                       onSelect: () => {
                         const when = new Date(Date.now() + 3_600_000)
                         addReminder({
                           itemId: item.id,
                           trigger: { type: 'at', at: when.toISOString() },
-                          note: 'Custom time',
+                          note: t.detail.remCustom,
                         })
                       },
                     },
@@ -615,7 +626,7 @@ export function RecordDetail() {
 
             {item.kind === 'event' && (
               <div className="rounded-xl border border-line bg-surface px-[15px] py-3.5">
-                <h3 className="mb-2 text-[14px]">People</h3>
+                <h3 className="mb-2 text-[14px]">{t.detail.people}</h3>
                 {(item.contactIds ?? []).map((cid) => {
                   const c = data.contacts[cid]
                   if (!c) return null
@@ -649,7 +660,7 @@ export function RecordDetail() {
                   }}
                   className="mt-2 h-7"
                 >
-                  <option value="">Add person…</option>
+                  <option value="">{t.detail.addPerson}</option>
                   {Object.values(data.contacts)
                     .filter((c) => !(item.contactIds ?? []).includes(c.id))
                     .map((c) => (
@@ -666,7 +677,7 @@ export function RecordDetail() {
 
       <ItemPicker
         open={pickDep}
-        title="Blocked by"
+        title={t.detail.blockedBy}
         kinds={['task']}
         exclude={[item.id, ...(item.blockedBy ?? [])]}
         onPick={(picked) =>
@@ -676,7 +687,7 @@ export function RecordDetail() {
       />
       <ConfirmDialog
         open={confirmDel}
-        title={`Delete “${item.title}”?`}
+        title={t.detail.deleteConfirmTitle(item.title)}
         onConfirm={() => {
           deleteItem(item.id)
           navigate(-1)
@@ -692,8 +703,8 @@ function Divider() {
   return <div className="h-px bg-line" />
 }
 
-function humanMinutes(m: number) {
-  if (m >= 1440) return `${m / 1440} day${m / 1440 > 1 ? 's' : ''}`
-  if (m >= 60) return `${m / 60} hour${m / 60 > 1 ? 's' : ''}`
-  return `${m} min`
+function humanMinutes(t: ReturnType<typeof useT>, m: number) {
+  if (m >= 1440) return t.detail.days(m / 1440)
+  if (m >= 60) return t.detail.hours(m / 60)
+  return t.detail.minutes(m)
 }
