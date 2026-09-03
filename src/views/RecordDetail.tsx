@@ -17,7 +17,6 @@ import {
 import { TopBar } from '@/components/TopBar'
 import { SourceBadge } from '@/components/items'
 import {
-  Avatar,
   Button,
   Checkbox,
   Chip,
@@ -26,12 +25,14 @@ import {
   Select,
   cn,
 } from '@/components/ui'
-import { ConfirmDialog, Menu } from '@/components/overlays'
+import { Menu } from '@/components/overlays'
 import { ItemPicker } from '@/components/ItemPicker'
+import { Subtasks } from '@/components/Subtasks'
+import { useConfirmDelete } from '@/components/useConfirmDelete'
 import { InlineBody, InlineTitle, PropRow, TagEditor } from '@/components/editors'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { eventConflicts, noteLinks, suggestSlot } from '@/lib/selectors'
+import { eventConflicts, noteLinks, subtasks as childSubtasks, suggestSlot } from '@/lib/selectors'
 import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
 import type { TaskStatus } from '@/lib/types'
 
@@ -52,17 +53,19 @@ export function RecordDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
-  const { updateItem, deleteItem, createItem, addReminder, deleteReminder, toast } = useStore()
+  const { updateItem, createItem, addReminder, deleteReminder, toast } = useStore()
+  const toggleDone = useStore((s) => s.toggleDone)
+  const { askDelete, dialog: deleteDialog } = useConfirmDelete()
 
   const item = id ? data.items[id] : undefined
   const [pickDep, setPickDep] = useState(false)
-  const [confirmDel, setConfirmDel] = useState(false)
 
   const blocks = useMemo(
     () => (item ? Object.values(data.items).filter((x) => x.blockedBy?.includes(item.id)) : []),
     [data.items, item],
   )
   const links = useMemo(() => (item ? noteLinks(data, item) : { linkedFrom: [], linksTo: [] }), [data, item])
+  const kids = useMemo(() => (item ? childSubtasks(data, item.id) : []), [data, item])
   const reminders = useMemo(
     () => (item ? Object.values(data.reminders).filter((r) => r.itemId === item.id) : []),
     [data.reminders, item],
@@ -137,6 +140,15 @@ export function RecordDetail() {
           ) : (
             <span>{t.kind[item.kind]}</span>
           )}
+          {item.parentId && data.items[item.parentId] && (
+            <Link
+              to={`/item/${item.parentId}`}
+              className="flex items-center gap-1.5 border-l border-line pl-1.5 hover:text-ink-2"
+            >
+              <GitBranch size={12} strokeWidth={1.7} />
+              <span className="max-w-[180px] truncate">{data.items[item.parentId].title}</span>
+            </Link>
+          )}
         </div>
         <div className="ml-auto flex items-center gap-2">
           {(item.due || item.start) && (
@@ -167,7 +179,12 @@ export function RecordDetail() {
                 onSelect: () => updateItem(item.id, { unsorted: !item.unsorted || undefined }),
               },
               'separator',
-              { label: t.common.delete, icon: <Trash2 size={13} />, danger: true, onSelect: () => setConfirmDel(true) },
+              {
+                label: t.common.delete,
+                icon: <Trash2 size={13} />,
+                danger: true,
+                onSelect: () => askDelete(item.id, item.title, () => navigate(-1)),
+              },
             ]}
           />
         </div>
@@ -220,7 +237,18 @@ export function RecordDetail() {
               </div>
             )}
 
-            <InlineTitle value={item.title} onCommit={(v) => updateItem(item.id, { title: v })} />
+            <div className="flex items-start gap-2.5">
+              {item.kind !== 'note' && (
+                <Checkbox
+                  checked={done}
+                  onChange={() => toggleDone(item.id)}
+                  className="mt-[7px]"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <InlineTitle value={item.title} onCommit={(v) => updateItem(item.id, { title: v })} />
+              </div>
+            </div>
 
             {(due || item.start) && (
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-2">
@@ -361,6 +389,18 @@ export function RecordDetail() {
                 </div>
 
                 <div className="mt-6 flex items-center gap-2">
+                  <SectionLabel>{t.detail.subtasks}</SectionLabel>
+                  {kids.length > 0 && (
+                    <span className="mono text-[10px] text-ink-3">
+                      {kids.filter((k) => k.status === 'done').length}/{kids.length}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2">
+                  <Subtasks parentId={item.id} />
+                </div>
+
+                <div className="mt-6 flex items-center gap-2">
                   <SectionLabel>{t.detail.dependencies}</SectionLabel>
                   <button
                     onClick={() => setPickDep(true)}
@@ -494,21 +534,6 @@ export function RecordDetail() {
               <Divider />
               {item.kind === 'task' ? (
                 <>
-                  <PropRow label={t.detail.propAssignee}>
-                    <Select
-                      value={item.assigneeId ?? ''}
-                      onChange={(e) => updateItem(item.id, { assigneeId: e.target.value || undefined })}
-                      className="h-7"
-                    >
-                      <option value="">{t.detail.propUnassigned}</option>
-                      {Object.values(data.contacts).map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </Select>
-                  </PropRow>
-                  <Divider />
                   <PropRow label={t.detail.propDue}>
                     <input
                       type="datetime-local"
@@ -624,53 +649,6 @@ export function RecordDetail() {
               </div>
             )}
 
-            {item.kind === 'event' && (
-              <div className="rounded-xl border border-line bg-surface px-[15px] py-3.5">
-                <h3 className="mb-2 text-[14px]">{t.detail.people}</h3>
-                {(item.contactIds ?? []).map((cid) => {
-                  const c = data.contacts[cid]
-                  if (!c) return null
-                  return (
-                    <div key={cid} className="group flex items-center gap-2.5 border-t border-line py-1.5 first:border-0">
-                      <Avatar name={c.name} size={20} />
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-[12.5px]">{c.name}</div>
-                        {c.role && <div className="text-[10px] text-ink-3">{c.role}</div>}
-                      </div>
-                      <button
-                        onClick={() =>
-                          updateItem(item.id, {
-                            contactIds: (item.contactIds ?? []).filter((x) => x !== cid),
-                          })
-                        }
-                        className="text-ink-3 opacity-0 hover:text-rose group-hover:opacity-100"
-                      >
-                        <X size={12} />
-                      </button>
-                    </div>
-                  )
-                })}
-                <Select
-                  value=""
-                  onChange={(e) => {
-                    if (e.target.value)
-                      updateItem(item.id, {
-                        contactIds: [...(item.contactIds ?? []), e.target.value],
-                      })
-                  }}
-                  className="mt-2 h-7"
-                >
-                  <option value="">{t.detail.addPerson}</option>
-                  {Object.values(data.contacts)
-                    .filter((c) => !(item.contactIds ?? []).includes(c.id))
-                    .map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                </Select>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -685,16 +663,7 @@ export function RecordDetail() {
         }
         onClose={() => setPickDep(false)}
       />
-      <ConfirmDialog
-        open={confirmDel}
-        title={t.detail.deleteConfirmTitle(item.title)}
-        onConfirm={() => {
-          deleteItem(item.id)
-          navigate(-1)
-        }}
-        onCancel={() => setConfirmDel(false)}
-      />
-      {done && null}
+      {deleteDialog}
     </>
   )
 }

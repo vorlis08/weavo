@@ -14,11 +14,32 @@ export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
   { name: 'blue', value: '#7cc1e8' },
 ]
 
+export type ProjectSectionId = 'tasks' | 'events' | 'notes' | 'done'
+
+export interface ProjectSection {
+  id: ProjectSectionId
+  collapsed?: boolean
+}
+
+export const DEFAULT_PROJECT_SECTIONS: ProjectSection[] = [
+  { id: 'tasks' },
+  { id: 'events' },
+  { id: 'notes' },
+  { id: 'done' },
+]
+
 export interface Project {
   id: string
   name: string
   color: string
   archived?: boolean
+  /** the project page body — free-form rich text (Notion-style) */
+  description?: string
+  /** ISO datetime — optional project deadline */
+  due?: string
+  createdAt?: string
+  /** ordered, collapsible content sections on the project page */
+  sections?: ProjectSection[]
 }
 
 export interface Contact {
@@ -60,6 +81,8 @@ export interface Item {
   assigneeId?: string
   blockedBy?: string[]
   checklist?: { id: string; text: string; done: boolean }[]
+  /** subtask: id of the parent task this rolls up into */
+  parentId?: string
 
   /** event — ISO datetimes */
   start?: string

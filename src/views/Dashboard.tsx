@@ -10,7 +10,7 @@ import {
   TriangleAlert,
 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
-import { Avatar, Button, Badge, Chip, Segmented } from '@/components/ui'
+import { Button, Badge, Chip, Segmented } from '@/components/ui'
 import { CompletedRow, KindIcon, TaskRow } from '@/components/items'
 import { WeekGrid } from '@/components/WeekGrid'
 import { useStore } from '@/lib/store'
@@ -164,7 +164,6 @@ export function Dashboard() {
             value={mode}
             onChange={setMode}
           />
-          {data.settings.displayName && <Avatar name={data.settings.displayName} size={26} />}
         </div>
       </TopBar>
 

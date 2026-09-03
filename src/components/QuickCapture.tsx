@@ -7,7 +7,6 @@ import {
   Hash,
   ListChecks,
   TriangleAlert,
-  User,
 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -51,7 +50,6 @@ export function QuickCapture() {
     data,
     createItem,
     addProject,
-    addContact,
     toast,
   } = useStore()
   const navigate = useNavigate()
@@ -115,13 +113,6 @@ export function QuickCapture() {
           PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
         ).id
     }
-    const contactIds = parsed.contactNames.map((name) => {
-      const found = Object.values(data.contacts).find(
-        (c) => c.name.toLowerCase() === name.toLowerCase(),
-      )
-      return found ? found.id : addContact({ name }).id
-    })
-
     const base: Partial<Item> & { kind: ItemKind; title: string } = {
       kind: captureKind,
       title: parsed.title,
@@ -135,12 +126,10 @@ export function QuickCapture() {
           parsed.when.end ?? new Date(parsed.when.start.getTime() + 3_600_000)
         ).toISOString()
         base.allDay = parsed.when.allDay
-        base.contactIds = contactIds
       } else if (captureKind === 'task') {
         base.due = parsed.when.start.toISOString()
       }
     }
-    if (captureKind === 'event' && contactIds.length) base.contactIds = contactIds
     if (captureKind === 'task') base.status = 'todo'
     return createItem(base)
   }
@@ -186,7 +175,7 @@ export function QuickCapture() {
           <Segmented size="md" options={kindOptions} value={captureKind} onChange={setCaptureKind} />
         </div>
 
-        {(whenLabel || parsed.projectName || parsed.contactNames.length > 0) && (
+        {(whenLabel || parsed.projectName) && (
           <div className="mt-3 flex flex-wrap gap-[7px]">
             {whenLabel && (
               <Pill tone="iris">
@@ -205,12 +194,6 @@ export function QuickCapture() {
                 {existingProject ? existingProject.name : t.capture.newProject(parsed.projectName)}
               </Pill>
             )}
-            {parsed.contactNames.map((n) => (
-              <Pill key={n}>
-                <User size={11} strokeWidth={1.7} />
-                {n}
-              </Pill>
-            ))}
           </div>
         )}
 

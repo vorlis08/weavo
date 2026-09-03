@@ -1,13 +1,12 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, BookOpen, Download, Plus, Sparkles, Trash2, Upload } from 'lucide-react'
+import { Bell, BookOpen, Download, Sparkles, Trash2, Upload } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
-import { Button, SectionLabel, Select, TextField, cn } from '@/components/ui'
+import { Button, SectionLabel, Select } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
 import { GoogleConnect } from '@/components/GoogleConnect'
 import { useStore } from '@/lib/store'
 import { LANGS, useT } from '@/lib/i18n'
-import { PROJECT_COLORS } from '@/lib/types'
 import type { Lang, WeavoData } from '@/lib/types'
 import { makeSampleData } from '@/lib/sampleData'
 import { ensureNotificationPermission } from '@/lib/notify'
@@ -36,23 +35,9 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
 export function SettingsView() {
   const t = useT()
   const data = useStore((s) => s.data)
-  const {
-    updateSettings,
-    startTour,
-    addProject,
-    updateProject,
-    deleteProject,
-    addContact,
-    updateContact,
-    deleteContact,
-    replaceAll,
-    clearAll,
-    toast,
-  } = useStore()
+  const { updateSettings, startTour, replaceAll, clearAll, toast } = useStore()
   const fileRef = useRef<HTMLInputElement>(null)
   const [confirmClear, setConfirmClear] = useState(false)
-  const [newProject, setNewProject] = useState('')
-  const [newContact, setNewContact] = useState('')
 
   const notifPerm = typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
 
@@ -102,17 +87,6 @@ export function SettingsView() {
                   </option>
                 ))}
               </Select>
-            </Row>
-          </Group>
-
-          <Group title={t.settings.gYou}>
-            <Row label={t.settings.displayName} hint={t.settings.displayNameHint}>
-              <TextField
-                defaultValue={data.settings.displayName}
-                placeholder={t.settings.displayNamePh}
-                onBlur={(e) => updateSettings({ displayName: e.target.value.trim() })}
-                className="w-[180px]"
-              />
             </Row>
           </Group>
 
@@ -199,106 +173,6 @@ export function SettingsView() {
 
           <Group title={t.settings.gIntegrations}>
             <GoogleConnect />
-          </Group>
-
-          <Group title={t.settings.gProjects}>
-            {Object.values(data.projects).map((p) => (
-              <Row key={p.id} label={p.name}>
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1">
-                    {PROJECT_COLORS.map((c) => (
-                      <button
-                        key={c.name}
-                        onClick={() => updateProject(p.id, { color: c.value })}
-                        className={cn(
-                          'h-4 w-4 rounded-full ring-offset-2 ring-offset-surface',
-                          p.color === c.value && 'ring-2 ring-white/40',
-                        )}
-                        style={{ background: c.value }}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={() => deleteProject(p.id)}
-                    className="text-ink-3 hover:text-rose"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </Row>
-            ))}
-            <div className="mt-3 flex gap-2 border-t border-line pt-3">
-              <TextField
-                value={newProject}
-                onChange={(e) => setNewProject(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newProject.trim()) {
-                    addProject(
-                      newProject,
-                      PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
-                    )
-                    setNewProject('')
-                  }
-                }}
-                placeholder={t.settings.newProjectPh}
-              />
-              <Button
-                onClick={() => {
-                  if (newProject.trim()) {
-                    addProject(
-                      newProject,
-                      PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
-                    )
-                    setNewProject('')
-                  }
-                }}
-              >
-                <Plus size={13} />
-                {t.common.add}
-              </Button>
-            </div>
-          </Group>
-
-          <Group title={t.settings.gPeople}>
-            {Object.values(data.contacts).map((c) => (
-              <Row key={c.id} label={c.name} hint={c.email}>
-                <div className="flex items-center gap-2">
-                  <TextField
-                    defaultValue={c.role ?? ''}
-                    placeholder={t.settings.rolePh}
-                    onBlur={(e) => updateContact(c.id, { role: e.target.value.trim() || undefined })}
-                    className="w-[130px]"
-                  />
-                  <button onClick={() => deleteContact(c.id)} className="text-ink-3 hover:text-rose">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              </Row>
-            ))}
-            <div className="mt-3 flex gap-2 border-t border-line pt-3">
-              <TextField
-                value={newContact}
-                onChange={(e) => setNewContact(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && newContact.trim()) {
-                    addContact({ name: newContact.trim() })
-                    setNewContact('')
-                  }
-                }}
-                placeholder={t.settings.newPersonPh}
-              />
-              <Button
-                onClick={() => {
-                  if (newContact.trim()) {
-                    addContact({ name: newContact.trim() })
-                    setNewContact('')
-                  }
-                }}
-              >
-                <Plus size={13} />
-                {t.common.add}
-              </Button>
-            </div>
           </Group>
 
           <Group title={t.settings.gData}>

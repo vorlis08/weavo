@@ -155,6 +155,51 @@ export function buildDigest(data: WeavoData, ref = new Date()): Digest {
   }
 }
 
+export interface ProjectStats {
+  /** all tasks in the project (incl. subtasks) */
+  total: number
+  done: number
+  openTasks: number
+  overdue: number
+  nextDue?: string
+  events: number
+  notes: number
+  /** 0–100 */
+  pct: number
+}
+
+export function projectStats(
+  data: WeavoData,
+  projectId: string,
+  ref = new Date(),
+): ProjectStats {
+  const mine = itemsArray(data).filter((it) => it.projectId === projectId)
+  const tasks = mine.filter((it) => it.kind === 'task')
+  const done = tasks.filter((it) => it.status === 'done').length
+  const open = tasks.filter((it) => it.status !== 'done')
+  const overdue = open.filter((it) => it.due && new Date(it.due) < ref).length
+  const nextDue = open
+    .filter((it) => it.due)
+    .sort((a, b) => new Date(a.due!).getTime() - new Date(b.due!).getTime())[0]?.due
+  return {
+    total: tasks.length,
+    done,
+    openTasks: open.length,
+    overdue,
+    nextDue,
+    events: mine.filter((it) => it.kind === 'event').length,
+    notes: mine.filter((it) => it.kind === 'note').length,
+    pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0,
+  }
+}
+
+/** direct subtasks of a task, oldest first */
+export function subtasks(data: WeavoData, parentId: string): Item[] {
+  return itemsArray(data)
+    .filter((it) => it.parentId === parentId)
+    .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
+}
+
 /** notes that mention [[title]] of the given item, plus notes it links to */
 export function noteLinks(data: WeavoData, item: Item) {
   const items = itemsArray(data)

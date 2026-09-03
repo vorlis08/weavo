@@ -4,7 +4,6 @@ import {
   FileText,
   Hash,
   ListChecks,
-  User,
 } from 'lucide-react'
 import { parseCapture } from '@/lib/parse'
 import { fmtDayMonth, fmtTime, fmtWeekday } from '@/lib/date'
@@ -16,14 +15,14 @@ const EXAMPLES: Record<'cs' | 'en', string[]> = {
   cs: [
     'Návrh ceníku na review ve čtvrtek 14:00 #launch',
     'Zavolat instalatérovi zítra 9:00',
-    'Design review v pátek 14–15 @alex #web',
+    'Design review v pátek 14–15 #web',
     'Odeslat newsletter za 3 dny',
     'Nápad: přidat onboarding do tarifu Pro',
   ],
   en: [
     'Draft pricing deck for finance review Thursday 2pm #launch',
     'Call the plumber tomorrow 9am',
-    'Design review Fri 2–3pm @alex #website',
+    'Design review Fri 2–3pm #website',
     'Ship the newsletter in 3 days',
     'Idea: bundle onboarding into the Pro tier',
   ],
@@ -111,13 +110,7 @@ export function CapturePlayground() {
               {parsed.projectName}
             </Chip>
           )}
-          {parsed.contactNames.map((n) => (
-            <Chip key={n}>
-              <User size={11} strokeWidth={1.7} />
-              {n}
-            </Chip>
-          ))}
-          {!whenLabel && !parsed.projectName && parsed.contactNames.length === 0 && (
+          {!whenLabel && !parsed.projectName && (
             <span className="text-[11.5px] text-ink-3">
               {t.playground.nothingDetected(parsed.title)}
             </span>

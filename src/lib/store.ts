@@ -76,13 +76,16 @@ interface Store {
 
   createItem: (partial: Partial<Item> & { kind: ItemKind; title: string }) => Item
   updateItem: (id: string, patch: Partial<Item>) => void
-  deleteItem: (id: string) => void
+  /** removes the item and any subtasks; returns a snapshot for undo */
+  deleteItem: (id: string) => { items: Item[]; reminders: Reminder[] }
+  restoreItems: (items: Item[], reminders: Reminder[]) => void
   toggleDone: (id: string) => void
   setStatus: (id: string, status: TaskStatus, order?: number) => void
 
   addProject: (name: string, color: string) => Project
   updateProject: (id: string, patch: Partial<Project>) => void
   deleteProject: (id: string) => void
+  addSubtask: (parentId: string, title: string) => Item | undefined
 
   addContact: (c: Omit<Contact, 'id'>) => Contact
   updateContact: (id: string, patch: Partial<Contact>) => void
@@ -182,21 +185,47 @@ export const useStore = create<Store>()(
           }
         }),
 
-      deleteItem: (id) =>
+      deleteItem: (id) => {
+        const snapshot: { items: Item[]; reminders: Reminder[] } = { items: [], reminders: [] }
         set((s) => {
           const items = { ...s.data.items }
-          delete items[id]
+          // collect the item and any subtasks that roll up into it
+          const removed = new Set<string>([id])
+          for (const it of Object.values(items)) {
+            if (it.parentId === id) removed.add(it.id)
+          }
+          for (const rid of removed) {
+            if (items[rid]) snapshot.items.push(items[rid])
+            delete items[rid]
+          }
           // scrub dependency references
           for (const it of Object.values(items)) {
-            if (it.blockedBy?.includes(id)) {
-              items[it.id] = { ...it, blockedBy: it.blockedBy.filter((x) => x !== id) }
+            if (it.blockedBy?.some((x) => removed.has(x))) {
+              items[it.id] = {
+                ...it,
+                blockedBy: it.blockedBy.filter((x) => !removed.has(x)),
+              }
             }
           }
           const reminders = { ...s.data.reminders }
           for (const r of Object.values(reminders)) {
-            if (r.itemId === id) delete reminders[r.id]
+            if (removed.has(r.itemId)) {
+              snapshot.reminders.push(r)
+              delete reminders[r.id]
+            }
           }
           return { data: { ...s.data, items, reminders } }
+        })
+        return snapshot
+      },
+
+      restoreItems: (items, reminders) =>
+        set((s) => {
+          const it = { ...s.data.items }
+          for (const x of items) it[x.id] = x
+          const rem = { ...s.data.reminders }
+          for (const r of reminders) rem[r.id] = r
+          return { data: { ...s.data, items: it, reminders: rem } }
         }),
 
       toggleDone: (id) =>
@@ -243,7 +272,7 @@ export const useStore = create<Store>()(
         }),
 
       addProject: (name, color) => {
-        const p: Project = { id: uid(), name: name.trim(), color }
+        const p: Project = { id: uid(), name: name.trim(), color, createdAt: now() }
         set((s) => ({ data: { ...s.data, projects: { ...s.data.projects, [p.id]: p } } }))
         return p
       },
@@ -264,6 +293,17 @@ export const useStore = create<Store>()(
           }
           return { data: { ...s.data, projects, items } }
         }),
+
+      addSubtask: (parentId, title) => {
+        const parent = get().data.items[parentId]
+        if (!parent) return undefined
+        return get().createItem({
+          kind: 'task',
+          title: title.trim(),
+          parentId,
+          projectId: parent.projectId,
+        })
+      },
 
       addContact: (c) => {
         const contact: Contact = { id: uid(), ...c }
@@ -330,14 +370,17 @@ export const useStore = create<Store>()(
       upsertExternalEvents: (events, window) =>
         set((s) => {
           const items = { ...s.data.items }
-          const byExternal = new Map<string, Item>()
+          const evByExternal = new Map<string, Item>()
+          const taskByExternal = new Map<string, Item>()
           for (const it of Object.values(items)) {
-            if (it.source === 'gcal' && it.externalId) byExternal.set(it.externalId, it)
+            if (it.source !== 'gcal' || !it.externalId) continue
+            if (it.kind === 'task') taskByExternal.set(it.externalId, it)
+            else evByExternal.set(it.externalId, it)
           }
           const seen = new Set<string>()
           for (const ev of events) {
             seen.add(ev.externalId)
-            const existing = byExternal.get(ev.externalId)
+            const existing = evByExternal.get(ev.externalId)
             if (existing) {
               items[existing.id] = {
                 ...existing,
@@ -368,14 +411,54 @@ export const useStore = create<Store>()(
                 updatedAt: now(),
               }
             }
+
+            // mirror each calendar entry as a task as well, keyed by the same externalId
+            const existingTask = taskByExternal.get(ev.externalId)
+            if (existingTask) {
+              items[existingTask.id] = {
+                ...existingTask,
+                title: ev.title,
+                due: ev.start,
+                externalUrl: ev.url,
+                externalUpdatedAt: ev.updated,
+                updatedAt: now(),
+              }
+            } else {
+              const tid = uid()
+              items[tid] = {
+                id: tid,
+                kind: 'task',
+                status: 'todo',
+                title: ev.title,
+                due: ev.start,
+                tags: [],
+                source: 'gcal',
+                externalId: ev.externalId,
+                externalUrl: ev.url,
+                externalUpdatedAt: ev.updated,
+                readOnlyExternal: true,
+                createdAt: now(),
+                updatedAt: now(),
+              }
+            }
           }
-          // drop mirrored events that vanished from Google within the synced window
+          // drop mirrored entries that vanished from Google within the synced window
           const winStart = new Date(window.start).getTime()
           const winEnd = new Date(window.end).getTime()
-          for (const it of byExternal.values()) {
-            if (seen.has(it.externalId!)) continue
-            const t = it.start ? new Date(it.start).getTime() : 0
-            if (t >= winStart && t <= winEnd) delete items[it.id]
+          const inWindow = (it: Item) => {
+            const t = it.start
+              ? new Date(it.start).getTime()
+              : it.due
+                ? new Date(it.due).getTime()
+                : 0
+            return t >= winStart && t <= winEnd
+          }
+          for (const it of evByExternal.values()) {
+            if (!seen.has(it.externalId!) && inWindow(it)) delete items[it.id]
+          }
+          for (const it of taskByExternal.values()) {
+            // keep a mirrored task the user has already completed
+            if (!seen.has(it.externalId!) && it.status !== 'done' && inWindow(it)) delete items[it.id]
           }
           return {
             data: {
@@ -391,7 +474,7 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'weavo-v1',
-      version: 2,
+      version: 3,
       partialize: (s) => ({ data: s.data }),
       migrate: (persisted, version) => {
         const p = persisted as { data?: Partial<WeavoData> } | undefined

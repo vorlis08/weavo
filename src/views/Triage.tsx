@@ -4,6 +4,7 @@ import { ArrowRight, Check, Inbox, Trash2 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { EmptyState, Select, cn } from '@/components/ui'
 import { KindIcon } from '@/components/items'
+import { useConfirmDelete } from '@/components/useConfirmDelete'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 
@@ -21,8 +22,8 @@ export function Triage() {
   )
   const projects = useMemo(() => Object.values(projectsRec), [projectsRec])
   const updateItem = useStore((s) => s.updateItem)
-  const deleteItem = useStore((s) => s.deleteItem)
   const toast = useStore((s) => s.toast)
+  const { askDelete, dialog } = useConfirmDelete()
 
   function file(id: string) {
     updateItem(id, { unsorted: undefined })
@@ -90,10 +91,7 @@ export function Triage() {
                   <Check size={13} />
                 </button>
                 <button
-                  onClick={() => {
-                    deleteItem(it.id)
-                    toast(t.triage.deleted)
-                  }}
+                  onClick={() => askDelete(it.id, it.title)}
                   title={t.triage.deleteTip}
                   className="flex h-7 w-7 items-center justify-center rounded-lg border border-line-2 text-ink-3 hover:border-rose/40 hover:text-rose"
                 >
@@ -104,6 +102,7 @@ export function Triage() {
           </div>
         </div>
       )}
+      {dialog}
     </>
   )
 }

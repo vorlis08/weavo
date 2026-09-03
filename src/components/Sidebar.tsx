@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { BookOpen, Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
 import { views } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
+import { PROJECT_COLORS } from '@/lib/types'
 import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -18,7 +19,10 @@ export function Sidebar() {
   const navigate = useNavigate()
   const openCapture = useStore((s) => s.openCapture)
   const setPalette = useStore((s) => s.setPalette)
+  const addProject = useStore((s) => s.addProject)
   const projectsRec = useStore((s) => s.data.projects)
+  const [creating, setCreating] = useState(false)
+  const [draft, setDraft] = useState('')
   const items = useStore((s) => s.data.items)
   const googleConnected = useStore((s) => s.data.google.connected)
   const projects = useMemo(
@@ -31,6 +35,20 @@ export function Sidebar() {
       (it) => it.projectId === projectId && it.status !== 'done',
     ).length
   const unsortedCount = Object.values(items).filter((it) => it.unsorted).length
+
+  function createProject() {
+    const name = draft.trim()
+    if (!name) {
+      setCreating(false)
+      return
+    }
+    const color =
+      PROJECT_COLORS[Object.keys(projectsRec).length % PROJECT_COLORS.length].value
+    const p = addProject(name, color)
+    setDraft('')
+    setCreating(false)
+    navigate(`/project/${p.id}`)
+  }
 
   return (
     <aside className="flex w-[232px] shrink-0 flex-col border-r border-line bg-[#0c0d10] px-3.5 py-[18px]">
@@ -83,16 +101,46 @@ export function Sidebar() {
         data-tour="projects"
         className="flex items-center justify-between px-2.5 pb-[7px] pt-[17px]"
       >
-        <SectionLabel>{t.nav.projects}</SectionLabel>
+        <NavLink
+          to="/projects"
+          className={({ isActive }) =>
+            cn(
+              'transition-colors',
+              isActive ? 'text-iris-2' : 'hover:text-ink-2',
+            )
+          }
+        >
+          <SectionLabel>{t.nav.projects}</SectionLabel>
+        </NavLink>
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => {
+            setCreating((v) => !v)
+            setDraft('')
+          }}
           className="text-ink-3 transition-colors hover:text-ink-2"
           title={t.nav.manageProjects}
         >
           <Plus size={13} />
         </button>
       </div>
-      {projects.length === 0 && (
+      {creating && (
+        <input
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={createProject}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') createProject()
+            if (e.key === 'Escape') {
+              setDraft('')
+              setCreating(false)
+            }
+          }}
+          placeholder={t.project.newProjectName}
+          className="mx-2.5 mb-1 h-7 rounded-md border border-line bg-surface-2 px-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+        />
+      )}
+      {projects.length === 0 && !creating && (
         <p className="px-2.5 pb-1 text-[11px] leading-relaxed text-ink-3">
           {t.nav.addProjectHint}
         </p>

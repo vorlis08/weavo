@@ -9,6 +9,7 @@ import { Digest } from './views/Digest'
 import { Triage } from './views/Triage'
 import { Guide } from './views/Guide'
 import { MailView } from './views/MailView'
+import { ProjectsView } from './views/ProjectsView'
 import { ProjectView } from './views/ProjectView'
 import { RecordDetail } from './views/RecordDetail'
 import { SettingsView } from './views/SettingsView'
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="triage" element={<Triage />} />
         <Route path="guide" element={<Guide />} />
         <Route path="mail" element={<MailView />} />
+        <Route path="projects" element={<ProjectsView />} />
         <Route path="project/:id" element={<ProjectView />} />
         <Route path="item/:id" element={<RecordDetail />} />
         <Route path="settings" element={<SettingsView />} />
