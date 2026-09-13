@@ -2,11 +2,14 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
   Contact,
+  Goal,
   GoogleIntegration,
   Item,
   ItemKind,
   Project,
+  Reflection,
   Reminder,
+  RepeatFreq,
   Settings,
   TaskStatus,
   WeavoData,
@@ -38,14 +41,25 @@ export const DEFAULT_GOOGLE: GoogleIntegration = {
 
 function emptyData(): WeavoData {
   return {
-    version: 1,
+    version: 4,
     items: {},
     projects: {},
+    goals: {},
+    reflections: {},
     contacts: {},
     reminders: {},
     settings: { ...DEFAULT_SETTINGS },
     google: { ...DEFAULT_GOOGLE },
   }
+}
+
+/** next due date for a repeating task, keeping the original time of day */
+function nextOccurrence(due: string, freq: RepeatFreq): string {
+  const d = new Date(due)
+  if (freq === 'daily') d.setDate(d.getDate() + 1)
+  else if (freq === 'weekly') d.setDate(d.getDate() + 7)
+  else if (freq === 'monthly') d.setMonth(d.getMonth() + 1)
+  return d.toISOString()
 }
 
 export interface Toast {
@@ -86,6 +100,12 @@ interface Store {
   updateProject: (id: string, patch: Partial<Project>) => void
   deleteProject: (id: string) => void
   addSubtask: (parentId: string, title: string) => Item | undefined
+
+  addGoal: (title: string, color: string) => Goal
+  updateGoal: (id: string, patch: Partial<Goal>) => void
+  deleteGoal: (id: string) => void
+
+  upsertReflection: (date: string, patch: Partial<Omit<Reflection, 'id' | 'date'>>) => void
 
   addContact: (c: Omit<Contact, 'id'>) => Contact
   updateContact: (id: string, patch: Partial<Contact>) => void
@@ -233,20 +253,30 @@ export const useStore = create<Store>()(
           const it = s.data.items[id]
           if (!it) return s
           const done = it.kind === 'task' ? it.status !== 'done' : !it.completedAt
-          return {
-            data: {
-              ...s.data,
-              items: {
-                ...s.data.items,
-                [id]: {
-                  ...it,
-                  status: it.kind === 'task' ? (done ? 'done' : 'todo') : it.status,
-                  completedAt: done ? now() : undefined,
-                  updatedAt: now(),
-                },
-              },
+          const items = {
+            ...s.data.items,
+            [id]: {
+              ...it,
+              status: it.kind === 'task' ? (done ? 'done' : 'todo') : it.status,
+              completedAt: done ? now() : undefined,
+              updatedAt: now(),
             },
           }
+          // completing a repeating task spins off the next occurrence
+          if (done && it.kind === 'task' && it.repeat && it.repeat !== 'none' && it.due) {
+            const nid = uid()
+            items[nid] = {
+              ...it,
+              id: nid,
+              status: 'todo',
+              completedAt: undefined,
+              due: nextOccurrence(it.due, it.repeat),
+              checklist: it.checklist?.map((c) => ({ ...c, done: false })),
+              createdAt: now(),
+              updatedAt: now(),
+            }
+          }
+          return { data: { ...s.data, items } }
         }),
 
       setStatus: (id, status, order) =>
@@ -304,6 +334,35 @@ export const useStore = create<Store>()(
           projectId: parent.projectId,
         })
       },
+
+      addGoal: (title, color) => {
+        const g: Goal = { id: uid(), title: title.trim(), color, createdAt: now() }
+        set((s) => ({ data: { ...s.data, goals: { ...s.data.goals, [g.id]: g } } }))
+        return g
+      },
+      updateGoal: (id, patch) =>
+        set((s) => ({
+          data: { ...s.data, goals: { ...s.data.goals, [id]: { ...s.data.goals[id], ...patch } } },
+        })),
+      deleteGoal: (id) =>
+        set((s) => {
+          const goals = { ...s.data.goals }
+          delete goals[id]
+          const projects = { ...s.data.projects }
+          for (const p of Object.values(projects)) {
+            if (p.goalId === id) projects[p.id] = { ...p, goalId: undefined }
+          }
+          return { data: { ...s.data, goals, projects } }
+        }),
+
+      upsertReflection: (date, patch) =>
+        set((s) => {
+          const existing = s.data.reflections[date]
+          const rec: Reflection = existing
+            ? { ...existing, ...patch, updatedAt: now() }
+            : { id: date, date, createdAt: now(), updatedAt: now(), ...patch }
+          return { data: { ...s.data, reflections: { ...s.data.reflections, [date]: rec } } }
+        }),
 
       addContact: (c) => {
         const contact: Contact = { id: uid(), ...c }
@@ -474,12 +533,16 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'weavo-v1',
-      version: 3,
+      version: 4,
       partialize: (s) => ({ data: s.data }),
       migrate: (persisted, version) => {
         const p = persisted as { data?: Partial<WeavoData> } | undefined
         if (p?.data && version < 2 && !p.data.google) {
           p.data.google = { ...DEFAULT_GOOGLE }
+        }
+        if (p?.data && version < 4) {
+          p.data.goals ??= {}
+          p.data.reflections ??= {}
         }
         return p as { data: WeavoData }
       },

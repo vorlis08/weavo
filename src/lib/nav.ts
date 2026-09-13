@@ -3,12 +3,20 @@ import {
   Columns3,
   LayoutGrid,
   GanttChartSquare,
+  Moon,
   Network,
   Sunrise,
   type LucideIcon,
 } from 'lucide-react'
 
-export type ViewId = 'dashboard' | 'calendar' | 'board' | 'timeline' | 'notes' | 'digest'
+export type ViewId =
+  | 'dashboard'
+  | 'calendar'
+  | 'board'
+  | 'timeline'
+  | 'notes'
+  | 'digest'
+  | 'reflection'
 
 export interface ViewDef {
   id: ViewId
@@ -23,4 +31,5 @@ export const views: ViewDef[] = [
   { id: 'timeline', path: '/timeline', icon: GanttChartSquare },
   { id: 'notes', path: '/notes', icon: Network },
   { id: 'digest', path: '/digest', icon: Sunrise },
+  { id: 'reflection', path: '/reflection', icon: Moon },
 ]

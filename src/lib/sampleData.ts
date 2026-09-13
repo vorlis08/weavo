@@ -158,9 +158,11 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   }
 
   return {
-    version: 1,
+    version: 4,
     items: Object.fromEntries(items.map((i) => [i.id, i])),
     projects,
+    goals: {},
+    reflections: {},
     contacts,
     reminders,
     settings: { ...DEFAULT_SETTINGS, lang, displayName: x.you, tourSeen: true },

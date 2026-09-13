@@ -11,6 +11,10 @@ import { Guide } from './views/Guide'
 import { MailView } from './views/MailView'
 import { ProjectsView } from './views/ProjectsView'
 import { ProjectView } from './views/ProjectView'
+import { GoalsView } from './views/GoalsView'
+import { GoalView } from './views/GoalView'
+import { SomedayView } from './views/SomedayView'
+import { ReflectionView } from './views/ReflectionView'
 import { RecordDetail } from './views/RecordDetail'
 import { SettingsView } from './views/SettingsView'
 
@@ -29,6 +33,10 @@ export default function App() {
         <Route path="mail" element={<MailView />} />
         <Route path="projects" element={<ProjectsView />} />
         <Route path="project/:id" element={<ProjectView />} />
+        <Route path="goals" element={<GoalsView />} />
+        <Route path="goal/:id" element={<GoalView />} />
+        <Route path="someday" element={<SomedayView />} />
+        <Route path="reflection" element={<ReflectionView />} />
         <Route path="item/:id" element={<RecordDetail />} />
         <Route path="settings" element={<SettingsView />} />
         <Route path="*" element={<Navigate to="/" replace />} />

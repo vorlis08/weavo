@@ -3,8 +3,14 @@ import { CalendarDays, CircleCheck, FileText, Hash, ListChecks, Mail } from 'luc
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { fmtDue } from '@/lib/date'
-import type { Item, ItemKind, SourceKind } from '@/lib/types'
+import type { Item, ItemKind, SourceKind, TaskPriority } from '@/lib/types'
 import { Checkbox, Dot, cn } from './ui'
+
+const PRIORITY_COLOR: Record<TaskPriority, string> = {
+  high: 'var(--color-rose)',
+  medium: 'var(--color-amber)',
+  low: 'var(--color-ink-3)',
+}
 
 const SOURCE_CFG: Record<SourceKind, { Icon: typeof Mail; cls: string }> = {
   gmail: { Icon: Mail, cls: 'text-rose' },
@@ -92,6 +98,7 @@ export function TaskRow({ item }: { item: Item }) {
         {item.title}
       </span>
       {isBlocked && <span className="mono shrink-0 text-[10px] text-rose">{t.board.blocked}</span>}
+      {item.priority && <Dot color={PRIORITY_COLOR[item.priority]} title={t.priority[item.priority]} />}
       {item.source && <SourceBadge source={item.source} />}
       {project && <Dot color={project.color} />}
       <DueChip due={item.due} className="w-16 text-right" />

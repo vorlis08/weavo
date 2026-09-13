@@ -14,7 +14,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
-import { Button, Checkbox, EmptyState, TextField, cn } from '@/components/ui'
+import { Button, Checkbox, EmptyState, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog, Menu } from '@/components/overlays'
 import { CompletedRow, DueChip } from '@/components/items'
 import { InlineBody } from '@/components/editors'
@@ -189,6 +189,24 @@ export function ProjectView() {
                 className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
               />
               {project.due && <DueChip due={project.due} />}
+            </label>
+
+            <label className="flex items-center gap-2">
+              <span>{t.project.propGoal}</span>
+              <Select
+                value={project.goalId ?? ''}
+                onChange={(e) => updateProject(project.id, { goalId: e.target.value || undefined })}
+                className="h-7 w-auto min-w-[140px]"
+              >
+                <option value="">{t.project.noGoal}</option>
+                {Object.values(data.goals)
+                  .filter((g) => !g.archived)
+                  .map((g) => (
+                    <option key={g.id} value={g.id}>
+                      {g.title}
+                    </option>
+                  ))}
+              </Select>
             </label>
 
             <div className="flex gap-1.5">

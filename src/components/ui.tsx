@@ -20,9 +20,10 @@ export function SectionLabel({ children, className }: { children: ReactNode; cla
   )
 }
 
-export function Dot({ color, className }: { color: string; className?: string }) {
+export function Dot({ color, className, title }: { color: string; className?: string; title?: string }) {
   return (
     <span
+      title={title}
       className={cn('inline-block h-[7px] w-[7px] shrink-0 rounded-full', className)}
       style={{ background: color }}
     />

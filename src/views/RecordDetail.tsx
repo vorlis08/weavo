@@ -34,7 +34,7 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { eventConflicts, noteLinks, subtasks as childSubtasks, suggestSlot } from '@/lib/selectors'
 import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
-import type { TaskStatus } from '@/lib/types'
+import type { RepeatFreq, TaskPriority, TaskStatus } from '@/lib/types'
 
 const STATUS_COLOR: Record<TaskStatus, string> = {
   todo: 'var(--color-ink-2)',
@@ -43,6 +43,8 @@ const STATUS_COLOR: Record<TaskStatus, string> = {
   done: 'var(--color-sage)',
 }
 const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'done']
+const PRIORITY_ORDER: TaskPriority[] = ['high', 'medium', 'low']
+const REPEAT_ORDER: RepeatFreq[] = ['none', 'daily', 'weekly', 'monthly']
 
 function uid() {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
@@ -178,6 +180,14 @@ export function RecordDetail() {
                 label: item.unsorted ? t.detail.menuFromUnsorted : t.detail.menuToUnsorted,
                 onSelect: () => updateItem(item.id, { unsorted: !item.unsorted || undefined }),
               },
+              ...(item.kind === 'task'
+                ? [
+                    {
+                      label: item.someday ? t.detail.menuFromSomeday : t.detail.menuToSomeday,
+                      onSelect: () => updateItem(item.id, { someday: !item.someday || undefined }),
+                    },
+                  ]
+                : []),
               'separator',
               {
                 label: t.common.delete,
@@ -510,6 +520,35 @@ export function RecordDetail() {
                       {STATUS_ORDER.map((s) => (
                         <option key={s} value={s}>
                           {t.status[s]}
+                        </option>
+                      ))}
+                    </Select>
+                  </PropRow>
+                  <Divider />
+                  <PropRow label={t.detail.propPriority}>
+                    <Select
+                      value={item.priority ?? ''}
+                      onChange={(e) => updateItem(item.id, { priority: (e.target.value || undefined) as TaskPriority | undefined })}
+                      className="h-7"
+                    >
+                      <option value="">{t.priority.none}</option>
+                      {PRIORITY_ORDER.map((p) => (
+                        <option key={p} value={p}>
+                          {t.priority[p]}
+                        </option>
+                      ))}
+                    </Select>
+                  </PropRow>
+                  <Divider />
+                  <PropRow label={t.detail.propRepeat}>
+                    <Select
+                      value={item.repeat ?? 'none'}
+                      onChange={(e) => updateItem(item.id, { repeat: e.target.value as RepeatFreq })}
+                      className="h-7"
+                    >
+                      {REPEAT_ORDER.map((r) => (
+                        <option key={r} value={r}>
+                          {t.repeat[r]}
                         </option>
                       ))}
                     </Select>

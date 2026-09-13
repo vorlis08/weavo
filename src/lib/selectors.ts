@@ -149,6 +149,7 @@ export function buildDigest(data: WeavoData, ref = new Date()): Digest {
           isOpenTask(it) &&
           !it.due &&
           !it.unsorted &&
+          !it.someday &&
           Date.now() - new Date(it.updatedAt).getTime() > 7 * 86_400_000,
       )
       .sort((a, b) => (a.updatedAt < b.updatedAt ? -1 : 1)),
@@ -190,6 +191,40 @@ export function projectStats(
     events: mine.filter((it) => it.kind === 'event').length,
     notes: mine.filter((it) => it.kind === 'note').length,
     pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0,
+  }
+}
+
+export interface GoalStats {
+  projectCount: number
+  total: number
+  done: number
+  /** 0–100 */
+  pct: number
+}
+
+/** aggregate progress across every project rolled up under a goal */
+export function goalStats(data: WeavoData, goalId: string): GoalStats {
+  const linked = Object.values(data.projects).filter((p) => p.goalId === goalId)
+  const tasks = itemsArray(data).filter(
+    (it) => it.kind === 'task' && it.projectId && linked.some((p) => p.id === it.projectId),
+  )
+  const done = tasks.filter((it) => it.status === 'done').length
+  return {
+    projectCount: linked.length,
+    total: tasks.length,
+    done,
+    pct: tasks.length ? Math.round((done / tasks.length) * 100) : 0,
+  }
+}
+
+/** what happened on a given day, for the daily reflection auto-summary */
+export function dayActivity(data: WeavoData, ref = new Date()) {
+  const items = itemsArray(data)
+  return {
+    completed: items.filter((it) => it.completedAt && isSameDay(it.completedAt, ref)),
+    events: items
+      .filter((it) => it.kind === 'event' && it.start && isSameDay(it.start, ref))
+      .sort((a, b) => eventStartMs(a) - eventStartMs(b)),
   }
 }
 

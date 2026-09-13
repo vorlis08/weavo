@@ -4,6 +4,11 @@ export type SourceKind = 'gmail' | 'gcal' | 'slack'
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done'
 
+export type TaskPriority = 'low' | 'medium' | 'high'
+export const PRIORITY_RANK: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 }
+
+export type RepeatFreq = 'none' | 'daily' | 'weekly' | 'monthly'
+
 export type AccentName = 'iris' | 'amber' | 'rose' | 'sage' | 'blue'
 
 export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
@@ -40,6 +45,32 @@ export interface Project {
   createdAt?: string
   /** ordered, collapsible content sections on the project page */
   sections?: ProjectSection[]
+  /** the long-term goal this project rolls up into, if any */
+  goalId?: string
+}
+
+/** a long-term objective (quarter/year horizon) that projects roll up into */
+export interface Goal {
+  id: string
+  title: string
+  color: string
+  archived?: boolean
+  /** free-form page body — why it matters, what success looks like */
+  description?: string
+  /** ISO date — optional target date */
+  targetDate?: string
+  createdAt: string
+}
+
+/** one day's journal entry */
+export interface Reflection {
+  /** = the date, e.g. '2026-09-13' */
+  id: string
+  date: string
+  mood?: 1 | 2 | 3 | 4 | 5
+  note?: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Contact {
@@ -83,6 +114,11 @@ export interface Item {
   checklist?: { id: string; text: string; done: boolean }[]
   /** subtask: id of the parent task this rolls up into */
   parentId?: string
+  priority?: TaskPriority
+  /** recurring task: when completed, the next occurrence is created automatically */
+  repeat?: RepeatFreq
+  /** parked in the Someday/later list, kept out of the board and digest */
+  someday?: boolean
 
   /** event — ISO datetimes */
   start?: string
@@ -138,6 +174,8 @@ export interface WeavoData {
   version: number
   items: Record<string, Item>
   projects: Record<string, Project>
+  goals: Record<string, Goal>
+  reflections: Record<string, Reflection>
   contacts: Record<string, Contact>
   reminders: Record<string, Reminder>
   settings: Settings

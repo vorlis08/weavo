@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
-import { BookOpen, Inbox, Mail, Plus, Search, Settings } from 'lucide-react'
+import { BookOpen, Clock9, Inbox, Mail, Plus, Search, Settings, Target } from 'lucide-react'
 import { views } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -35,6 +35,7 @@ export function Sidebar() {
       (it) => it.projectId === projectId && it.status !== 'done',
     ).length
   const unsortedCount = Object.values(items).filter((it) => it.unsorted).length
+  const somedayCount = Object.values(items).filter((it) => it.someday).length
 
   function createProject() {
     const name = draft.trim()
@@ -95,6 +96,15 @@ export function Sidebar() {
             {t.nav.mail}
           </NavLink>
         )}
+        <NavLink to="/goals" className={navClass}>
+          <Target size={16} strokeWidth={1.5} />
+          {t.nav.goals}
+        </NavLink>
+        <NavLink to="/someday" className={navClass}>
+          <Clock9 size={16} strokeWidth={1.5} />
+          {t.nav.someday}
+          {somedayCount > 0 && <Badge>{somedayCount}</Badge>}
+        </NavLink>
       </nav>
 
       <div

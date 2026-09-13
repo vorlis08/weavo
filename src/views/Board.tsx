@@ -19,7 +19,14 @@ import { Badge, cn } from '@/components/ui'
 import { DueChip, SourceBadge } from '@/components/items'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import type { Item, TaskStatus } from '@/lib/types'
+import { PRIORITY_RANK } from '@/lib/types'
+import type { Item, TaskPriority, TaskStatus } from '@/lib/types'
+
+const PRIORITY_COLOR: Record<TaskPriority, string> = {
+  high: 'var(--color-rose)',
+  medium: 'var(--color-amber)',
+  low: 'var(--color-ink-3)',
+}
 
 type ColKey = TaskStatus | 'unsorted'
 const COLUMNS: { key: ColKey; accent?: string }[] = [
@@ -64,8 +71,17 @@ function CardBody({ item }: { item: Item }) {
           {item.source && <SourceBadge source={item.source} size={12} />}
         </span>
       </div>
-      <div className={cn('text-[12.5px] leading-snug text-ink', done && 'text-ink-2 line-through')}>
-        {item.title}
+      <div className="flex items-start gap-1.5">
+        {item.priority && (
+          <span
+            title={t.priority[item.priority]}
+            className="mt-[5px] h-[6px] w-[6px] shrink-0 rounded-full"
+            style={{ background: PRIORITY_COLOR[item.priority] }}
+          />
+        )}
+        <div className={cn('text-[12.5px] leading-snug text-ink', done && 'text-ink-2 line-through')}>
+          {item.title}
+        </div>
       </div>
       <div className="mt-2 flex items-center gap-2.5 empty:hidden">
         {openBlockerCount > 0 && (
@@ -211,6 +227,7 @@ export function Board() {
     () =>
       Object.values(data.items).filter((it) => {
         if (it.parentId) return false
+        if (it.someday) return false
         if (it.kind === 'note' && !it.unsorted) return false
         if (it.kind === 'event' && !it.unsorted) return false
         if (projectFilter && it.projectId !== projectFilter) return false
@@ -224,8 +241,14 @@ export function Board() {
       .filter((it) => (key === 'unsorted' ? it.unsorted : !it.unsorted && it.status === key))
       .sort(
         (a, b) =>
-          (a.boardOrder ?? 0) - (b.boardOrder ?? 0) || (a.createdAt < b.createdAt ? -1 : 1),
+          (a.boardOrder ?? 0) - (b.boardOrder ?? 0) ||
+          rank(a.priority) - rank(b.priority) ||
+          (a.createdAt < b.createdAt ? -1 : 1),
       )
+  }
+
+  function rank(p?: TaskPriority) {
+    return p ? PRIORITY_RANK[p] : 3
   }
 
   function onDragEnd(e: DragEndEvent) {
