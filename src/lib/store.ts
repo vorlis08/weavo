@@ -33,6 +33,9 @@ export const DEFAULT_SETTINGS: Settings = {
   defaultView: '/',
   notificationsAsked: false,
   tourSeen: false,
+  spaceFilter: 'all',
+  todoMode: 'list',
+  workGroup: 'urgency',
 }
 
 export const DEFAULT_GOOGLE: GoogleIntegration = {

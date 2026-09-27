@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Calendar as CalendarIcon,
   FileText,
+  Flame,
   FolderPlus,
   Hash,
   ListChecks,
@@ -12,10 +13,10 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { parseCapture } from '@/lib/parse'
 import { fmtDayMonth, fmtTime, fmtWeekday } from '@/lib/date'
-import type { Item, ItemKind } from '@/lib/types'
-import { PROJECT_COLORS } from '@/lib/types'
+import type { Item, ItemKind, Project, Space } from '@/lib/types'
+import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import { Modal } from './overlays'
-import { Button, Checkbox, Kbd, Segmented, cn } from './ui'
+import { Button, Checkbox, Dot, Kbd, Segmented, cn } from './ui'
 
 function Pill({
   children,
@@ -56,11 +57,27 @@ export function QuickCapture() {
   const kindLabel = (k: ItemKind) =>
     k === 'event' ? t.kind.eventLower : k === 'task' ? t.kind.taskLower : t.kind.noteLower
   const areaRef = useRef<HTMLTextAreaElement>(null)
+  const location = useLocation()
   const [leaveUnsorted, setLeaveUnsorted] = useState(false)
+  const [spacePick, setSpacePick] = useState<Space>('personal')
+  const [flame, setFlame] = useState(false)
 
   useEffect(() => {
     if (captureOpen) {
       setLeaveUnsorted(false)
+      setFlame(false)
+      // start in the space the user is looking at
+      const { data: d } = useStore.getState()
+      const projectMatch = location.pathname.match(/^\/project\/([^/]+)/)
+      setSpacePick(
+        location.pathname.startsWith('/todo/work')
+          ? 'work'
+          : projectMatch && d.projects[projectMatch[1]]
+            ? d.projects[projectMatch[1]].space
+            : location.pathname.startsWith('/todo') || d.settings.spaceFilter !== 'work'
+              ? 'personal'
+              : 'work',
+      )
       requestAnimationFrame(() => {
         const el = areaRef.current
         if (el) {
@@ -72,12 +89,29 @@ export function QuickCapture() {
   }, [captureOpen])
 
   const parsed = useMemo(() => parseCapture(captureText), [captureText])
+  const chosenSpace = parsed.space ?? spacePick
 
-  const existingProject = parsed.projectName
-    ? Object.values(data.projects).find(
-        (p) => p.name.toLowerCase() === parsed.projectName!.toLowerCase(),
-      )
-    : undefined
+  // each #word is a tag of the chosen space, else an existing project, else (first one) a new project
+  const resolved = useMemo(() => {
+    const tagIds: string[] = []
+    let project: Project | undefined
+    let newProject: string | undefined
+    for (const h of parsed.hashes) {
+      const low = h.toLowerCase()
+      const tag = Object.values(data.tags).find((tg) => tg.space === chosenSpace && tg.name.toLowerCase() === low)
+      if (tag) {
+        if (!tagIds.includes(tag.id)) tagIds.push(tag.id)
+        continue
+      }
+      const p = Object.values(data.projects).find((x) => x.name.toLowerCase() === low)
+      if (p && !project) project = p
+      else if (!p && !project && !newProject) newProject = h
+    }
+    return { tagIds, project, newProject }
+  }, [parsed.hashes, data.tags, data.projects, chosenSpace])
+  const existingProject = resolved.project
+  const space = existingProject?.space ?? chosenSpace
+  const burning = flame || parsed.flame
 
   const whenLabel = parsed.when
     ? parsed.when.allDay
@@ -104,19 +138,21 @@ export function QuickCapture() {
   if (!captureOpen) return null
 
   function build(): Item {
-    let projectId: string | undefined
-    if (parsed.projectName) {
-      projectId =
-        existingProject?.id ??
-        addProject(
-          parsed.projectName,
-          PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
-        ).id
+    let projectId = existingProject?.id
+    if (!projectId && resolved.newProject) {
+      projectId = addProject(
+        resolved.newProject,
+        PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
+        space,
+      ).id
     }
     const base: Partial<Item> & { kind: ItemKind; title: string } = {
       kind: captureKind,
       title: parsed.title,
       projectId,
+      space,
+      tags: resolved.tagIds,
+      flame: (captureKind === 'task' && burning) || undefined,
       unsorted: leaveUnsorted || undefined,
     }
     if (parsed.when) {
@@ -171,11 +207,34 @@ export function QuickCapture() {
           className="w-full resize-none bg-transparent text-[16px] leading-[1.5] text-ink outline-none placeholder:text-ink-3"
         />
 
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <Segmented size="md" options={kindOptions} value={captureKind} onChange={setCaptureKind} />
+          <Segmented
+            size="md"
+            options={SPACES.map((sp) => ({
+              value: sp,
+              label: <><Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />{t.spaces[sp]}</>,
+            }))}
+            value={space}
+            onChange={setSpacePick}
+          />
+          {captureKind === 'task' && (
+            <button
+              type="button"
+              onClick={() => setFlame((f) => !f)}
+              title={t.todo.flameOn}
+              className={cn(
+                'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] transition-colors',
+                burning ? 'border-flame/50 bg-flame/12 text-flame' : 'border-line text-ink-3 hover:text-ink-2',
+              )}
+            >
+              <Flame size={13} fill={burning ? 'currentColor' : 'none'} fillOpacity={0.3} />
+              {t.todo.flame}
+            </button>
+          )}
         </div>
 
-        {(whenLabel || parsed.projectName) && (
+        {(whenLabel || existingProject || resolved.newProject || resolved.tagIds.length > 0) && (
           <div className="mt-3 flex flex-wrap gap-[7px]">
             {whenLabel && (
               <Pill tone="iris">
@@ -184,16 +243,22 @@ export function QuickCapture() {
                 {captureKind === 'task' && ` · ${t.capture.due}`}
               </Pill>
             )}
-            {parsed.projectName && (
+            {(existingProject || resolved.newProject) && (
               <Pill tone={existingProject ? 'iris' : 'suggest'}>
                 {existingProject ? (
                   <Hash size={11} strokeWidth={1.8} />
                 ) : (
                   <FolderPlus size={11} strokeWidth={1.7} />
                 )}
-                {existingProject ? existingProject.name : t.capture.newProject(parsed.projectName)}
+                {existingProject ? existingProject.name : t.capture.newProject(resolved.newProject!)}
               </Pill>
             )}
+            {resolved.tagIds.map((id) => (
+              <Pill key={id}>
+                <Dot color={data.tags[id].color} className="h-1.5 w-1.5" />
+                {data.tags[id].name}
+              </Pill>
+            ))}
           </div>
         )}
 

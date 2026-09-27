@@ -5,14 +5,15 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { dateLocale, decimalHours, fmtTime, isSameDay } from '@/lib/date'
 import { eventConflicts } from '@/lib/selectors'
-import type { Item } from '@/lib/types'
+import { SPACE_COLOR } from '@/lib/types'
+import type { Item, Space } from '@/lib/types'
 import { cn } from './ui'
 
 const ROW_H = 52
 
 function colorFor(ev: Item, projects: Record<string, { color: string }>): string {
   if (ev.projectId && projects[ev.projectId]) return projects[ev.projectId].color
-  return '#6b7280'
+  return SPACE_COLOR[ev.space]
 }
 
 function packDay(events: Item[]) {
@@ -35,9 +36,12 @@ function packDay(events: Item[]) {
 export function WeekGrid({
   days,
   now = new Date(),
+  space,
 }: {
   days: Date[]
   now?: Date
+  /** show only this space */
+  space?: Space
 }) {
   const t = useT()
   const navigate = useNavigate()
@@ -53,8 +57,11 @@ export function WeekGrid({
   const bodyHeight = hours.length * ROW_H
 
   const events = useMemo(
-    () => Object.values(items).filter((it) => it.kind === 'event' && it.start && !it.allDay),
-    [items],
+    () =>
+      Object.values(items).filter(
+        (it) => it.kind === 'event' && it.start && !it.allDay && (!space || it.space === space),
+      ),
+    [items, space],
   )
   const conflicts = useMemo(() => eventConflicts(events), [events])
 
@@ -67,6 +74,7 @@ export function WeekGrid({
       title: t.calendar.addEventTitle,
       start: start.toISOString(),
       end: end.toISOString(),
+      space: space ?? 'personal',
     })
     navigate(`/item/${it.id}`)
   }

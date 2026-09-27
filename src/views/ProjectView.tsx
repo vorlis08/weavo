@@ -14,7 +14,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
-import { Button, Checkbox, EmptyState, Select, TextField, cn } from '@/components/ui'
+import { Button, Checkbox, Dot, EmptyState, Segmented, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog, Menu } from '@/components/overlays'
 import { CompletedRow, DueChip } from '@/components/items'
 import { InlineBody } from '@/components/editors'
@@ -24,7 +24,7 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { dateLocale, fmtTime, isSameDay, toLocalInput } from '@/lib/date'
 import { projectStats, subtasks as selectSubtasks } from '@/lib/selectors'
-import { DEFAULT_PROJECT_SECTIONS, PROJECT_COLORS } from '@/lib/types'
+import { DEFAULT_PROJECT_SECTIONS, PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import type { Item, ProjectSection, ProjectSectionId } from '@/lib/types'
 
 type Buckets = { tasks: Item[]; events: Item[]; notes: Item[]; done: Item[] }
@@ -174,6 +174,18 @@ export function ProjectView() {
         <div className="mx-auto max-w-[720px]">
           {/* properties */}
           <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-[12px] text-ink-3">
+            <div className="flex items-center gap-2">
+              <span>{t.spaces.label}</span>
+              <Segmented
+                options={SPACES.map((sp) => ({
+                  value: sp,
+                  label: <><Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />{t.spaces[sp]}</>,
+                }))}
+                value={project.space}
+                onChange={(sp) => updateProject(project.id, { space: sp })}
+              />
+            </div>
+
             <label className="flex items-center gap-2">
               <span>{t.project.deadline}</span>
               <input

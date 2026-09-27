@@ -6,7 +6,7 @@ import { fmtDue } from '@/lib/date'
 import type { Item, ItemKind, SourceKind, TaskPriority } from '@/lib/types'
 import { Checkbox, Dot, cn } from './ui'
 
-const PRIORITY_COLOR: Record<TaskPriority, string> = {
+export const PRIORITY_COLOR: Record<TaskPriority, string> = {
   high: 'var(--color-rose)',
   medium: 'var(--color-amber)',
   low: 'var(--color-ink-3)',

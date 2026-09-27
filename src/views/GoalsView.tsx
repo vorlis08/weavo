@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArchiveRestore, Plus, Target } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
+import { ReflectionTabs } from '@/components/ReflectionTabs'
 import { Button, EmptyState, SectionLabel, cn } from '@/components/ui'
 import { Modal } from '@/components/overlays'
 import { useStore } from '@/lib/store'
@@ -39,7 +40,8 @@ export function GoalsView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.goals.title}</h1>
+        <h1 className="text-[16px]">{t.nav.reflection}</h1>
+        <ReflectionTabs />
         <Button variant="accent" className="ml-auto h-[30px] text-[12px]" onClick={() => setDialog(true)}>
           <Plus size={13} />
           {t.goals.newGoal}

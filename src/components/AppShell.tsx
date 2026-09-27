@@ -98,9 +98,12 @@ export function AppShell() {
       if (e.metaKey || e.ctrlKey || e.altKey) return
 
       if (Date.now() - g < 600) {
-        if (k === 'd') navigate('/')
+        if (k === 'h' || k === 'd') navigate('/')
+        else if (k === 'o') navigate('/todo')
+        else if (k === 'w') navigate('/todo/work')
         else if (k === 'c') navigate('/calendar')
-        else if (k === 'b') navigate('/board')
+        else if (k === 'p') navigate('/projects')
+        else if (k === 'r') navigate('/reflection')
         else if (k === 't') navigate('/timeline')
         else if (k === 'n') navigate('/notes')
         g = 0
@@ -138,7 +141,7 @@ export function AppShell() {
             [
               ['C', t.shortcutsModal.capture],
               ['⌘ / Ctrl + K', t.shortcutsModal.search],
-              ['G → D / C / B / T / N', t.shortcutsModal.goto],
+              ['G → H / O / W / C / P / R', t.shortcutsModal.goto],
               ['?', t.shortcutsModal.thisList],
             ] as [string, string][]
           ).map(([k, label]) => (

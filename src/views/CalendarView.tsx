@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
 import { WeekGrid } from '@/components/WeekGrid'
+import { SpaceFilterSwitch } from '@/components/todo'
+import { SPACE_COLOR } from '@/lib/types'
 import { Button, Dot, Segmented, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT, useLang } from '@/lib/i18n'
@@ -24,13 +26,18 @@ export function CalendarView() {
   const projects = useStore((s) => s.data.projects)
   const weekStartsMonday = useStore((s) => s.data.settings.weekStartsMonday)
   const createItem = useStore((s) => s.createItem)
+  const filter = useStore((s) => s.data.settings.spaceFilter)
+  const space = filter === 'all' ? undefined : filter
 
   const [mode, setMode] = useState<'week' | 'month'>('week')
   const [anchor, setAnchor] = useState(() => new Date())
 
   const events = useMemo(
-    () => Object.values(items).filter((it) => it.kind === 'event' && it.start),
-    [items],
+    () =>
+      Object.values(items).filter(
+        (it) => it.kind === 'event' && it.start && (!space || it.space === space),
+      ),
+    [items, space],
   )
 
   const weekDays = useMemo(
@@ -81,7 +88,8 @@ export function CalendarView() {
           </Button>
         </div>
         <h1 className="text-[16px]">{heading}</h1>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <SpaceFilterSwitch />
           <Segmented
             options={[
               { value: 'week', label: t.common.week },
@@ -95,7 +103,7 @@ export function CalendarView() {
 
       {mode === 'week' ? (
         <div className="flex flex-1 overflow-hidden p-[18px]">
-          <WeekGrid days={weekDays} />
+          <WeekGrid days={weekDays} space={space} />
         </div>
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden p-[18px]">
@@ -124,6 +132,7 @@ export function CalendarView() {
                       title: t.calendar.addEventTitle,
                       start: start.toISOString(),
                       end: new Date(start.getTime() + 3_600_000).toISOString(),
+                      space: space ?? 'personal',
                     })
                     navigate(`/item/${it.id}`)
                   }}
@@ -152,14 +161,14 @@ export function CalendarView() {
                         background:
                           (e.projectId && projects[e.projectId]?.color
                             ? projects[e.projectId].color
-                            : '#6b7280') + '20',
+                            : SPACE_COLOR[e.space]) + '20',
                       }}
                     >
                       <Dot
                         color={
                           e.projectId && projects[e.projectId]?.color
                             ? projects[e.projectId].color
-                            : '#6b7280'
+                            : SPACE_COLOR[e.space]
                         }
                       />
                       <span className="truncate">

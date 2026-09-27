@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ChevronDown, ChevronRight, ListChecks, Sparkles } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
+import { ReflectionTabs } from '@/components/ReflectionTabs'
 import { SectionLabel, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -151,7 +152,8 @@ export function ReflectionView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.reflection.title}</h1>
+        <h1 className="text-[16px]">{t.nav.reflection}</h1>
+        <ReflectionTabs />
       </TopBar>
       <div className="flex-1 overflow-y-auto px-7 py-6">
         <div className="mx-auto flex max-w-[640px] flex-col gap-6">

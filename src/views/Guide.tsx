@@ -93,14 +93,14 @@ const CS: GuideContent = {
     { name: 'Poznámka', body: 'Volný text. Propoj ji s čímkoli přes [[název]] — druhá strana pak ukáže zpětný odkaz.' },
   ],
   viewBlurbs: {
-    Dashboard:
-      'Týden jako kalendář plus panel: dnes k termínu a po termínu, živé připomínky, schránka netříděných a odložené úkoly. Klik do prázdna přidá událost.',
-    Calendar: 'Plnější kalendář s režimy Týden a Měsíc.',
-    Board: 'Kanban: Netříděné → Udělat → Probíhá → Blokováno → Hotovo. Přetáhni kartu a změň stav.',
-    Timeline: 'Jedna dráha na projekt na časové ose. Úkoly jako pruhy, události jako body.',
-    Notes: 'Každá poznámka je uzel, každý [[odkaz]] hrana. Najetím zvýrazníš sousedy, kliknutím otevřeš.',
-    Digest: 'Psaný souhrn: dnes v kalendáři, po termínu, dnes k termínu, tento týden, čeká, odloženo, hotovo.',
-    Unsorted: 'Seznam k roztřídění — každé položce dej projekt, otevři, založ, nebo smaž.',
+    home: 'Výchozí obrazovka: průběh dneška, co hoří, program dne, co je na řadě, na koho čekáš a blížící se termíny projektů.',
+    todo: 'Denní checklist ve dvou oddělených seznamech — Osobní (podle tagů) a Pracovní (hoří, dnes, týden, čeká). Přepínač Seznam / Kanban.',
+    calendar: 'Týden a měsíc, osobní i pracovní události dohromady. Filtr Vše / Osobní / Práce.',
+    projects: 'Projekty rozdělené na osobní a pracovní, každý s vlastní stránkou.',
+    reflection: 'Večerní deník s náladou a automatickým souhrnem dne. Na druhé záložce dlouhodobé Cíle.',
+    timeline: 'Jedna dráha na projekt na časové ose. Úkoly jako pruhy, události jako body. (pod „Další“)',
+    notes: 'Každá poznámka je uzel, každý [[odkaz]] hrana. Najetím zvýrazníš sousedy. (pod „Další“)',
+    unsorted: 'Seznam k roztřídění — každé položce dej projekt, otevři, založ, nebo smaž. Ukáže se, jen když něco čeká.',
   },
   mailBlurb:
     'Objeví se po připojení Googlu — Gmail zprávy, ze kterých uděláš úkol nebo poznámku. Viz Google níže.',
@@ -197,9 +197,9 @@ const CS: GuideContent = {
       title: 'Typický den',
       ol: [
         '**Přes den** — zmáčkni `C` a házej věci dovnitř. Nezastavuj se u třídění; nech je netříděné, když spěcháš.',
-        '**Jednou denně** — otevři [Netříděné](/triage) (nebo si přečti [Souhrn](/digest)) a vyčisti schránku.',
-        '**Při práci** — žij v [Přehledu](/) nebo na [Nástěnce](/board); přetahuj karty, jak se věci hýbou.',
-        '**Jednou týdně** — projeď [Souhrn](/digest) — co je po termínu, co přijde a co ztichlo.',
+        '**Ráno** — otevři [Domů](/) a podívej se, co hoří a co tě dnes čeká.',
+        '**Při práci** — žij v [To-do](/todo); osobní a [pracovní](/todo/work) seznam přepínáš v nadpisu. Co hoří, označ plamínkem.',
+        '**Večer** — zapiš den do [Reflexe](/reflection) a nedodělky přesuň na zítra.',
       ],
     },
     {
@@ -230,14 +230,14 @@ const EN: GuideContent = {
     { name: 'Note', body: 'Free text. Link it to any record with [[its title]] — the other record then shows a backlink.' },
   ],
   viewBlurbs: {
-    Dashboard:
-      'The week as a calendar plus a rail: due today and overdue, live reminders, your unsorted inbox, and stale tasks. Click an empty slot to add an event.',
-    Calendar: 'A fuller calendar with Week and Month modes.',
-    Board: 'Kanban: Unsorted → To do → In progress → Blocked → Done. Drag a card to change its status.',
-    Timeline: 'One lane per project across a date axis. Tasks as bars, events as dots.',
-    Notes: 'Every note a node, every [[link]] an edge. Hover to light up neighbours, click to open.',
-    Digest: 'A written rollup: on the calendar today, overdue, due today, coming up, waiting, deferred, done.',
-    Unsorted: 'The triage list — give each item a project, open it, file it, or delete it.',
+    home: 'The start screen: today’s progress, what is on fire, today’s schedule, what is next, who you are waiting on, and upcoming project deadlines.',
+    todo: 'The daily checklist as two separate lists — Personal (by tag) and Work (on fire, today, this week, waiting). List / Kanban switch.',
+    calendar: 'Week and month, personal and work events together. All / Personal / Work filter.',
+    projects: 'Projects split into personal and work, each with its own page.',
+    reflection: 'An evening journal with mood and an automatic day summary. Long-term Goals on the second tab.',
+    timeline: 'One lane per project across a date axis. Tasks as bars, events as dots. (under “More”)',
+    notes: 'Every note a node, every [[link]] an edge. Hover to light up neighbours. (under “More”)',
+    unsorted: 'The triage list — give each item a project, open it, file it, or delete it. Shows up only when something is waiting.',
   },
   mailBlurb: 'Appears once Google is connected — Gmail messages you can turn into tasks or notes. See Google below.',
   seeGoogle: 'Google',
@@ -328,9 +328,9 @@ const EN: GuideContent = {
       title: 'A typical day',
       ol: [
         '**Through the day** — hit `C` and dump things in. Don’t stop to file them; leave them unsorted if you’re moving fast.',
-        '**Once a day** — open [Unsorted](/triage) (or read the [Digest](/digest)) and clear the inbox.',
-        '**While working** — live in the [Dashboard](/) or the [Board](/board); drag cards as things move.',
-        '**Once a week** — scan the [Digest](/digest) for what’s overdue, coming, and gone quiet.',
+        '**In the morning** — open [Home](/) and see what is on fire and what today holds.',
+        '**While working** — live in the [To-do](/todo); switch between personal and [work](/todo/work) in the heading. Flag what is on fire.',
+        '**In the evening** — write the day into [Reflection](/reflection) and move leftovers to tomorrow.',
       ],
     },
     {
@@ -349,14 +349,15 @@ const EN: GuideContent = {
 
 const KIND_ICONS = [CalendarDays, ListChecks, FileText]
 const KIND_TONES = ['sage', 'iris', 'ink'] as const
-const VIEW_META: { key: string; icon: typeof LayoutGrid; to: string }[] = [
-  { key: 'Dashboard', icon: LayoutGrid, to: '/' },
-  { key: 'Calendar', icon: CalendarDays, to: '/calendar' },
-  { key: 'Board', icon: Columns3, to: '/board' },
-  { key: 'Timeline', icon: GanttChartSquare, to: '/timeline' },
-  { key: 'Notes', icon: Network, to: '/notes' },
-  { key: 'Digest', icon: Sunrise, to: '/digest' },
-  { key: 'Unsorted', icon: Inbox, to: '/triage' },
+const VIEW_META: { key: 'home' | 'todo' | 'calendar' | 'projects' | 'reflection' | 'timeline' | 'notes' | 'unsorted'; icon: typeof LayoutGrid; to: string }[] = [
+  { key: 'home', icon: LayoutGrid, to: '/' },
+  { key: 'todo', icon: ListChecks, to: '/todo' },
+  { key: 'calendar', icon: CalendarDays, to: '/calendar' },
+  { key: 'projects', icon: Columns3, to: '/projects' },
+  { key: 'reflection', icon: Sunrise, to: '/reflection' },
+  { key: 'timeline', icon: GanttChartSquare, to: '/timeline' },
+  { key: 'notes', icon: Network, to: '/notes' },
+  { key: 'unsorted', icon: Inbox, to: '/triage' },
 ]
 
 export function Guide() {
@@ -456,7 +457,7 @@ export function Guide() {
                       >
                         <div className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
                           <v.icon size={15} strokeWidth={1.6} className="text-ink-3 group-hover:text-iris-2" />
-                          {v.key === 'Notes' ? t.nav.notes : v.key === 'Unsorted' ? t.nav.unsorted : v.key === 'Dashboard' ? t.nav.dashboard : v.key === 'Calendar' ? t.nav.calendar : v.key === 'Board' ? t.nav.board : v.key === 'Timeline' ? t.nav.timeline : t.nav.digest}
+                          {t.nav[v.key]}
                         </div>
                         <p className="mt-1 text-[12px] leading-snug text-ink-2">{g.viewBlurbs[v.key]}</p>
                       </Link>

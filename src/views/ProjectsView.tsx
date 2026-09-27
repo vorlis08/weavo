@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArchiveRestore, FolderPlus, Plus } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
-import { Button, EmptyState, SectionLabel, cn } from '@/components/ui'
+import { Button, Dot, EmptyState, SectionLabel, Segmented, cn } from '@/components/ui'
 import { Modal } from '@/components/overlays'
 import { DueChip } from '@/components/items'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { projectStats } from '@/lib/selectors'
-import { PROJECT_COLORS } from '@/lib/types'
-import type { Project } from '@/lib/types'
+import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
+import type { Project, Space } from '@/lib/types'
 
 export function ProjectsView() {
   const t = useT()
@@ -21,6 +21,7 @@ export function ProjectsView() {
   const [dialog, setDialog] = useState(false)
   const [name, setName] = useState('')
   const [color, setColor] = useState(PROJECT_COLORS[0].value)
+  const [space, setSpace] = useState<Space>('personal')
 
   const { active, archived } = useMemo(() => {
     const all = Object.values(data.projects).sort((a, b) =>
@@ -35,7 +36,7 @@ export function ProjectsView() {
   function create() {
     const n = name.trim()
     if (!n) return
-    const p = addProject(n, color)
+    const p = addProject(n, color, space)
     setName('')
     setColor(PROJECT_COLORS[0].value)
     setDialog(false)
@@ -66,11 +67,23 @@ export function ProjectsView() {
       ) : (
         <div className="flex-1 overflow-y-auto px-7 py-6">
           <div className="mx-auto max-w-[1100px]">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3.5">
-              {active.map((p) => (
-                <ProjectCard key={p.id} project={p} onOpen={() => navigate(`/project/${p.id}`)} />
-              ))}
-            </div>
+            {SPACES.map((sp) => {
+              const list = active.filter((p) => p.space === sp)
+              if (!list.length) return null
+              return (
+                <section key={sp} className="mb-8">
+                  <SectionLabel className="mb-2.5 flex items-center gap-2">
+                    <Dot color={SPACE_COLOR[sp]} />
+                    {t.spaces[sp]}
+                  </SectionLabel>
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3.5">
+                    {list.map((p) => (
+                      <ProjectCard key={p.id} project={p} onOpen={() => navigate(`/project/${p.id}`)} />
+                    ))}
+                  </div>
+                </section>
+              )
+            })}
 
             {archived.length > 0 && (
               <div className="mt-9">
@@ -117,6 +130,17 @@ export function ProjectsView() {
             placeholder={t.project.newProjectName}
             className="mt-1.5 h-8 w-full rounded-lg border border-line bg-surface-2 px-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
           />
+          <div className="mt-3.5">
+            <Segmented
+              size="md"
+              options={SPACES.map((sp) => ({
+                value: sp,
+                label: <><Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />{t.spaces[sp]}</>,
+              }))}
+              value={space}
+              onChange={setSpace}
+            />
+          </div>
           <div className="mt-3.5 flex gap-2">
             {PROJECT_COLORS.map((c) => (
               <button

@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ChevronLeft,
   ExternalLink,
+  Flame,
   GitBranch,
   MoreHorizontal,
   Plus,
@@ -22,6 +23,7 @@ import {
   Chip,
   Dot,
   SectionLabel,
+  Segmented,
   Select,
   cn,
 } from '@/components/ui'
@@ -34,7 +36,31 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { eventConflicts, noteLinks, subtasks as childSubtasks, suggestSlot } from '@/lib/selectors'
 import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
+import { SPACE_COLOR, SPACES } from '@/lib/types'
 import type { RepeatFreq, TaskPriority, TaskStatus } from '@/lib/types'
+
+/** who the task is parked on — committed on blur / Enter, cleared by emptying it */
+function WaitingInput({ itemId, who, since }: { itemId: string; who?: string; since?: string }) {
+  const t = useT()
+  const setWaitingFor = useStore((s) => s.setWaitingFor)
+  const [draft, setDraft] = useState(who ?? '')
+  const commit = () => {
+    if (draft.trim() !== (who ?? '')) setWaitingFor(itemId, draft.trim() || null)
+  }
+  return (
+    <span className="flex w-full flex-col gap-0.5">
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        placeholder={t.todo.waitingPh}
+        className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+      />
+      {who && since && <span className="text-[10.5px] text-amber">{t.todo.since(fmtDue(since)?.label ?? '')}</span>}
+    </span>
+  )
+}
 
 const STATUS_COLOR: Record<TaskStatus, string> = {
   todo: 'var(--color-ink-2)',
@@ -509,8 +535,46 @@ export function RecordDetail() {
           {/* side */}
           <div className="flex w-[300px] shrink-0 flex-col gap-3.5">
             <div className="rounded-xl border border-line bg-surface px-[15px] py-2.5">
+              <PropRow label={t.spaces.label}>
+                <Segmented
+                  options={SPACES.map((sp) => ({
+                    value: sp,
+                    label: <><Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />{t.spaces[sp]}</>,
+                  }))}
+                  value={item.space}
+                  onChange={(sp) => {
+                    // leaving the space drops the project and tags that belong to the old one
+                    const project = item.projectId ? data.projects[item.projectId] : undefined
+                    updateItem(item.id, {
+                      space: sp,
+                      projectId: project?.space === sp ? item.projectId : undefined,
+                      tags: item.tags.filter((id) => data.tags[id]?.space === sp),
+                    })
+                  }}
+                />
+              </PropRow>
+              <Divider />
               {item.kind === 'task' && (
                 <>
+                  <PropRow label={t.todo.flame}>
+                    <button
+                      onClick={() => useStore.getState().toggleFlame(item.id)}
+                      className={cn(
+                        'flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] transition-colors',
+                        item.flame
+                          ? 'border-flame/50 bg-flame/12 text-flame'
+                          : 'border-line text-ink-2 hover:border-line-2 hover:text-ink',
+                      )}
+                    >
+                      <Flame size={13} fill={item.flame ? 'currentColor' : 'none'} fillOpacity={0.3} />
+                      {item.flame ? t.todo.yes : t.todo.no}
+                    </button>
+                  </PropRow>
+                  <Divider />
+                  <PropRow label={t.todo.waitingFor}>
+                    <WaitingInput key={item.id} itemId={item.id} who={item.waitingFor?.who} since={item.waitingFor?.since} />
+                  </PropRow>
+                  <Divider />
                   <PropRow label={t.detail.propStatus}>
                     <Select
                       value={item.status}
@@ -563,10 +627,16 @@ export function RecordDetail() {
                   className="h-7"
                 >
                   <option value="">{t.common.noProject}</option>
-                  {Object.values(data.projects).map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
+                  {SPACES.map((sp) => (
+                    <optgroup key={sp} label={t.spaces[sp]}>
+                      {Object.values(data.projects)
+                        .filter((p) => p.space === sp && (!p.archived || p.id === item.projectId))
+                        .map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.name}
+                          </option>
+                        ))}
+                    </optgroup>
                   ))}
                 </Select>
               </PropRow>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   DndContext,
   DragOverlay,
@@ -20,7 +20,7 @@ import { DueChip, SourceBadge } from '@/components/items'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { PRIORITY_RANK } from '@/lib/types'
-import type { Item, TaskPriority, TaskStatus } from '@/lib/types'
+import type { Item, Space, TaskPriority, TaskStatus } from '@/lib/types'
 
 const PRIORITY_COLOR: Record<TaskPriority, string> = {
   high: 'var(--color-rose)',
@@ -207,10 +207,35 @@ function Column({
   )
 }
 
+/** a project's own board (reached from the project page) */
 export function Board() {
   const t = useT()
   const [params, setParams] = useSearchParams()
   const projectFilter = params.get('project') ?? undefined
+  const project = useStore((s) => (projectFilter ? s.data.projects[projectFilter] : undefined))
+  if (!projectFilter) return <Navigate to="/todo" replace />
+
+  return (
+    <>
+      <TopBar>
+        <h1 className="flex items-center gap-2 text-[16px]">
+          {project && (
+            <span className="h-[7px] w-[7px] rounded-full" style={{ background: project.color }} />
+          )}
+          {project ? t.board.boardSuffix(project.name) : t.board.title}
+        </h1>
+        <button onClick={() => setParams({})} className="text-[11.5px] text-ink-3 hover:text-ink-2">
+          {t.common.clearFilter}
+        </button>
+        <span className="mono ml-auto text-[11px] text-ink-3">{t.board.dragHint}</span>
+      </TopBar>
+      <BoardColumns projectId={projectFilter} />
+    </>
+  )
+}
+
+/** status columns with drag & drop — the To-do's kanban mode and the project board */
+export function BoardColumns({ projectId: projectFilter, space }: { projectId?: string; space?: Space }) {
   const data = useStore((s) => s.data)
   const setStatus = useStore((s) => s.setStatus)
   const updateItem = useStore((s) => s.updateItem)
@@ -231,9 +256,10 @@ export function Board() {
         if (it.kind === 'note' && !it.unsorted) return false
         if (it.kind === 'event' && !it.unsorted) return false
         if (projectFilter && it.projectId !== projectFilter) return false
+        if (space && it.space !== space) return false
         return true
       }),
-    [data.items, projectFilter],
+    [data.items, projectFilter, space],
   )
 
   function columnItems(key: string) {
@@ -263,32 +289,9 @@ export function Board() {
   }
 
   const dragItem = dragId ? data.items[dragId] : null
-  const projectName = projectFilter ? data.projects[projectFilter]?.name : null
 
   return (
     <>
-      <TopBar>
-        <h1 className="flex items-center gap-2 text-[16px]">
-          {projectName ? (
-            <>
-              <span
-                className="h-[7px] w-[7px] rounded-full"
-                style={{ background: data.projects[projectFilter!]?.color }}
-              />
-              {t.board.boardSuffix(projectName)}
-            </>
-          ) : (
-            t.board.title
-          )}
-        </h1>
-        {projectFilter && (
-          <button onClick={() => setParams({})} className="text-[11.5px] text-ink-3 hover:text-ink-2">
-            {t.common.clearFilter}
-          </button>
-        )}
-        <span className="mono ml-auto text-[11px] text-ink-3">{t.board.dragHint}</span>
-      </TopBar>
-
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
@@ -310,6 +313,7 @@ export function Board() {
                   status: col.key === 'unsorted' ? 'todo' : (col.key as TaskStatus),
                   unsorted: col.key === 'unsorted' || undefined,
                   projectId: projectFilter,
+                  space,
                 })
               }
             />

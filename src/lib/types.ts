@@ -12,6 +12,8 @@ export type RepeatFreq = 'none' | 'daily' | 'weekly' | 'monthly'
 /** top-level partition: personal and work items live in separate to-do lists */
 export type Space = 'personal' | 'work'
 export const SPACES: Space[] = ['personal', 'work']
+export type SpaceFilter = 'all' | Space
+export const SPACE_COLOR: Record<Space, string> = { personal: '#a6abf4', work: '#dfa871' }
 
 export type AccentName ='iris' | 'amber' | 'rose' | 'sage' | 'blue'
 
@@ -199,6 +201,11 @@ export interface Settings {
   defaultView: string
   notificationsAsked: boolean
   tourSeen: boolean
+  /** shared space filter for the combined views (Home, Calendar) */
+  spaceFilter: SpaceFilter
+  todoMode: 'list' | 'kanban'
+  /** how the work to-do is grouped */
+  workGroup: 'urgency' | 'project'
 }
 
 export interface WeavoData {

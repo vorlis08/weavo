@@ -5,6 +5,7 @@ import { TopBar } from '@/components/TopBar'
 import { Button, SectionLabel, Select } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
 import { GoogleConnect } from '@/components/GoogleConnect'
+import { GoogleSpaceSetting, TagSettings } from '@/components/TagSettings'
 import { useStore } from '@/lib/store'
 import { LANGS, useT } from '@/lib/i18n'
 import type { Lang, WeavoData } from '@/lib/types'
@@ -107,6 +108,10 @@ export function SettingsView() {
             </Row>
           </Group>
 
+          <Group title={t.tagSettings.title}>
+            <TagSettings />
+          </Group>
+
           <Group title={t.settings.gCalendar}>
             <Row label={t.settings.weekStarts}>
               <Select
@@ -173,6 +178,7 @@ export function SettingsView() {
 
           <Group title={t.settings.gIntegrations}>
             <GoogleConnect />
+            <GoogleSpaceSetting />
           </Group>
 
           <Group title={t.settings.gData}>

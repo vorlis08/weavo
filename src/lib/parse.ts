@@ -1,3 +1,4 @@
+import type { Space } from './types'
 import { addDays, startOfDay } from './date'
 
 const EN_WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -27,9 +28,21 @@ export interface ParsedWhen {
 
 export interface ParseResult {
   title: string
+  /** the first #word that is not a space keyword */
   projectName?: string
+  /** every #word that is not a space keyword — resolved against tags, then projects */
+  hashes: string[]
+  /** #práce / #work, #osobní / #personal */
+  space?: Space
+  /** a standalone "!" marks the task as burning */
+  flame: boolean
   contactNames: string[]
   when: ParsedWhen | null
+}
+
+const SPACE_WORDS: Record<string, Space> = {
+  práce: 'work', prace: 'work', pracovní: 'work', pracovni: 'work', work: 'work',
+  osobní: 'personal', osobni: 'personal', personal: 'personal',
 }
 
 function nextWeekday(from: Date, target: number, forceNext = false): Date {
@@ -161,11 +174,19 @@ function escapeRe(s: string) {
 
 export function parseCapture(input: string, now = new Date()): ParseResult {
   let text = input
-  let projectName: string | undefined
+  let space: Space | undefined
+  const hashes: string[] = []
   const contactNames: string[] = []
 
-  text = text.replace(/(^|\s)#([\p{L}\p{N}_-]+)/u, (_all, sp, name) => {
-    if (!projectName) projectName = name
+  text = text.replace(/(^|\s)#([\p{L}\p{N}_-]+)/gu, (_all, sp, name: string) => {
+    const kw = SPACE_WORDS[name.toLowerCase()]
+    if (kw) space ??= kw
+    else hashes.push(name)
+    return sp
+  })
+  let flame = false
+  text = text.replace(/(^|\s)!(?=\s|$)/g, (_all, sp) => {
+    flame = true
     return sp
   })
   text = text.replace(
@@ -238,5 +259,5 @@ export function parseCapture(input: string, now = new Date()): ParseResult {
     .replace(/\b(at|on|by|for|v|ve|na|do|od|k|ke)\s*$/i, '')
     .trim()
 
-  return { title: title || input.trim(), projectName, contactNames, when }
+  return { title: title || input.trim(), projectName: hashes[0], hashes, space, flame, contactNames, when }
 }

@@ -1,22 +1,15 @@
 import {
   CalendarDays,
-  Columns3,
-  LayoutGrid,
+  FolderKanban,
   GanttChartSquare,
+  Home,
+  ListChecks,
   Moon,
   Network,
-  Sunrise,
   type LucideIcon,
 } from 'lucide-react'
 
-export type ViewId =
-  | 'dashboard'
-  | 'calendar'
-  | 'board'
-  | 'timeline'
-  | 'notes'
-  | 'digest'
-  | 'reflection'
+export type ViewId = 'home' | 'todo' | 'calendar' | 'projects' | 'reflection' | 'timeline' | 'notes'
 
 export interface ViewDef {
   id: ViewId
@@ -24,12 +17,19 @@ export interface ViewDef {
   icon: LucideIcon
 }
 
-export const views: ViewDef[] = [
-  { id: 'dashboard', path: '/', icon: LayoutGrid },
+/** the sidebar's main navigation */
+export const mainViews: ViewDef[] = [
+  { id: 'home', path: '/', icon: Home },
+  { id: 'todo', path: '/todo', icon: ListChecks },
   { id: 'calendar', path: '/calendar', icon: CalendarDays },
-  { id: 'board', path: '/board', icon: Columns3 },
-  { id: 'timeline', path: '/timeline', icon: GanttChartSquare },
-  { id: 'notes', path: '/notes', icon: Network },
-  { id: 'digest', path: '/digest', icon: Sunrise },
+  { id: 'projects', path: '/projects', icon: FolderKanban },
   { id: 'reflection', path: '/reflection', icon: Moon },
 ]
+
+/** kept but tucked into the collapsed "More" group */
+export const moreViews: ViewDef[] = [
+  { id: 'timeline', path: '/timeline', icon: GanttChartSquare },
+  { id: 'notes', path: '/notes', icon: Network },
+]
+
+export const views: ViewDef[] = [...mainViews, ...moreViews]
