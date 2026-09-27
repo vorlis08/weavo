@@ -206,6 +206,9 @@ export interface Settings {
   todoMode: 'list' | 'kanban'
   /** how the work to-do is grouped */
   workGroup: 'urgency' | 'project'
+  /** date keys (YYYY-MM-DD) of the last morning plan / evening close */
+  lastPlanned?: string
+  lastClosed?: string
 }
 
 export interface WeavoData {

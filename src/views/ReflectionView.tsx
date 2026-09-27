@@ -17,12 +17,12 @@ const MOODS: { value: 1 | 2 | 3 | 4 | 5; emoji: string }[] = [
   { value: 5, emoji: '😄' },
 ]
 
-function dateKey(d: Date) {
+export function dateKey(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-function MoodPicker({
+export function MoodPicker({
   value,
   onChange,
 }: {

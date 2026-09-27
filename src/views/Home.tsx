@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Flame, Hourglass, Inbox } from 'lucide-react'
 import { TopBar } from '@/components/TopBar'
+import { DayRituals } from '@/components/DayRituals'
 import { ProgressBar, SpaceFilterSwitch, TodoRow, byUrgency } from '@/components/todo'
 import { Dot, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
@@ -105,10 +106,12 @@ export function Home() {
               {name ? `, ${name}` : ''}
             </h2>
             <p className="mt-1 text-[12.5px] text-ink-2">
-              <span className="capitalize">{dateLine}</span> ·{' '}
+              {dateLine.charAt(0).toUpperCase() + dateLine.slice(1)} ·{' '}
               {t.home.summary(agenda.length, today.filter((it) => it.status !== 'done').length)}
             </p>
           </div>
+
+          <DayRituals />
 
           {unsorted > 0 && (
             <Link
