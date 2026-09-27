@@ -9,7 +9,11 @@ export const PRIORITY_RANK: Record<TaskPriority, number> = { high: 0, medium: 1,
 
 export type RepeatFreq = 'none' | 'daily' | 'weekly' | 'monthly'
 
-export type AccentName = 'iris' | 'amber' | 'rose' | 'sage' | 'blue'
+/** top-level partition: personal and work items live in separate to-do lists */
+export type Space = 'personal' | 'work'
+export const SPACES: Space[] = ['personal', 'work']
+
+export type AccentName ='iris' | 'amber' | 'rose' | 'sage' | 'blue'
 
 export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
   { name: 'iris', value: '#8d93ef' },
@@ -18,6 +22,26 @@ export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
   { name: 'rose', value: '#de8892' },
   { name: 'blue', value: '#7cc1e8' },
 ]
+
+export const TAG_COLORS = ['#7fb2f0', '#d9c26f', '#83c79d', '#c49bf0', '#6fc3c9', '#de8892', '#dfa871', '#9fc46e']
+
+/** a label within one space (school, cooking, shopping…) */
+export interface Tag {
+  id: string
+  name: string
+  color: string
+  space: Space
+  /** show tasks with this tag in "today" this many days before they are due */
+  leadDays?: number
+  createdAt: string
+}
+
+/** a task parked on someone else — sent, now waiting for their reply */
+export interface WaitingFor {
+  who: string
+  /** ISO datetime the ball was handed over */
+  since: string
+}
 
 export type ProjectSectionId = 'tasks' | 'events' | 'notes' | 'done'
 
@@ -37,6 +61,7 @@ export interface Project {
   id: string
   name: string
   color: string
+  space: Space
   archived?: boolean
   /** the project page body — free-form rich text (Notion-style) */
   description?: string
@@ -103,6 +128,7 @@ export interface Item {
   kind: ItemKind
   title: string
   body?: string
+  space: Space
   projectId?: string
 
   /** task */
@@ -119,6 +145,9 @@ export interface Item {
   repeat?: RepeatFreq
   /** parked in the Someday/later list, kept out of the board and digest */
   someday?: boolean
+  /** manually marked as burning — must get done no matter what */
+  flame?: boolean
+  waitingFor?: WaitingFor
 
   /** event — ISO datetimes */
   start?: string
@@ -126,7 +155,7 @@ export interface Item {
   allDay?: boolean
   contactIds?: string[]
 
-  /** shared */
+  /** shared — Tag ids */
   tags: string[]
   unsorted?: boolean
   boardOrder?: number
@@ -153,6 +182,8 @@ export interface GoogleIntegration {
   scopes: string[]
   gmailQuery: string
   calendarSyncEnabled: boolean
+  /** which space events synced from this account land in */
+  space: Space
   lastCalendarSync?: string
   lastError?: string
 }
@@ -174,6 +205,7 @@ export interface WeavoData {
   version: number
   items: Record<string, Item>
   projects: Record<string, Project>
+  tags: Record<string, Tag>
   goals: Record<string, Goal>
   reflections: Record<string, Reflection>
   contacts: Record<string, Contact>

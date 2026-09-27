@@ -1,5 +1,5 @@
 import { addDays, isSameDay, overlaps, startOfDay } from './date'
-import type { Item, Reminder, WeavoData } from './types'
+import type { Item, Reminder, Space, WeavoData } from './types'
 
 export const list = <T,>(rec: Record<string, T>): T[] => Object.values(rec)
 
@@ -96,6 +96,47 @@ export function reminderDueAt(r: Reminder, item: Item): number | null {
   if (r.trigger.type === 'before_start' && item.start)
     return new Date(item.start).getTime() - r.trigger.minutes * 60_000
   return null
+}
+
+/** how many days ahead a task surfaces in "today" — the longest lead of its tags */
+export function leadDays(data: WeavoData, it: Item): number {
+  return Math.max(0, ...it.tags.map((id) => data.tags[id]?.leadDays ?? 0))
+}
+
+const isOpen = (it: Item) => it.kind === 'task' && it.status !== 'done'
+
+export function isOverdue(it: Item, ref = new Date()): boolean {
+  return isOpen(it) && !!it.due && new Date(it.due) < startOfDay(ref)
+}
+
+/**
+ * Tasks that belong on today's list: due today, overdue, or inside their tag's
+ * lead window (shopping shows up two days early). Tasks finished today stay on
+ * the list so progress reads "4/9", not "0/5". Subtasks roll up into their
+ * parent; parked (someday / waiting) tasks are elsewhere.
+ */
+export function isOnToday(data: WeavoData, it: Item, ref = new Date()): boolean {
+  if (it.kind !== 'task' || !it.due || it.someday || it.waitingFor || it.parentId) return false
+  const within = startOfDay(new Date(it.due)) <= addDays(startOfDay(ref), leadDays(data, it))
+  if (it.status === 'done') return within && !!it.completedAt && isSameDay(it.completedAt, ref)
+  return within
+}
+
+/** burning: flagged by hand, or already past due */
+export function isHot(it: Item, ref = new Date()): boolean {
+  return isOpen(it) && !it.someday && !it.waitingFor && (!!it.flame || isOverdue(it, ref))
+}
+
+export function todayTasks(data: WeavoData, space?: Space, ref = new Date()): Item[] {
+  return itemsArray(data).filter(
+    (it) => (!space || it.space === space) && isOnToday(data, it, ref),
+  )
+}
+
+export function waitingTasks(data: WeavoData, space?: Space): Item[] {
+  return itemsArray(data)
+    .filter((it) => isOpen(it) && it.waitingFor && (!space || it.space === space))
+    .sort((a, b) => (a.waitingFor!.since < b.waitingFor!.since ? -1 : 1))
 }
 
 export interface Digest {

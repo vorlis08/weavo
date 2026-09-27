@@ -1,4 +1,4 @@
-import { DEFAULT_GOOGLE, DEFAULT_SETTINGS } from './store'
+import { DEFAULT_GOOGLE, DEFAULT_SETTINGS, starterTags } from './store'
 import { addDays, startOfDay, startOfWeek } from './date'
 import type { Item, Lang, WeavoData } from './types'
 
@@ -42,6 +42,9 @@ const TEXT = {
     bundle: 'Přidat onboarding do tarifu Pro?',
     bundleBody: 'Nápad z produktového kanálu — chce pořádně sepsat.',
     remNote: '2 hodiny před termínem',
+    groceries: 'Nakoupit na grilovačku',
+    homework: 'Odevzdat seminárku',
+    samWho: 'Sam (finance)',
   },
   en: {
     pLaunch: 'Product launch',
@@ -82,6 +85,9 @@ const TEXT = {
     bundle: 'Bundle onboarding into Pro tier?',
     bundleBody: 'Stray thought from the product channel — worth a proper writeup.',
     remNote: '2 hours before due',
+    groceries: 'Buy groceries for the barbecue',
+    homework: 'Hand in the seminar paper',
+    samWho: 'Sam (finance)',
   },
 }
 
@@ -102,17 +108,29 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   }
   const dueDay = (dayOffset: number, h = 17) => at(dayOffset, h)
 
-  const pLaunch = { id: uid(), name: x.pLaunch, color: '#dfa871' }
-  const pSite = { id: uid(), name: x.pSite, color: '#8d93ef' }
-  const pHome = { id: uid(), name: x.pHome, color: '#83c79d' }
+  const pLaunch = { id: uid(), name: x.pLaunch, color: '#dfa871', space: 'work' as const }
+  const pSite = { id: uid(), name: x.pSite, color: '#8d93ef', space: 'work' as const }
+  const pHome = { id: uid(), name: x.pHome, color: '#83c79d', space: 'personal' as const }
+
+  const tags = starterTags(lang)
+  const tagNamed = (i: number) => Object.values(tags)[i].id
+  // relative to today (not Monday), so the shopping lead window always shows
+  const fromToday = (days: number, h = 17) => {
+    const d = startOfDay(now)
+    d.setDate(d.getDate() + days)
+    d.setHours(h)
+    return d.toISOString()
+  }
 
   const cAlex = { id: uid(), name: x.cAlex, email: 'alex@example.com', role: x.roleDesign }
   const cSam = { id: uid(), name: x.cSam, email: 'sam@example.com', role: x.roleFinance }
 
   const items: Item[] = []
   const ts = startOfDay(now).toISOString()
+  const spaceOf = (projectId?: string) =>
+    [pLaunch, pSite, pHome].find((p) => p.id === projectId)?.space ?? 'personal'
   const push = (it: Partial<Item> & Pick<Item, 'kind' | 'title'>) => {
-    const full: Item = { id: uid(), tags: [], body: '', createdAt: ts, updatedAt: ts, ...it }
+    const full: Item = { id: uid(), tags: [], body: '', createdAt: ts, updatedAt: ts, space: spaceOf(it.projectId), ...it }
     items.push(full)
     return full
   }
@@ -127,12 +145,13 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   push({ kind: 'event', title: x.launchDay, start: at(4, 12), end: at(4, 13), projectId: pLaunch.id })
 
   const approval = push({
-    kind: 'task', title: x.approval, projectId: pLaunch.id, status: 'blocked',
+    kind: 'task', title: x.approval, projectId: pLaunch.id, status: 'todo',
     assigneeId: cSam.id, due: dueDay(2, 12),
+    waitingFor: { who: x.samWho, since: addDays(now, -2).toISOString() },
   })
   const copy = push({
     kind: 'task', title: x.copy, projectId: pLaunch.id, status: 'in_progress', due: dueDay(4, 15),
-    body: x.copyBody, blockedBy: [approval.id], tags: ['copy'],
+    body: x.copyBody, blockedBy: [approval.id], flame: true,
     checklist: [
       { id: uid(), text: x.ck1, done: true },
       { id: uid(), text: x.ck2, done: false },
@@ -146,8 +165,10 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   push({ kind: 'task', title: x.flights, projectId: pHome.id, status: 'done', completedAt: addDays(now, -1).toISOString() })
   push({ kind: 'task', title: x.replyAlex, projectId: pHome.id, status: 'todo', due: dueDay(0, 16) })
   push({ kind: 'task', title: x.invoice, status: 'todo', unsorted: true })
+  push({ kind: 'task', title: x.groceries, status: 'todo', due: fromToday(2), tags: [tagNamed(2)] })
+  push({ kind: 'task', title: x.homework, status: 'todo', due: fromToday(0), priority: 'high', tags: [tagNamed(0)] })
 
-  push({ kind: 'note', title: x.pricingNotes, projectId: pLaunch.id, body: x.pricingNotesBody, tags: ['pricing'] })
+  push({ kind: 'note', title: x.pricingNotes, projectId: pLaunch.id, body: x.pricingNotesBody })
   push({ kind: 'note', title: x.offsiteIdeas, projectId: pHome.id, body: x.offsiteBody })
   push({ kind: 'note', title: x.bundle, unsorted: true, body: x.bundleBody })
 
@@ -158,9 +179,10 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   }
 
   return {
-    version: 4,
+    version: 5,
     items: Object.fromEntries(items.map((i) => [i.id, i])),
     projects,
+    tags,
     goals: {},
     reflections: {},
     contacts,

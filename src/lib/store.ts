@@ -6,14 +6,18 @@ import type {
   GoogleIntegration,
   Item,
   ItemKind,
+  Lang,
   Project,
   Reflection,
   Reminder,
   RepeatFreq,
   Settings,
+  Space,
+  Tag,
   TaskStatus,
   WeavoData,
 } from './types'
+import { TAG_COLORS } from './types'
 
 const uid = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -37,13 +41,76 @@ export const DEFAULT_GOOGLE: GoogleIntegration = {
   scopes: [],
   gmailQuery: 'is:starred',
   calendarSyncEnabled: true,
+  space: 'personal',
+}
+
+const DATA_VERSION = 5
+
+const STARTER_TAGS: Record<Lang, [string, number?][]> = {
+  cs: [['Škola'], ['Vaření'], ['Nákup', 2], ['Projekty'], ['Zdraví'], ['Domov']],
+  en: [['School'], ['Cooking'], ['Shopping', 2], ['Projects'], ['Health'], ['Home']],
+}
+
+/** starter personal tags so the to-do is usable on day one */
+export function starterTags(lang: Lang = 'cs'): Record<string, Tag> {
+  const ts = new Date().toISOString()
+  const out: Record<string, Tag> = {}
+  STARTER_TAGS[lang].forEach(([name, leadDays], i) => {
+    const t: Tag = { id: uid(), name, color: TAG_COLORS[i % TAG_COLORS.length], space: 'personal', createdAt: ts }
+    if (leadDays) t.leadDays = leadDays
+    out[t.id] = t
+  })
+  return out
+}
+
+/**
+ * Bring data from any older version (persisted or imported JSON) up to the
+ * current shape: every item and project gets a space, and legacy free-text
+ * tags become Tag entities.
+ */
+export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<WeavoData> {
+  const projects: Record<string, Project> = {}
+  for (const p of Object.values(d.projects ?? {})) projects[p.id] = { ...p, space: p.space ?? 'personal' }
+
+  const tags: Record<string, Tag> = { ...(d.tags ?? {}) }
+  if (seedTags && !Object.keys(tags).length) Object.assign(tags, starterTags(d.settings?.lang))
+  const byName = new Map(Object.values(tags).map((t) => [t.name.toLowerCase(), t.id]))
+  const tagId = (raw: string) => {
+    if (tags[raw]) return raw
+    const key = raw.toLowerCase()
+    let id = byName.get(key)
+    if (!id) {
+      const t: Tag = {
+        id: uid(),
+        name: raw,
+        color: TAG_COLORS[Object.keys(tags).length % TAG_COLORS.length],
+        space: 'personal',
+        createdAt: new Date().toISOString(),
+      }
+      tags[t.id] = t
+      byName.set(key, t.id)
+      id = t.id
+    }
+    return id
+  }
+
+  const items: Record<string, Item> = {}
+  for (const it of Object.values(d.items ?? {})) {
+    items[it.id] = {
+      ...it,
+      space: it.space ?? (it.projectId && projects[it.projectId]?.space) ?? 'personal',
+      tags: [...new Set((it.tags ?? []).map(tagId))],
+    }
+  }
+  return { ...d, version: DATA_VERSION, projects, tags, items }
 }
 
 function emptyData(): WeavoData {
   return {
-    version: 4,
+    version: DATA_VERSION,
     items: {},
     projects: {},
+    tags: starterTags(),
     goals: {},
     reflections: {},
     contacts: {},
@@ -96,10 +163,19 @@ interface Store {
   toggleDone: (id: string) => void
   setStatus: (id: string, status: TaskStatus, order?: number) => void
 
-  addProject: (name: string, color: string) => Project
+  addProject: (name: string, color: string, space?: Space) => Project
   updateProject: (id: string, patch: Partial<Project>) => void
   deleteProject: (id: string) => void
   addSubtask: (parentId: string, title: string) => Item | undefined
+
+  addTag: (name: string, space: Space, color?: string) => Tag
+  updateTag: (id: string, patch: Partial<Tag>) => void
+  /** removes the tag and strips it from every item */
+  deleteTag: (id: string) => void
+
+  toggleFlame: (id: string) => void
+  /** park the task on someone (`who`), or clear it with null */
+  setWaitingFor: (id: string, who: string | null) => void
 
   addGoal: (title: string, color: string) => Goal
   updateGoal: (id: string, patch: Partial<Goal>) => void
@@ -175,11 +251,14 @@ export const useStore = create<Store>()(
 
       createItem: (partial) => {
         const ts = now()
+        const project = partial.projectId ? get().data.projects[partial.projectId] : undefined
         const item: Item = {
           id: uid(),
           body: '',
           tags: [],
           ...partial,
+          // an item always lives in its project's space
+          space: project?.space ?? partial.space ?? 'personal',
           status: partial.kind === 'task' ? (partial.status ?? 'todo') : partial.status,
           createdAt: ts,
           updatedAt: ts,
@@ -194,12 +273,18 @@ export const useStore = create<Store>()(
         set((s) => {
           const cur = s.data.items[id]
           if (!cur) return s
+          const project = patch.projectId ? s.data.projects[patch.projectId] : undefined
           return {
             data: {
               ...s.data,
               items: {
                 ...s.data.items,
-                [id]: { ...cur, ...patch, updatedAt: now() },
+                [id]: {
+                  ...cur,
+                  ...patch,
+                  ...(project ? { space: project.space } : {}),
+                  updatedAt: now(),
+                },
               },
             },
           }
@@ -270,6 +355,8 @@ export const useStore = create<Store>()(
               id: nid,
               status: 'todo',
               completedAt: undefined,
+              flame: undefined,
+              waitingFor: undefined,
               due: nextOccurrence(it.due, it.repeat),
               checklist: it.checklist?.map((c) => ({ ...c, done: false })),
               createdAt: now(),
@@ -301,18 +388,29 @@ export const useStore = create<Store>()(
           }
         }),
 
-      addProject: (name, color) => {
-        const p: Project = { id: uid(), name: name.trim(), color, createdAt: now() }
+      addProject: (name, color, space = 'personal') => {
+        const p: Project = { id: uid(), name: name.trim(), color, space, createdAt: now() }
         set((s) => ({ data: { ...s.data, projects: { ...s.data.projects, [p.id]: p } } }))
         return p
       },
       updateProject: (id, patch) =>
-        set((s) => ({
-          data: {
-            ...s.data,
-            projects: { ...s.data.projects, [id]: { ...s.data.projects[id], ...patch } },
-          },
-        })),
+        set((s) => {
+          let items = s.data.items
+          // moving a project to the other space takes its items along
+          if (patch.space && patch.space !== s.data.projects[id]?.space) {
+            items = { ...items }
+            for (const it of Object.values(items)) {
+              if (it.projectId === id) items[it.id] = { ...it, space: patch.space, updatedAt: now() }
+            }
+          }
+          return {
+            data: {
+              ...s.data,
+              items,
+              projects: { ...s.data.projects, [id]: { ...s.data.projects[id], ...patch } },
+            },
+          }
+        }),
       deleteProject: (id) =>
         set((s) => {
           const projects = { ...s.data.projects }
@@ -332,8 +430,45 @@ export const useStore = create<Store>()(
           title: title.trim(),
           parentId,
           projectId: parent.projectId,
+          space: parent.space,
         })
       },
+
+      addTag: (name, space, color) => {
+        const count = Object.keys(get().data.tags).length
+        const t: Tag = {
+          id: uid(),
+          name: name.trim().replace(/^#/, ''),
+          color: color ?? TAG_COLORS[count % TAG_COLORS.length],
+          space,
+          createdAt: now(),
+        }
+        set((s) => ({ data: { ...s.data, tags: { ...s.data.tags, [t.id]: t } } }))
+        return t
+      },
+      updateTag: (id, patch) =>
+        set((s) => ({
+          data: { ...s.data, tags: { ...s.data.tags, [id]: { ...s.data.tags[id], ...patch } } },
+        })),
+      deleteTag: (id) =>
+        set((s) => {
+          const tags = { ...s.data.tags }
+          delete tags[id]
+          const items = { ...s.data.items }
+          for (const it of Object.values(items)) {
+            if (it.tags.includes(id)) items[it.id] = { ...it, tags: it.tags.filter((x) => x !== id) }
+          }
+          return { data: { ...s.data, tags, items } }
+        }),
+
+      toggleFlame: (id) => {
+        const it = get().data.items[id]
+        if (it) get().updateItem(id, { flame: !it.flame })
+      },
+      setWaitingFor: (id, who) =>
+        get().updateItem(id, {
+          waitingFor: who?.trim() ? { who: who.trim(), since: now() } : undefined,
+        }),
 
       addGoal: (title, color) => {
         const g: Goal = { id: uid(), title: title.trim(), color, createdAt: now() }
@@ -460,6 +595,7 @@ export const useStore = create<Store>()(
                 start: ev.start,
                 end: ev.end,
                 allDay: ev.allDay,
+                space: s.data.google.space,
                 tags: [],
                 source: 'gcal',
                 externalId: ev.externalId,
@@ -490,6 +626,7 @@ export const useStore = create<Store>()(
                 status: 'todo',
                 title: ev.title,
                 due: ev.start,
+                space: s.data.google.space,
                 tags: [],
                 source: 'gcal',
                 externalId: ev.externalId,
@@ -528,12 +665,12 @@ export const useStore = create<Store>()(
           }
         }),
 
-      replaceAll: (data) => set({ data: { ...emptyData(), ...data } }),
+      replaceAll: (data) => set({ data: { ...emptyData(), ...normalizeData(data) } }),
       clearAll: () => set({ data: emptyData() }),
     }),
     {
       name: 'weavo-v1',
-      version: 4,
+      version: DATA_VERSION,
       partialize: (s) => ({ data: s.data }),
       migrate: (persisted, version) => {
         const p = persisted as { data?: Partial<WeavoData> } | undefined
@@ -543,6 +680,9 @@ export const useStore = create<Store>()(
         if (p?.data && version < 4) {
           p.data.goals ??= {}
           p.data.reflections ??= {}
+        }
+        if (p?.data && version < 5) {
+          p.data = normalizeData(p.data, true)
         }
         return p as { data: WeavoData }
       },

@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useT } from '@/lib/i18n'
+import { useStore } from '@/lib/store'
+import type { Space } from '@/lib/types'
 import { cn } from './ui'
 
 export function InlineTitle({
@@ -106,28 +108,41 @@ export function PropRow({ label, children }: { label: string; children: ReactNod
   )
 }
 
+/** picks Tag entities of the item's space; typing an unknown name creates the tag */
 export function TagEditor({
   tags,
+  space,
   onChange,
 }: {
   tags: string[]
+  space: Space
   onChange: (t: string[]) => void
 }) {
   const tr = useT()
+  const allTags = useStore((s) => s.data.tags)
+  const addTag = useStore((s) => s.addTag)
   const [draft, setDraft] = useState('')
+  const listId = useId()
+  const available = Object.values(allTags).filter((t) => t.space === space && !tags.includes(t.id))
   function add() {
-    const v = draft.trim().replace(/^#/, '')
-    if (v && !tags.includes(v)) onChange([...tags, v])
+    const name = draft.trim().replace(/^#/, '')
     setDraft('')
+    if (!name) return
+    const existing = Object.values(allTags).find(
+      (t) => t.space === space && t.name.toLowerCase() === name.toLowerCase(),
+    )
+    const id = existing?.id ?? addTag(name, space).id
+    if (!tags.includes(id)) onChange([...tags, id])
   }
   return (
     <span className="flex flex-wrap items-center gap-1.5">
       {tags.map((tag) => (
         <span
           key={tag}
-          className="inline-flex h-[22px] items-center gap-1 rounded-md bg-surface-3 pl-2 pr-1 text-[11px] text-ink-2"
+          className="inline-flex h-[22px] items-center gap-1.5 rounded-md bg-surface-3 pl-2 pr-1 text-[11px] text-ink-2"
         >
-          {tag}
+          <span className="h-1.5 w-1.5 rounded-full" style={{ background: allTags[tag]?.color }} />
+          {allTags[tag]?.name ?? tag}
           <button
             onClick={() => onChange(tags.filter((x) => x !== tag))}
             className="text-ink-3 hover:text-rose"
@@ -148,9 +163,15 @@ export function TagEditor({
           }
         }}
         onBlur={add}
+        list={listId}
         placeholder={tags.length ? '' : tr.editors.addTag}
         className="h-[22px] w-20 min-w-[60px] flex-1 bg-transparent text-[11.5px] text-ink outline-none placeholder:text-ink-3"
       />
+      <datalist id={listId}>
+        {available.map((t) => (
+          <option key={t.id} value={t.name} />
+        ))}
+      </datalist>
     </span>
   )
 }

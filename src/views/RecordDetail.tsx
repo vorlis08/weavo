@@ -616,7 +616,7 @@ export function RecordDetail() {
               ) : null}
               <Divider />
               <PropRow label={t.detail.propTags}>
-                <TagEditor tags={item.tags} onChange={(tg) => updateItem(item.id, { tags: tg })} />
+                <TagEditor tags={item.tags} space={item.space} onChange={(tg) => updateItem(item.id, { tags: tg })} />
               </PropRow>
             </div>
 
