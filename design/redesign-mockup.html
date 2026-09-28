@@ -1,0 +1,1005 @@
+<!doctype html>
+<!-- Weavo redesign — clickable mockup (27. 9. 2026). Design reference for the upcoming visual overhaul; not part of the app build. Live: https://claude.ai/artifact/GqEbk1YeA9iZhJywa2carm -->
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>Weavo Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --ground:#0F0F13; --side:#121217; --s1:#17171D; --s2:#1E1E26; --s3:#272730; --s4:#31313B;
+  --line:rgba(255,255,255,.065); --line2:rgba(255,255,255,.11); --line3:rgba(255,255,255,.18);
+  --t1:#EFEEF4; --t2:#B0AEBF; --t3:#8A889E; --t4:#5E5C70;
+  --acc:#9EA0F7; --acc2:#B6B8FF; --acc-ink:#12121C; --acc-soft:rgba(158,160,247,.13);
+  --p:#6FD0B0; --w:#E7B45F; --flame:#FF7A59; --danger:#F2838F;
+  --display:'Bricolage Grotesque','Hanken Grotesk',system-ui,sans-serif;
+  --sans:'Hanken Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.2,.7,.2,1);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--ground);color:var(--t1);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:inherit}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px;border-radius:8px}
+svg.i{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+svg.i.s{width:15px;height:15px}
+svg.i.xs{width:13px;height:13px}
+.kbd{font-family:var(--mono);font-size:10.5px;color:var(--t3);border:1px solid var(--line2);border-radius:5px;padding:1px 5px;line-height:1.4}
+
+/* ------- shell ------- */
+.app{display:flex;height:100%}
+.side{width:236px;flex:none;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:18px 12px 14px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 10px 18px}
+.brand b{font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.02em}
+.mark{width:26px;height:26px;border-radius:8px;background:var(--s2);border:1px solid var(--line2);display:grid;place-items:center}
+.capture{display:flex;align-items:center;gap:10px;height:38px;border-radius:10px;background:var(--s1);border:1px solid var(--line2);padding:0 10px 0 12px;color:var(--t2);font-size:13.5px;margin-bottom:18px;transition:border-color .15s,background .15s}
+.capture:hover{border-color:var(--line3);background:var(--s2);color:var(--t1)}
+.capture .plus{width:20px;height:20px;border-radius:6px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center}
+.capture .kbd{margin-left:auto}
+.nav{display:flex;align-items:center;gap:12px;height:36px;padding:0 10px;border-radius:9px;color:var(--t2);font-size:14px;font-weight:500;width:100%;transition:background .15s,color .15s}
+.nav:hover{background:var(--s1);color:var(--t1)}
+.nav.on{background:var(--s2);color:var(--t1)}
+.nav.on svg{color:var(--acc)}
+.nav .cnt{margin-left:auto;font-size:12px;color:var(--t3)}
+.side-sec{display:flex;align-items:center;gap:8px;padding:22px 10px 6px;font-size:12px;color:var(--t3);font-weight:500}
+.side-sec .thread{width:14px;height:2px;border-radius:2px}
+.pnav{display:flex;align-items:center;gap:11px;height:32px;padding:0 10px;border-radius:8px;color:var(--t2);font-size:13.5px;width:100%}
+.pnav:hover{background:var(--s1);color:var(--t1)}
+.pnav.on{background:var(--s2);color:var(--t1)}
+.pnav .cnt{margin-left:auto;font-size:12px;color:var(--t3)}
+.sq{display:inline-block;width:9px;height:9px;border-radius:3px;background:var(--c);flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.side-foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+.me{display:flex;align-items:center;gap:10px;padding:8px 10px;color:var(--t2);font-size:13px}
+.avatar{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#2A2A36,#3A3A4A);display:grid;place-items:center;font-size:11px;font-weight:600;color:var(--t1)}
+
+.main{flex:1;min-width:0;overflow-y:auto;position:relative}
+.banner{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:8px 40px;background:rgba(15,15,19,.82);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);font-size:12px;color:var(--t3)}
+.banner .pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;border:1px solid var(--line2);color:var(--t2)}
+.banner button{margin-left:auto;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:8px;color:var(--acc2);background:var(--acc-soft)}
+.page{max-width:1140px;margin:0 auto;padding-inline:40px;padding-block:34px 110px}
+
+/* ------- page header ------- */
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px}
+.eyebrow{font-size:13px;color:var(--t3);margin-bottom:6px}
+.eyebrow b{color:var(--t2);font-weight:500}
+h1.d{font-family:var(--display);font-weight:600;font-size:34px;line-height:1.08;letter-spacing:-.03em;margin:0;text-wrap:balance}
+.lede{color:var(--t2);font-size:14.5px;max-width:64ch;margin:10px 0 0}
+.actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* controls */
+.seg{display:inline-flex;padding:3px;gap:2px;border-radius:10px;background:var(--s1);border:1px solid var(--line)}
+.seg button{height:28px;padding:0 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--t3);display:inline-flex;align-items:center;gap:7px;transition:color .15s,background .15s}
+.seg button:hover{color:var(--t1)}
+.seg button.on{background:var(--s3);color:var(--t1)}
+.thr{width:12px;height:2px;border-radius:2px;background:var(--c)}
+.btn{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 14px;border-radius:9px;font-size:13.5px;font-weight:500;border:1px solid var(--line2);color:var(--t1);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--s2);border-color:var(--line3)}
+.btn.pri{background:var(--acc);border-color:transparent;color:var(--acc-ink);font-weight:600}
+.btn.pri:hover{background:var(--acc2)}
+.btn.ghost{border-color:transparent;color:var(--t2)}
+.btn.ghost:hover{color:var(--t1);background:var(--s1)}
+.icon-btn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--t3)}
+.icon-btn:hover{background:var(--s2);color:var(--t1)}
+
+/* ------- task rows ------- */
+.sect{margin-bottom:30px}
+.sh{display:flex;align-items:baseline;gap:10px;padding:0 12px 8px;font-size:13px;font-weight:600;color:var(--t2)}
+.sh .n{font-weight:500;color:var(--t3);font-size:12.5px}
+.sh .hint{margin-left:auto;font-weight:400;color:var(--t3);font-size:12.5px}
+.sh.hot{color:var(--flame)}
+.sh .tog{display:flex;align-items:center;gap:8px}
+.sh .tog svg{transition:transform .2s var(--ease)}
+.sh .tog.open svg{transform:rotate(90deg)}
+.rows{display:flex;flex-direction:column}
+.row{position:relative;display:flex;align-items:center;gap:12px;min-height:48px;padding:8px 10px 8px 12px;border-radius:11px;cursor:pointer;transition:background .15s}
+.row:hover{background:var(--s1)}
+.row + .row::before{content:"";position:absolute;top:0;left:44px;right:10px;height:1px;background:var(--line)}
+.row:hover::before,.row:hover + .row::before{opacity:0}
+.row .thread{position:absolute;left:0;top:12px;bottom:12px;width:2px;border-radius:2px;background:var(--c)}
+.ck{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--t4);flex:none;display:grid;place-items:center;transition:border-color .15s,background .2s var(--ease),transform .15s}
+.ck:hover{border-color:var(--t2)}
+.ck:active{transform:scale(.9)}
+.ck svg{width:11px;height:11px;stroke:transparent;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.row.done .ck{background:var(--acc);border-color:var(--acc)}
+.row.done .ck svg{stroke:var(--acc-ink)}
+.row .body{flex:1;min-width:0}
+.row .ti{font-size:14.5px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .2s}
+.row.done .ti{color:var(--t3);text-decoration:line-through;text-decoration-color:var(--t4)}
+.pri{color:var(--danger);font-weight:700;margin-right:5px}
+.meta{display:flex;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-top:3px;font-size:12.5px;color:var(--t3)}
+.meta:empty{display:none}
+.m{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.m.danger{color:var(--danger)}
+.m.lead{color:var(--p)}
+.m.today{color:var(--t2)}
+.m.wait{color:var(--t2)}
+.m.wait svg{color:var(--w)}
+.fl{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--t4);opacity:0;transition:opacity .15s,color .15s,background .15s;flex:none}
+.row:hover .fl,.fl.on,.fl:focus-visible{opacity:1}
+.fl:hover{background:var(--s3);color:var(--t2)}
+.fl.on{color:var(--flame)}
+.fl.on svg{fill:rgba(255,122,89,.28)}
+.empty{padding:12px 12px 4px 44px;color:var(--t3);font-size:13.5px}
+.add{display:flex;align-items:center;gap:12px;height:44px;padding:0 12px;border-radius:11px;color:var(--t3);font-size:14px;width:100%}
+.add:hover{background:var(--s1);color:var(--t2)}
+.add .ring{width:20px;height:20px;border-radius:50%;border:1.6px dashed var(--t4);display:grid;place-items:center}
+.quick{display:flex;align-items:center;gap:12px;height:48px;padding:0 14px;border-radius:12px;background:var(--s1);border:1px solid var(--line);margin-bottom:26px;color:var(--t3);font-size:14.5px}
+.quick:focus-within{border-color:var(--line3)}
+.quick input{flex:1;background:none;border:0;outline:0;color:var(--t1);font-size:14.5px;min-width:0}
+.quick input::placeholder{color:var(--t3)}
+
+/* progress thread */
+.pt{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.pt .track{position:relative;flex:1;height:4px;border-radius:4px;background:var(--s3);overflow:hidden;display:flex}
+.pt .track i{display:block;height:100%;transition:width .45s var(--ease)}
+.pt .lbl{font-size:13px;color:var(--t2);white-space:nowrap}
+.pt .lbl b{color:var(--t1);font-weight:600}
+
+/* space tabs */
+.stabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin-bottom:24px}
+.stab{position:relative;display:flex;align-items:center;gap:10px;padding:0 2px 12px;font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.02em;color:var(--t3);transition:color .15s}
+.stab:hover{color:var(--t2)}
+.stab.on{color:var(--t1)}
+.stab::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:2px;background:var(--c);transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.stab.on::after{transform:scaleX(1)}
+.stab .n{font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--t2);background:var(--s2);border-radius:999px;padding:1px 8px}
+
+/* events strip */
+.evs{display:flex;gap:8px;overflow-x:auto;margin:-6px 0 26px;padding-bottom:2px}
+.ev{flex:none;display:flex;align-items:center;gap:10px;height:36px;padding:0 14px 0 12px;border-radius:10px;background:var(--s1);border:1px solid var(--line);font-size:13.5px}
+.ev .bar{width:2px;height:16px;border-radius:2px;background:var(--c)}
+.ev time{color:var(--t3);font-size:12.5px}
+.ev.past{opacity:.5}
+
+/* ------- home ------- */
+.hgrid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:36px;align-items:start}
+.card{background:var(--s1);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px}
+.card h3{margin:0 0 14px;font-size:13px;font-weight:600;color:var(--t2);display:flex;align-items:center;gap:8px}
+.card h3 .more{margin-left:auto;font-weight:500;color:var(--acc2);font-size:12.5px}
+.stack{display:flex;flex-direction:column;gap:14px}
+.rituals{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:34px}
+.rit{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:var(--s1);border:1px solid var(--line);text-align:left;transition:border-color .15s,background .15s}
+.rit:hover{border-color:var(--line3);background:var(--s2)}
+.rit .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:none}
+.rit b{display:block;font-size:14.5px;font-weight:600}
+.rit small{display:block;color:var(--t3);font-size:12.5px;margin-top:1px}
+.rit.suggest{border-color:rgba(231,180,95,.35)}
+.today-num{display:flex;align-items:baseline;gap:8px;font-family:var(--display);font-weight:600;letter-spacing:-.03em}
+.today-num b{font-size:44px;line-height:1}
+.today-num span{font-size:17px;color:var(--t3)}
+.threads2{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.th2{display:grid;grid-template-columns:62px 1fr 34px;align-items:center;gap:10px;font-size:12.5px;color:var(--t2)}
+.th2 .track{height:3px;border-radius:3px;background:var(--s3);overflow:hidden}
+.th2 .track i{display:block;height:100%;background:var(--c);transition:width .45s var(--ease)}
+.th2 .v{text-align:right;color:var(--t3)}
+.agenda{position:relative;display:flex;flex-direction:column}
+.ag{display:grid;grid-template-columns:48px 2px 1fr;gap:12px;align-items:center;min-height:40px;font-size:13.5px;cursor:pointer;border-radius:8px}
+.ag time{color:var(--t3);font-size:12.5px;text-align:right}
+.ag .bar{height:22px;border-radius:2px;background:var(--c)}
+.ag .sub{color:var(--t3);font-size:12px}
+.ag.past{opacity:.45}
+.now{display:grid;grid-template-columns:48px 1fr;gap:12px;align-items:center;margin:2px 0}
+.now span{font-size:11.5px;color:var(--acc2);text-align:right;font-weight:600}
+.now i{height:1px;background:var(--acc);position:relative}
+.now i::before{content:"";position:absolute;left:-3px;top:-3px;width:7px;height:7px;border-radius:50%;background:var(--acc)}
+.pmini{display:flex;flex-direction:column;gap:12px}
+.pm{display:grid;grid-template-columns:1fr auto;gap:6px 12px;cursor:pointer}
+.pm .nm{display:flex;align-items:center;gap:9px;font-size:13.5px;min-width:0}
+.pm .nm span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pm .dd{font-size:12.5px;color:var(--t3);text-align:right}
+.pm .track{grid-column:1 / -1;height:3px;border-radius:3px;background:var(--s3);overflow:hidden}
+.pm .track i{display:block;height:100%;background:var(--c)}
+
+/* ------- projects list ------- */
+.pgroup{margin-bottom:34px}
+.pgh{display:flex;align-items:center;gap:10px;padding:0 14px 10px;font-size:13px;font-weight:600;color:var(--t2)}
+.pgh .thr{width:18px}
+.pgh .n{color:var(--t3);font-weight:500}
+.pgh .tog{display:flex;align-items:center;gap:10px}
+.pgh .tog svg{transition:transform .2s var(--ease)}
+.pgh .tog.open svg{transform:rotate(90deg)}
+.ptable{border-top:1px solid var(--line)}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) 170px 128px 150px 72px;gap:20px;align-items:center;padding:14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s}
+.prow:hover{background:var(--s1)}
+.pcol-h{display:grid;grid-template-columns:minmax(0,1fr) 170px 128px 150px 72px;gap:20px;padding:0 14px 14px;font-size:12px;color:var(--t3)}
+.pname{display:flex;align-items:center;gap:11px;min-width:0}
+.pname .sq{width:11px;height:11px;border-radius:3.5px}
+.pname b{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pnext{display:flex;align-items:center;gap:7px;margin:4px 0 0 22px;font-size:13px;color:var(--t2);min-width:0}
+.pnext span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pnext .lbl{color:var(--t3);flex:none}
+.pnext svg{color:var(--flame);flex:none}
+.status{display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 10px;border-radius:999px;font-size:12.5px;font-weight:500;background:var(--s2);color:var(--t2);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.status i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.active{color:var(--t1)}
+.status.active i{background:var(--acc)}
+.status.paused{color:var(--t3)}
+.status.done{color:var(--t3)}
+.status.done i{background:var(--t3)}
+.due b{display:block;font-size:13.5px;font-weight:500}
+.due small{display:block;font-size:12.5px;color:var(--t3)}
+.due.soon small{color:var(--w)}
+.due.late small{color:var(--danger)}
+.prog{display:flex;align-items:center;gap:10px}
+.prog .track{flex:1;height:4px;border-radius:4px;background:var(--s3);overflow:hidden}
+.prog .track i{display:block;height:100%;background:var(--c);border-radius:4px}
+.prog span{font-size:12.5px;color:var(--t2);min-width:36px;text-align:right}
+.sig{display:flex;gap:10px;justify-content:flex-end;font-size:12.5px;color:var(--t2)}
+.sig span{display:inline-flex;align-items:center;gap:4px}
+.sig .f{color:var(--flame)}
+.sig .h svg{color:var(--w)}
+.sig .none{color:var(--t4)}
+
+/* portfolio osnova */
+.loom{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--s1);padding:14px 16px 12px;overflow:hidden}
+.loom-scroll{overflow-x:auto}
+.loom-inner{position:relative;min-width:760px}
+.axis{display:grid;height:26px;border-bottom:1px solid var(--line);font-size:12px;color:var(--t3)}
+.axis div{padding-left:6px;border-left:1px solid var(--line);white-space:nowrap}
+.lane{position:relative;display:grid;grid-template-columns:200px 1fr;align-items:center;height:44px}
+.lane + .lane{border-top:1px solid var(--line)}
+.lane .ln{display:flex;align-items:center;gap:10px;font-size:13.5px;min-width:0;padding-right:12px;cursor:pointer}
+.lane .ln span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lane .ln small{color:var(--t3);font-size:12px;margin-left:auto;flex:none}
+.lane .tr{position:relative;height:100%}
+.bar-l{position:absolute;top:50%;height:12px;transform:translateY(-50%);border-radius:12px;overflow:hidden;background:repeating-linear-gradient(135deg,color-mix(in oklab,var(--c) 42%,transparent) 0 2px,transparent 2px 6px);box-shadow:inset 0 0 0 1px color-mix(in oklab,var(--c) 50%,transparent);cursor:pointer}
+.bar-l i{display:block;height:100%;background:var(--c);border-radius:12px 0 0 12px}
+.bar-l.paused{filter:saturate(.2) brightness(.8)}
+.flag{position:absolute;top:50%;width:2px;height:22px;transform:translate(-1px,-50%);background:var(--c);border-radius:2px}
+.needle{position:absolute;top:0;bottom:0;width:1px;background:var(--acc);pointer-events:none}
+.needle::before{content:attr(data-l);position:absolute;top:-2px;left:6px;font-size:11px;font-weight:600;color:var(--acc2)}
+.weekend{position:absolute;top:0;bottom:0;background:rgba(255,255,255,.018)}
+
+/* ------- project detail ------- */
+.crumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t3);margin-bottom:14px}
+.crumb button:hover{color:var(--t1)}
+.ptitle{display:flex;align-items:center;gap:14px}
+.ptitle .sq{width:16px;height:16px;border-radius:5px}
+.props{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.prop{display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 12px;border-radius:9px;background:var(--s1);border:1px solid var(--line);font-size:13px;color:var(--t2);transition:border-color .15s}
+.prop:hover{border-color:var(--line3);color:var(--t1)}
+.prop b{color:var(--t1);font-weight:500}
+.prop .k{color:var(--t3)}
+.prop.ghost{background:none;border-style:dashed;color:var(--t3)}
+.prop.warn b{color:var(--w)}
+.tabs{display:flex;gap:4px;margin:30px 0 22px;border-bottom:1px solid var(--line)}
+.tab{position:relative;height:38px;padding:0 12px;font-size:14px;font-weight:500;color:var(--t3);display:inline-flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1)}
+.tab.on{color:var(--t1)}
+.tab.on::after{content:"";position:absolute;left:10px;right:10px;bottom:-1px;height:2px;border-radius:2px;background:var(--acc)}
+.tab .n{font-size:12px;color:var(--t3)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:36px;align-items:start}
+.phase{margin-bottom:26px}
+.phh{display:flex;align-items:center;gap:12px;padding:0 12px 8px}
+.phh .tog{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.015em;color:var(--t1)}
+.phh .tog svg{color:var(--t3);transition:transform .2s var(--ease)}
+.phh .tog.open svg{transform:rotate(90deg)}
+.phh .dates{font-size:12.5px;color:var(--t3)}
+.phh .pp{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--t3)}
+.phh .pp .track{width:60px;height:3px;border-radius:3px;background:var(--s3);overflow:hidden}
+.phh .pp .track i{display:block;height:100%;background:var(--c)}
+.phase.done .phh .tog{color:var(--t3)}
+.phase.cur .phh .dates{color:var(--acc2)}
+.next{background:linear-gradient(180deg,color-mix(in oklab,var(--c) 10%,var(--s1)),var(--s1));border:1px solid color-mix(in oklab,var(--c) 30%,var(--line));border-radius:16px;padding:16px}
+.next .lbl{font-size:12px;color:var(--t3);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.next .tt{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.015em;line-height:1.25}
+.next .meta{margin-top:8px}
+.next .btn{margin-top:14px;width:100%;justify-content:center}
+.rail-list{display:flex;flex-direction:column}
+.ri{display:flex;align-items:center;gap:10px;min-height:38px;font-size:13.5px;border-top:1px solid var(--line);cursor:pointer}
+.ri:first-child{border-top:0}
+.ri time,.ri small{color:var(--t3);font-size:12.5px;margin-left:auto;white-space:nowrap}
+.ri .doc{color:var(--t3)}
+.ploom{margin-top:6px}
+.ploom .lane{grid-template-columns:170px 1fr;height:40px}
+.kan{display:grid;grid-template-columns:repeat(4,minmax(220px,1fr));gap:14px;overflow-x:auto;padding-bottom:6px}
+.kcol{background:var(--s1);border:1px solid var(--line);border-radius:14px;padding:12px;min-height:200px}
+.kcol h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--t2);display:flex;align-items:center;gap:8px}
+.kcol h4 span{color:var(--t3);font-weight:500}
+.kc{background:var(--s2);border:1px solid var(--line);border-radius:11px;padding:10px 12px;margin-bottom:8px;font-size:13.5px;cursor:pointer;transition:border-color .15s}
+.kc:hover{border-color:var(--line3)}
+.kc .meta{margin-top:6px}
+
+/* ------- calendar ------- */
+.cal{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--s1)}
+.cal-scroll{overflow-x:auto}
+.cal-in{min-width:860px}
+.chead,.cband,.cgrid{display:grid;grid-template-columns:56px repeat(7,minmax(0,1fr))}
+.chead div{padding:12px 10px 10px;border-left:1px solid var(--line);font-size:12.5px;color:var(--t3)}
+.chead div b{display:block;font-family:var(--display);font-size:22px;font-weight:600;color:var(--t1);letter-spacing:-.02em;line-height:1.1}
+.chead div.today b{color:var(--acc2)}
+.chead div:first-child,.cband > div:first-child,.cgrid > div:first-child{border-left:0}
+.cband{border-top:1px solid var(--line);border-bottom:1px solid var(--line2);background:var(--ground)}
+.cband > div{border-left:1px solid var(--line);padding:6px;display:flex;flex-direction:column;gap:4px;min-height:44px}
+.cband .lbl{font-size:11.5px;color:var(--t3);padding:8px 8px 0 0;text-align:right}
+.ct{display:flex;align-items:center;gap:6px;font-size:12px;padding:3px 6px;border-radius:6px;background:var(--s2);cursor:pointer;min-width:0}
+.ct span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ct .mini{width:12px;height:12px;border-radius:50%;border:1.4px solid var(--t4);flex:none}
+.ct.done{opacity:.5}
+.ct.done span{text-decoration:line-through}
+.ct.hot{box-shadow:inset 2px 0 0 var(--flame)}
+.cgrid{position:relative}
+.hours{display:flex;flex-direction:column}
+.hours div{height:48px;font-size:11.5px;color:var(--t3);text-align:right;padding-right:8px;transform:translateY(-7px)}
+.dcol{position:relative;border-left:1px solid var(--line);background-image:repeating-linear-gradient(to bottom,transparent 0 47px,var(--line) 47px 48px)}
+.dcol.today{background-color:rgba(158,160,247,.035)}
+.ce{position:absolute;left:4px;right:4px;border-radius:8px;padding:5px 8px;font-size:12px;line-height:1.3;overflow:hidden;background:color-mix(in oklab,var(--c) 16%,var(--s2));box-shadow:inset 2px 0 0 var(--c);cursor:pointer}
+.ce b{display:block;font-weight:600;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ce time{color:var(--t2);font-size:11.5px}
+.nowline{position:absolute;left:0;right:0;height:1px;background:var(--acc);z-index:2}
+.nowline::before{content:"";position:absolute;left:-4px;top:-3.5px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.agenda-m{display:none}
+
+/* ------- drawer ------- */
+.scrim{position:fixed;inset:0;background:rgba(6,6,9,.5);backdrop-filter:blur(2px);z-index:30;animation:fade .2s}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--s1);border-left:1px solid var(--line2);z-index:31;display:flex;flex-direction:column;box-shadow:-30px 0 80px rgba(0,0,0,.45);animation:slide .28s var(--ease)}
+@keyframes slide{from{transform:translateX(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+.dr-top{display:flex;align-items:center;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);font-size:13px;color:var(--t3)}
+.dr-top .sp{margin-left:auto}
+.dr-body{flex:1;overflow-y:auto;padding:22px 24px 30px}
+.dr-title{display:flex;gap:14px;align-items:flex-start}
+.dr-title .ck{margin-top:6px}
+.dr-title h2{margin:0;font-family:var(--display);font-size:24px;line-height:1.2;font-weight:600;letter-spacing:-.02em}
+.dr-title.done h2{color:var(--t3);text-decoration:line-through}
+.dr-title.done .ck{background:var(--acc);border-color:var(--acc)}
+.dr-title.done .ck svg{stroke:var(--acc-ink)}
+.pgrid{display:grid;grid-template-columns:96px 1fr;gap:4px 12px;margin:22px 0 26px;font-size:13.5px}
+.pgrid dt{color:var(--t3);padding:6px 0}
+.pgrid dd{margin:0;padding:3px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:34px}
+.chip{display:inline-flex;align-items:center;gap:7px;height:28px;padding:0 10px;border-radius:8px;background:var(--s2);border:1px solid var(--line);font-size:13px;color:var(--t1)}
+.chip.flame-on{color:var(--flame);border-color:rgba(255,122,89,.4);background:rgba(255,122,89,.1)}
+.chip.muted{color:var(--t3)}
+.dr-h{font-size:13px;font-weight:600;color:var(--t2);margin:0 0 8px}
+.steps{display:flex;flex-direction:column;margin-bottom:24px}
+.step{display:flex;align-items:center;gap:12px;min-height:38px;font-size:14px;border-radius:8px;padding:0 6px;cursor:pointer}
+.step:hover{background:var(--s2)}
+.step .ck{width:17px;height:17px}
+.step.done span{color:var(--t3);text-decoration:line-through}
+.step.done .ck{background:var(--acc);border-color:var(--acc)}
+.step.done .ck svg{stroke:var(--acc-ink)}
+.note{color:var(--t2);font-size:14px;line-height:1.6;background:var(--s2);border-radius:12px;padding:12px 14px}
+.dr-foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+
+/* notes sheet */
+.notes{position:fixed;right:20px;bottom:20px;width:min(380px,calc(100% - 32px));max-height:min(70vh,560px);overflow-y:auto;background:var(--s2);border:1px solid var(--line2);border-radius:16px;padding:18px 20px;z-index:25;box-shadow:0 30px 80px rgba(0,0,0,.5);animation:slide .25s var(--ease)}
+.notes h4{margin:0 0 4px;font-family:var(--display);font-size:18px;font-weight:600;letter-spacing:-.015em}
+.notes p{margin:0 0 12px;color:var(--t3);font-size:12.5px}
+.notes ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--t2)}
+.notes li b{color:var(--t1);font-weight:600}
+.notes .x{position:absolute;top:12px;right:12px}
+
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:var(--s3);border:1px solid var(--line2);border-radius:11px;padding:10px 16px;font-size:13.5px;z-index:40;box-shadow:0 14px 40px rgba(0,0,0,.45);animation:fade .2s}
+
+/* mobile tab bar */
+.tabbar{display:none}
+
+@media (max-width:1100px){
+  .dgrid{grid-template-columns:1fr}
+  .hgrid{grid-template-columns:1fr}
+}
+@media (max-width:900px){
+  .side{display:none}
+  .banner{padding-inline:16px}
+  .page{padding-inline:16px;padding-block:22px 120px}
+  h1.d{font-size:28px}
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;justify-content:space-around;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(18,18,23,.92);backdrop-filter:blur(14px);border-top:1px solid var(--line)}
+  .tb{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--t3);min-width:56px;padding:4px 0}
+  .tb.on{color:var(--t1)}
+  .tb.on svg{color:var(--acc)}
+  .tb-add{width:48px;height:48px;border-radius:16px;background:var(--acc);color:var(--acc-ink);display:grid;place-items:center;box-shadow:0 8px 24px rgba(158,160,247,.3)}
+  .fl{opacity:1}
+  .fl:not(.on){display:none}
+  .rituals{grid-template-columns:1fr}
+  .pcol-h{display:none}
+  .prow{grid-template-columns:1fr auto;gap:8px 12px;padding:14px 8px}
+  .prow .c-status{display:none}
+  .prow .c-due{grid-column:2;grid-row:1;text-align:right}
+  .prow .c-prog{grid-column:1 / -1;grid-row:2}
+  .prow .c-sig{display:none}
+  .pnext{margin-left:22px}
+  .lane{grid-template-columns:120px 1fr}
+  .cal{display:none}
+  .agenda-m{display:block}
+  .stab{font-size:18px}
+  .row .ti{white-space:normal}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <main class="main" id="main">
+    <div class="banner">
+      <span class="pill">Návrh redesignu</span>
+      <span>Klikací mockup · ukázková data · „dnes“ je pondělí 28. 9. 2026, 10:40</span>
+      <button data-act="notes"><svg class="i xs" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8h.01M11 12h1v4h1"/></svg>Co je jinak</button>
+    </div>
+    <div class="page" id="view"></div>
+  </main>
+</div>
+<nav class="tabbar" id="tabbar"></nav>
+<div id="layer"></div>
+
+<script>
+/* ============ icons ============ */
+const P={
+  home:'<path d="M3.5 10.2 12 3.5l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-5v6H5A1.5 1.5 0 0 1 3.5 19z"/>',
+  todo:'<circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/>',
+  cal:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  proj:'<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v11a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 17.5z"/><path d="M8 9h8M8 12.5h5M8 16h6"/>',
+  moon:'<path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/>',
+  sun:'<circle cx="12" cy="12" r="3.8"/><path d="M12 2.8v2M12 19.2v2M4.6 4.6 6 6M18 18l1.4 1.4M2.8 12h2M19.2 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+  flame:'<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.1 0-3.3 2.5-5.3 3.5-8.6.5 1.8 1.6 2.9 2.7 3.3.1-2.8 1.4-5 3.4-6.2-.2 2.5.9 4.5 2.3 6.2 1.4 1.7 2.3 3.4 2.3 5.4C19.7 18.5 16.2 21 12 21z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>',
+  left:'<path d="m15 6-6 6 6 6"/>',
+  right:'<path d="m9 6 6 6-6 6"/>',
+  hour:'<path d="M6.5 3h11M6.5 21h11M7.5 3c0 5 4.5 6 4.5 9s-4.5 4-4.5 9M16.5 3c0 5-4.5 6-4.5 9s4.5 4 4.5 9"/>',
+  repeat:'<path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 12v-2a4 4 0 0 1 4-4h13M7 21.5 3.5 18 7 14.5"/><path d="M20.5 12v2a4 4 0 0 1-4 4h-13"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.6 19.4l1.7-1.7M17.7 6.3l1.7-1.7"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  list:'<path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/>',
+  cols:'<rect x="3.5" y="4" width="17" height="16" rx="3"/><path d="M9.2 4v16M14.8 4v16"/>',
+  loom:'<path d="M3.5 7h11M7 12h13.5M3.5 17h8"/><circle cx="14.5" cy="7" r="1.4"/><circle cx="20.5" cy="12" r="1.4"/><circle cx="11.5" cy="17" r="1.4"/>',
+  doc:'<path d="M7 3.5h7l4.5 4.5V19a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M14 3.5V8h4.5M9 13h6M9 16.5h4"/>',
+  more:'<circle cx="5.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18.5" cy="12" r="1.2"/>',
+  expand:'<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  inbox:'<path d="M3.5 13.5 6 5.5h12l2.5 8V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M3.5 13.5H9l1 2h4l1-2h5.5"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r=".8"/>'
+};
+const ic=(n,c='')=>`<svg class="i ${c}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
+const CK='<svg viewBox="0 0 24 24"><path d="m5.5 12.5 4.2 4.2L18.5 8"/></svg>';
+const MARK=`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke-width="2.2" stroke-linecap="round"><path d="M3 15.5c3.5 0 5.5-7 9-7s5.5 7 9 7" stroke="#E7B45F"/><path d="M3 8.5c3.5 0 5.5 7 9 7s5.5-7 9-7" stroke="#6FD0B0"/></svg>`;
+
+/* ============ dates ============ */
+const BASE=new Date(2026,8,28), NOW=10+40/60;
+const DS=['ne','po','út','st','čt','pá','so'];
+const DL=['neděle','pondělí','úterý','středa','čtvrtek','pátek','sobota'];
+const ML=['ledna','února','března','dubna','května','června','července','srpna','září','října','listopadu','prosince'];
+const ACC=['neděli','pondělí','úterý','středu','čtvrtek','pátek','sobotu'];
+const dOf=o=>{const d=new Date(BASE);d.setDate(d.getDate()+o);return d};
+const short=o=>{const d=dOf(o);return `${DS[d.getDay()]} ${d.getDate()}. ${d.getMonth()+1}.`};
+const longD=o=>{const d=dOf(o);return `${DL[d.getDay()]} ${d.getDate()}. ${ML[d.getMonth()]}`};
+const cz=(n,f)=>n===1?f[0]:n>=2&&n<=4?f[1]:f[2];
+const rel=o=>o===0?'dnes':o===1?'zítra':o===-1?'včera':o>1?`za ${o} ${cz(o,['den','dny','dní'])}`:`před ${-o} ${cz(-o,['dnem','dny','dny'])}`;
+const dayName=o=>o===0?'dnes':o===1?'zítra':o===-1?'včera':short(o);
+
+/* ============ data ============ */
+const SP={personal:{name:'Osobní',c:'var(--p)'},work:{name:'Práce',c:'var(--w)'}};
+const TAGS={skola:{name:'škola'},vareni:{name:'vaření'},nakup:{name:'nákup',lead:2},zdravi:{name:'zdraví'},domov:{name:'domov'}};
+const PR={
+  alfa:{name:'Klient Alfa — onboarding',short:'Klient Alfa',space:'work',status:'active',color:'#7FA7E0',start:-14,due:11,goal:'Růst týmu Q4',
+    brief:'Zprovoznit Alfě reporting a naučit jejich tým pracovat s dashboardy. Hotovo, až bude podepsaná smlouva a Alfa dostane první měsíční report.',
+    phases:[{id:'prep',name:'Příprava',s:-14,e:-6},{id:'deal',name:'Nabídka a smlouva',s:-5,e:3},{id:'impl',name:'Implementace',s:3,e:9},{id:'hand',name:'Předání',s:10,e:11}],
+    notes:['Zápis z kick-offu','Ceník — tři varianty','Kontakty na tým Alfy']},
+  reporting:{name:'Reporting Q4',space:'work',status:'active',color:'#E07A5F',start:-10,due:17,brief:'Čtvrtletní report tržeb a nákladů pro vedení.',notes:['Struktura reportu']},
+  web:{name:'Redesign webu',space:'work',status:'active',color:'#B794F4',start:-21,due:32,
+    phases:[{id:'res',name:'Výzkum',s:-21,e:-8},{id:'des',name:'Návrh',s:-7,e:10},{id:'dev',name:'Vývoj',s:11,e:32}],notes:['Shrnutí výzkumu','Moodboard']},
+  provoz:{name:'Provoz',space:'work',status:'active',color:'#9AA4B5',brief:'Průběžná agenda bez termínu.'},
+  crm:{name:'Migrace CRM',space:'work',status:'paused',color:'#C9B86A',start:-40,due:60},
+  weavo:{name:'Weavo',space:'personal',status:'active',color:'#E58FB5',start:-30,due:14,
+    phases:[{id:'dm',name:'Datový model',s:-30,e:-15},{id:'td',name:'To-do a Domů',s:-14,e:-1},{id:'pj',name:'Projekty',s:0,e:6},{id:'mob',name:'Mobil',s:7,e:14}],notes:['Mockup to-do','Seznam nápadů']},
+  zapocet:{name:'Zápočet z mikroekonomie',short:'Zápočet',space:'personal',status:'active',color:'#8BC47A',start:-12,due:4},
+  stehovani:{name:'Stěhování',space:'personal',status:'active',color:'#5FB7D6',start:-5,due:33},
+  mama:{name:'Narozeniny mámy',space:'personal',status:'active',color:'#E3A0A0',start:-3,due:5},
+  brigada:{name:'Letní brigáda — vyúčtování',space:'personal',status:'done',color:'#9AA4B5',start:-60,due:-20,doneStat:[6,6]}
+};
+let uid=0;
+const T=(title,o)=>Object.assign({id:++uid,title,done:false,prio:2,flame:false,status:'todo'},o);
+const S={view:'projects',space:'personal',filter:'all',pfilter:'all',pview:'list',projectId:'alfa',ptab:'list',drawer:null,collapsed:{paused:true,finished:true,someday:true},notes:false,toast:null,
+tasks:[
+  // Klient Alfa
+  T('Kick-off s Alfou',{space:'work',proj:'alfa',phase:'prep',due:-13,done:true}),
+  T('Sepsat požadavky na reporting',{space:'work',proj:'alfa',phase:'prep',due:-11,done:true}),
+  T('Návrh datového modelu',{space:'work',proj:'alfa',phase:'prep',due:-9,done:true}),
+  T('Odhad pracnosti',{space:'work',proj:'alfa',phase:'prep',due:-8,done:true}),
+  T('Poslat úvodní nabídku',{space:'work',proj:'alfa',phase:'prep',due:-6,done:true}),
+  T('Připravit podklady na call',{space:'work',proj:'alfa',phase:'deal',due:0,done:true}),
+  T('Poslat Alfě revidovanou nabídku',{space:'work',proj:'alfa',phase:'deal',due:0,time:'12:00',prio:3,flame:true,status:'doing',
+    steps:[['Zapracovat slevu za roční závazek',true],['Přidat variantu bez školení',true],['Nechat zkontrolovat Petrou',false],['Odeslat s průvodním e-mailem',false]],
+    note:'Alfa chce nižší vstupní cenu. Nabídnout roční závazek se slevou 8 % a školení jako volitelnou položku.'}),
+  T('Zapracovat připomínky k ceníku',{space:'work',proj:'alfa',phase:'deal',due:2}),
+  T('Podpis rámcové smlouvy',{space:'work',proj:'alfa',phase:'deal',waiting:{who:'Alfa — právní',since:-6}}),
+  T('Napojit datový export',{space:'work',proj:'alfa',phase:'impl',due:3}),
+  T('Nastavit dashboardy pro obchod',{space:'work',proj:'alfa',phase:'impl',due:7}),
+  T('Školení týmu Alfy',{space:'work',proj:'alfa',phase:'impl',due:8,time:'14:00'}),
+  T('První měsíční report',{space:'work',proj:'alfa',phase:'hand',due:11,prio:3}),
+  T('Retro s klientem',{space:'work',proj:'alfa',phase:'hand',due:11}),
+  // Reporting
+  T('Dokončit Q4 report — tržby po regionech',{space:'work',proj:'reporting',due:0,prio:3}),
+  T('Schválení rozpočtu na Q4',{space:'work',proj:'reporting',due:2,waiting:{who:'Petra (finance)',since:-5}}),
+  T('Aktualizovat KPI dashboard',{space:'work',proj:'reporting',due:3,prio:1}),
+  T('Sběr dat za září',{space:'work',proj:'reporting',due:-3,done:true}),
+  T('Vyčistit duplicity v exportu',{space:'work',proj:'reporting',due:-2,done:true}),
+  // Web
+  T('Rozhovory s uživateli',{space:'work',proj:'web',phase:'res',due:-12,done:true}),
+  T('Shrnutí výzkumu',{space:'work',proj:'web',phase:'res',due:-8,done:true}),
+  T('Review wireframů homepage',{space:'work',proj:'web',phase:'des',due:2}),
+  T('Naplánovat sprint 14',{space:'work',proj:'web',phase:'des',due:4}),
+  T('Texty na novou homepage',{space:'work',proj:'web',phase:'des',due:6,waiting:{who:'agentura Kopie',since:-3}}),
+  T('Barvy a typografie',{space:'work',proj:'web',phase:'des',due:9}),
+  T('Frontend homepage',{space:'work',proj:'web',phase:'dev',due:20}),
+  // Provoz
+  T('Opravit chybu v exportu do CSV',{space:'work',proj:'provoz',due:-1,prio:3,flame:true}),
+  T('Odpovědět na tickety z víkendu',{space:'work',proj:'provoz',due:0,prio:1}),
+  T('Vyúčtovat cestovné za září',{space:'work',proj:'provoz',due:4,prio:1}),
+  T('Automatizovat měsíční uzávěrku',{space:'work',proj:'provoz',someday:true}),
+  // CRM paused
+  T('Srovnání nabídek dodavatelů',{space:'work',proj:'crm',due:-30,done:true}),
+  T('Vybrat dodavatele CRM',{space:'work',proj:'crm'}),
+  // Weavo
+  T('Datový model prostorů',{space:'personal',proj:'weavo',phase:'dm',due:-16,done:true}),
+  T('To-do a Domů',{space:'personal',proj:'weavo',phase:'td',due:-2,done:true}),
+  T('Rituály dne',{space:'personal',proj:'weavo',phase:'td',due:-1,done:true}),
+  T('Projít redesign Projektů',{space:'personal',proj:'weavo',phase:'pj',due:0,prio:3,status:'doing'}),
+  T('Fáze a osnova projektu',{space:'personal',proj:'weavo',phase:'pj',due:3}),
+  T('Mobilní rozložení',{space:'personal',proj:'weavo',phase:'mob',due:9}),
+  T('Spodní lišta na telefonu',{space:'personal',proj:'weavo',phase:'mob',due:10}),
+  // Zápočet
+  T('Odevzdat seminárku z ekonomie',{space:'personal',proj:'zapocet',tag:'skola',due:0,time:'17:00',prio:3}),
+  T('Nastudovat kapitoly 4–5',{space:'personal',proj:'zapocet',tag:'skola',due:1}),
+  T('Přečíst kapitoly 1–3',{space:'personal',proj:'zapocet',tag:'skola',due:-4,done:true}),
+  // Stěhování
+  T('Vytřídit oblečení',{space:'personal',proj:'stehovani',due:-2,done:true}),
+  T('Krabice z práce',{space:'personal',proj:'stehovani',waiting:{who:'Ondra',since:-2}}),
+  T('Objednat stěhováky',{space:'personal',proj:'stehovani',due:7}),
+  T('Nahlásit změnu adresy',{space:'personal',proj:'stehovani',due:20}),
+  // Máma
+  T('Koupit dárek',{space:'personal',proj:'mama',due:3}),
+  T('Upéct narozeninový dort',{space:'personal',proj:'mama',tag:'vareni',due:5}),
+  // loose personal
+  T('Zaplatit nájem',{space:'personal',tag:'domov',due:-1,prio:3,flame:true}),
+  T('Připravit meal prep na týden',{space:'personal',tag:'vareni',due:0}),
+  T('Nakoupit maso a zeleninu na grilovačku',{space:'personal',tag:'nakup',due:2}),
+  T('Nakoupit suroviny na meal prep',{space:'personal',tag:'nakup',due:0,done:true}),
+  T('Posilovna — nohy',{space:'personal',tag:'zdravi',due:0,time:'18:00',repeat:'po a čt'}),
+  T('Vitamíny',{space:'personal',tag:'zdravi',due:0,repeat:'denně',done:true,prio:1}),
+  T('Zalít kytky',{space:'personal',tag:'domov',due:0,repeat:'týdně',prio:1}),
+  T('Objednat se k zubaři',{space:'personal',tag:'zdravi',due:3,prio:1}),
+  T('Naučit se kváskový chleba',{space:'personal',tag:'vareni',someday:true}),
+  T('Začít s japonštinou',{space:'personal',tag:'skola',someday:true})
+],
+events:[
+  {d:0,s:7.5,e:8.25,t:'Běh s Ondrou',space:'personal'},
+  {d:0,s:9,e:9.25,t:'Standup',space:'work'},
+  {d:0,s:13.5,e:14.5,t:'Call s klientem Alfa',space:'work',proj:'alfa'},
+  {d:0,s:15,e:15.5,t:'1:1 s vedoucí',space:'work'},
+  {d:0,s:18,e:19.5,t:'Seminář — mikroekonomie',space:'personal',proj:'zapocet'},
+  {d:1,s:9,e:9.25,t:'Standup',space:'work'},
+  {d:1,s:10,e:12,t:'Workshop redesign webu',space:'work',proj:'web'},
+  {d:1,s:19,e:21,t:'Kino',space:'personal'},
+  {d:2,s:9,e:9.25,t:'Standup',space:'work'},
+  {d:2,s:17,e:21,t:'Grilovačka u Kuby',space:'personal'},
+  {d:3,s:9,e:9.25,t:'Standup',space:'work'},
+  {d:3,s:14,e:15,t:'Konzultace k zápočtu',space:'personal',proj:'zapocet'},
+  {d:4,s:9,e:9.25,t:'Standup',space:'work'},
+  {d:4,s:16,e:17,t:'Retro sprintu',space:'work',proj:'web'},
+  {d:5,s:12,e:15,t:'Oslava — máma',space:'personal',proj:'mama'},
+  {d:8,s:14,e:16,t:'Školení týmu Alfy',space:'work',proj:'alfa'}
+]};
+
+/* ============ selectors ============ */
+const open=t=>!t.done;
+const lead=t=>t.tag&&TAGS[t.tag].lead||0;
+const onToday=t=>!t.someday&&!t.waiting&&t.due!=null&&t.due<=lead(t)&&(!t.done||t.due>=-1);
+const over=t=>open(t)&&t.due!=null&&t.due<0;
+const hot=t=>open(t)&&!t.someday&&!t.waiting&&(t.flame||over(t));
+const inF=(x,f)=>f==='all'||x.space===f;
+const byU=(a,b)=>(a.done-b.done)||(b.flame-a.flame)||(b.prio-a.prio)||((a.due??99)-(b.due??99));
+const fmtH=h=>`${Math.floor(h)}:${String(Math.round((h%1)*60)).padStart(2,'0')}`;
+const pTasks=id=>S.tasks.filter(t=>t.proj===id&&!t.someday);
+function pStats(id){
+  const p=PR[id];if(p.doneStat)return{d:p.doneStat[0],n:p.doneStat[1]};
+  const a=pTasks(id);return{d:a.filter(t=>t.done).length,n:a.length};
+}
+const pNext=id=>pTasks(id).filter(t=>open(t)&&!t.waiting).sort(byU)[0];
+const byId=id=>S.tasks.find(t=>t.id===+id);
+
+/* ============ pieces ============ */
+function dueMeta(t,ctx){
+  if(t.due==null)return '';
+  if(t.done&&ctx!=='drawer')return '';
+  if(t.due<0)return `<span class="m danger">po termínu · ${dayName(t.due)}</span>`;
+  if(t.due>0&&t.due<=lead(t)&&ctx==='today')return `<span class="m lead">na ${ACC[dOf(t.due).getDay()]} · ${short(t.due)}</span>`;
+  if(t.due===0)return (ctx==='today'&&!t.time)?'':`<span class="m today">dnes${t.time?' '+t.time:''}</span>`;
+  return `<span class="m">${dayName(t.due)}${t.time?' '+t.time:''}</span>`;
+}
+function metaHTML(t,o={}){
+  const parts=[];
+  if(t.proj&&!o.hideProj){const p=PR[t.proj];parts.push(`<span class="m"><i class="sq" style="--c:${p.color}"></i>${p.short||p.name}</span>`)}
+  if(t.tag&&!o.hideTag)parts.push(`<span class="m">#${TAGS[t.tag].name}</span>`);
+  parts.push(dueMeta(t,o.ctx));
+  if(t.repeat)parts.push(`<span class="m">${ic('repeat','xs')}${t.repeat}</span>`);
+  if(t.waiting)parts.push(`<span class="m wait">${ic('hour','xs')}${t.waiting.who} · ${-t.waiting.since} ${cz(-t.waiting.since,['den','dny','dní'])}</span>`);
+  if(t.steps){const d=t.steps.filter(s=>s[1]).length;parts.push(`<span class="m">${d}/${t.steps.length} kroků</span>`)}
+  return parts.filter(Boolean).join('');
+}
+function row(t,o={}){
+  return `<div class="row ${t.done?'done':''}" data-open="${t.id}">
+    ${o.thread?`<span class="thread" style="--c:${SP[t.space].c}"></span>`:''}
+    <button class="ck" data-done="${t.id}" aria-label="${t.done?'Označit jako neudělané':'Hotovo'}">${CK}</button>
+    <div class="body"><div class="ti">${t.prio===3&&!t.done?'<span class="pri" title="Vysoká priorita">!</span>':''}${t.title}</div><div class="meta">${metaHTML(t,o)}</div></div>
+    <button class="fl ${t.flame?'on':''}" data-flame="${t.id}" title="${t.flame?'Už nehoří':'Hoří'}" aria-pressed="${t.flame}">${ic('flame','s')}</button>
+  </div>`;
+}
+const rows=(a,o={})=>a.length?`<div class="rows">${a.map(t=>row(t,o)).join('')}</div>`:(o.empty?`<div class="empty">${o.empty}</div>`:'');
+function sect(title,a,o={}){
+  if(!a.length&&!o.empty&&!o.always)return '';
+  const n=a.filter(open).length;
+  if(o.key){
+    const isOpen=!S.collapsed[o.key];
+    return `<section class="sect"><div class="sh ${o.hot?'hot':''}"><button class="tog ${isOpen?'open':''}" data-coll="${o.key}">${ic('chev','xs')}${o.icon?ic(o.icon,'s'):''}${title}<span class="n">${n}</span></button>${o.hint?`<span class="hint">${o.hint}</span>`:''}</div>${isOpen?rows(a,o):''}</section>`;
+  }
+  return `<section class="sect"><div class="sh ${o.hot?'hot':''}">${o.icon?ic(o.icon,'s'):''}${o.dot?`<i class="thr" style="--c:${o.dot}"></i>`:''}${title}<span class="n">${n}</span>${o.hint?`<span class="hint">${o.hint}</span>`:''}</div>${rows(a,o)}</section>`;
+}
+function progressThread(list,split){
+  const n=list.length||1,d=list.filter(t=>t.done).length;
+  const bars=split
+    ?`<i style="width:${list.filter(t=>t.done&&t.space==='personal').length/n*100}%;background:var(--p)"></i><i style="width:${list.filter(t=>t.done&&t.space==='work').length/n*100}%;background:var(--w)"></i>`
+    :`<i style="width:${d/n*100}%;background:${split===false?'var(--acc)':'var(--acc)'}"></i>`;
+  return `<div class="pt"><div class="track">${bars}</div><span class="lbl"><b>${d}</b> z ${list.length} hotovo</span></div>`;
+}
+function dueCell(p){
+  if(p.due==null)return `<div class="due"><b>—</b><small>průběžný</small></div>`;
+  const cls=p.status==='done'?'':p.due<0?'late':p.due<=7?'soon':'';
+  const sub=p.status==='done'?'uzavřeno':p.due<0?`po termínu ${-p.due} ${cz(-p.due,['den','dny','dní'])}`:rel(p.due);
+  return `<div class="due ${cls}"><b>${short(p.due)}</b><small>${sub}</small></div>`;
+}
+
+/* ============ sidebar & tabbar ============ */
+function renderSide(){
+  const todayOpen=S.tasks.filter(t=>onToday(t)&&open(t)).length;
+  const nav=(v,icon,label,cnt)=>`<button class="nav ${S.view===v||(v==='projects'&&S.view==='project')?'on':''}" data-nav="${v}">${ic(icon)}${label}${cnt?`<span class="cnt">${cnt}</span>`:''}</button>`;
+  const plist=sp=>Object.entries(PR).filter(([,p])=>p.space===sp&&p.status==='active').map(([k,p])=>{
+    const n=pTasks(k).filter(t=>open(t)).length;
+    return `<button class="pnav ${S.view==='project'&&S.projectId===k?'on':''}" data-proj="${k}"><i class="sq" style="--c:${p.color}"></i>${p.short||p.name}<span class="cnt">${n||''}</span></button>`}).join('');
+  document.getElementById('side').innerHTML=`
+    <div class="brand"><span class="mark">${MARK}</span><b>Weavo</b></div>
+    <button class="capture" data-act="capture"><span class="plus">${ic('plus','xs')}</span>Zachytit…<span class="kbd">C</span></button>
+    ${nav('home','home','Domů')}${nav('todo','todo','To-do',todayOpen)}${nav('cal','cal','Kalendář')}${nav('projects','proj','Projekty')}${nav('refl','moon','Reflexe')}
+    <div class="side-sec"><i class="thread" style="background:var(--w)"></i>Práce</div>${plist('work')}
+    <div class="side-sec"><i class="thread" style="background:var(--p)"></i>Osobní</div>${plist('personal')}
+    <div class="side-foot">
+      <button class="nav">${ic('search')}Hledat<span class="cnt"><span class="kbd">⌘K</span></span></button>
+      <button class="nav">${ic('gear')}Nastavení</button>
+      <div class="me"><span class="avatar">H</span>Honza</div>
+    </div>`;
+}
+function renderTabbar(){
+  const tb=(v,icon,label)=>`<button class="tb ${S.view===v||(v==='projects'&&S.view==='project')?'on':''}" data-nav="${v}">${ic(icon)}${label}</button>`;
+  document.getElementById('tabbar').innerHTML=`${tb('home','home','Domů')}${tb('todo','todo','To-do')}<button class="tb-add" data-act="capture" aria-label="Zachytit">${ic('plus')}</button>${tb('cal','cal','Kalendář')}${tb('projects','proj','Projekty')}`;
+}
+
+/* ============ views ============ */
+function viewHome(){
+  const f=S.filter;
+  const today=S.tasks.filter(t=>onToday(t)&&inF(t,f));
+  const hots=S.tasks.filter(t=>hot(t)&&inF(t,f)).sort(byU);
+  const next=today.filter(t=>open(t)&&!hot(t)).sort(byU).slice(0,5);
+  const waits=S.tasks.filter(t=>t.waiting&&open(t)&&inF(t,f));
+  const ev=S.events.filter(e=>e.d===0&&inF(e,f)).sort((a,b)=>a.s-b.s);
+  const projs=Object.entries(PR).filter(([,p])=>p.status==='active'&&p.due!=null&&inF(p,f)).sort((a,b)=>a[1].due-b[1].due).slice(0,4);
+  const d=today.filter(t=>t.done).length;
+  const sp=s=>{const a=today.filter(t=>t.space===s);return[a.filter(t=>t.done).length,a.length]};
+  const [pd,pn]=sp('personal'),[wd,wn]=sp('work');
+  let nowPlaced=false;
+  const agenda=ev.map(e=>{
+    let pre='';
+    if(!nowPlaced&&e.s>NOW){nowPlaced=true;pre=`<div class="now"><span>${fmtH(NOW)}</span><i></i></div>`}
+    return pre+`<div class="ag ${e.e<NOW?'past':''}"><time>${fmtH(e.s)}</time><span class="bar" style="--c:${SP[e.space].c}"></span><div><div>${e.t}</div><div class="sub">${fmtH(e.s)}–${fmtH(e.e)}${e.proj?` · ${PR[e.proj].short||PR[e.proj].name}`:''}</div></div></div>`}).join('');
+  return `
+  <div class="ph"><div><div class="eyebrow"><b>Pondělí 28. září</b> · 40. týden</div><h1 class="d">Dobré ráno, Honzo</h1>
+    <p class="lede">${ev.length} ${cz(ev.length,['událost','události','událostí'])}, ${today.filter(open).length} ${cz(today.filter(open).length,['úkol','úkoly','úkolů'])} na dnes a ${hots.length} ${cz(hots.length,['věc hoří','věci hoří','věcí hoří'])}.</p></div>
+    ${filterSeg()}</div>
+  <div class="rituals">
+    <button class="rit suggest" data-act="toast" data-msg="Ranní plánování: po termínu → co hoří → souhrn dne"><span class="ic" style="background:rgba(231,180,95,.14);color:var(--w)">${ic('sun')}</span><span><b>Naplánuj den</b><small>Minuta ráno: co visí, co hoří, co dnes</small></span></button>
+    <button class="rit" data-act="toast" data-msg="Uzávěrka: nedodělky na zítra → nálada → zápis do Reflexe"><span class="ic" style="background:var(--acc-soft);color:var(--acc2)">${ic('moon')}</span><span><b>Uzavři den</b><small>Nedodělky na zítra, nálada, zápis</small></span></button>
+  </div>
+  <div class="hgrid">
+    <div>
+      ${sect('Hoří',hots,{hot:true,icon:'flame',thread:f==='all',empty:'Nic nehoří.'})}
+      ${sect('Dál na řadě',next,{thread:f==='all',ctx:'today',empty:'Dnešek je hotový.'})}
+      ${sect('Čeká na ostatní',waits,{icon:'hour',thread:f==='all'})}
+    </div>
+    <div class="stack">
+      <div class="card"><h3>Dnešek</h3>
+        <div class="today-num"><b>${d}</b><span>z ${today.length} hotovo</span></div>
+        <div class="threads2">
+          ${f!=='work'?`<div class="th2"><span>Osobní</span><div class="track"><i style="--c:var(--p);width:${pn?pd/pn*100:0}%"></i></div><span class="v">${pd}/${pn}</span></div>`:''}
+          ${f!=='personal'?`<div class="th2"><span>Práce</span><div class="track"><i style="--c:var(--w);width:${wn?wd/wn*100:0}%"></i></div><span class="v">${wd}/${wn}</span></div>`:''}
+        </div></div>
+      <div class="card"><h3>Program dne<button class="more" data-nav="cal">Kalendář →</button></h3><div class="agenda">${agenda}${!nowPlaced?`<div class="now"><span>${fmtH(NOW)}</span><i></i></div>`:''}</div></div>
+      <div class="card"><h3>Projekty s termínem<button class="more" data-nav="projects">Všechny →</button></h3><div class="pmini">
+        ${projs.map(([k,p])=>{const s=pStats(k);return `<div class="pm" data-proj="${k}"><div class="nm"><i class="sq" style="--c:${p.color}"></i><span>${p.short||p.name}</span></div><div class="dd">${short(p.due)} · ${rel(p.due)}</div><div class="track"><i style="--c:${p.color};width:${s.d/s.n*100}%"></i></div></div>`}).join('')}
+      </div></div>
+    </div>
+  </div>`;
+}
+function filterSeg(key='filter'){
+  const v=S[key];const b=(x,l,c)=>`<button class="${v===x?'on':''}" data-seg="${key}" data-val="${x}">${c?`<i class="thr" style="--c:${c}"></i>`:''}${l}</button>`;
+  return `<div class="seg">${b('all','Vše')}${b('personal','Osobní','var(--p)')}${b('work','Práce','var(--w)')}</div>`;
+}
+
+function viewTodo(){
+  const sp=S.space;
+  const mine=S.tasks.filter(t=>t.space===sp);
+  const today=mine.filter(onToday);
+  const cnt=s=>S.tasks.filter(t=>t.space===s&&onToday(t)&&open(t)).length;
+  const ev=S.events.filter(e=>e.d===0&&e.space===sp).sort((a,b)=>a.s-b.s);
+  const upcoming=mine.filter(t=>open(t)&&!t.someday&&!t.waiting&&t.due!=null&&t.due>0&&t.due<=7&&!onToday(t)).sort((a,b)=>a.due-b.due);
+  const noDate=mine.filter(t=>open(t)&&!t.someday&&!t.waiting&&t.due==null);
+  const waits=mine.filter(t=>t.waiting&&open(t));
+  const some=mine.filter(t=>t.someday);
+  let body='';
+  if(sp==='personal'){
+    const overdue=today.filter(over).sort(byU);
+    const rest=today.filter(t=>!over(t)&&!t.repeat);
+    const routines=today.filter(t=>t.repeat);
+    const groups={};
+    rest.forEach(t=>{const k=t.proj?'p:'+t.proj:t.tag?'t:'+t.tag:'x';(groups[k]=groups[k]||[]).push(t)});
+    body+=sect('Po termínu',overdue,{hot:true,icon:'flame'});
+    Object.entries(groups).forEach(([k,a])=>{
+      const [type,id]=k.split(':');
+      const title=type==='p'?PR[id].short||PR[id].name:type==='t'?'#'+TAGS[id].name:'Ostatní';
+      const hint=type==='t'&&TAGS[id].lead?`ukazuje se ${TAGS[id].lead} dny předem`:'';
+      body+=`<section class="sect"><div class="sh">${type==='p'?`<i class="sq" style="--c:${PR[id].color}"></i>`:''}${title}<span class="n">${a.filter(open).length}</span>${hint?`<span class="hint">${hint}</span>`:''}</div>${rows(a.sort(byU),{hideProj:type==='p',hideTag:type==='t',ctx:'today'})}</section>`;
+    });
+    body+=sect('Rutiny',routines,{icon:'repeat',hideTag:false,ctx:'today',hint:'po odškrtnutí se naplánují znovu'});
+  } else {
+    const hots=mine.filter(hot).sort(byU);
+    const rest=today.filter(t=>!hot(t)).sort(byU);
+    body+=sect('Hoří',hots,{hot:true,icon:'flame',hint:'ručně označené a po termínu',empty:'Nic nehoří.'});
+    body+=sect('Dnes',rest,{ctx:'today',empty:'Na dnes nic dalšího.'});
+  }
+  body+=sect('Tento týden',upcoming,{});
+  body+=sect('Čeká na ostatní',waits,{icon:'hour',hint:'předáno dál, čekáš na odpověď'});
+  body+=sect('Bez termínu',noDate,{});
+  body+=sect('Někdy',some,{key:'someday',icon:'',hint:'odložené nápady'});
+  return `
+  <div class="ph"><div><div class="eyebrow"><b>Pondělí 28. září</b></div><h1 class="d">To-do</h1></div>
+    <div class="actions"><div class="seg"><button class="on">${ic('list','s')}Seznam</button><button data-act="toast" data-msg="Kanban zůstává jako druhý pohled">${ic('cols','s')}Kanban</button></div></div></div>
+  <div class="stabs">
+    <button class="stab ${sp==='personal'?'on':''}" style="--c:var(--p)" data-space="personal">Osobní <span class="n">${cnt('personal')}</span></button>
+    <button class="stab ${sp==='work'?'on':''}" style="--c:var(--w)" data-space="work">Práce <span class="n">${cnt('work')}</span></button>
+  </div>
+  <label class="quick" for="qa">${ic('plus','s')}<input id="qa" placeholder="Přidat úkol — třeba „zítra 14:00 #škola !“" autocomplete="off"><span class="kbd">↵</span></label>
+  ${progressThread(today)}
+  ${ev.length?`<div class="evs">${ev.map(e=>`<div class="ev ${e.e<NOW?'past':''}"><span class="bar" style="--c:${SP[e.space].c}"></span><time>${fmtH(e.s)}</time>${e.t}</div>`).join('')}</div>`:''}
+  ${body}`;
+}
+
+function viewProjects(){
+  const f=S.pfilter;
+  const all=Object.entries(PR).filter(([,p])=>inF(p,f));
+  const active=all.filter(([,p])=>p.status==='active');
+  const paused=all.filter(([,p])=>p.status==='paused');
+  const fin=all.filter(([,p])=>p.status==='done');
+  const sortDue=(a,b)=>(a[1].due??999)-(b[1].due??999);
+  const prow=([k,p])=>{
+    const s=pStats(k),nx=pNext(k),h=pTasks(k).filter(hot).length,w=pTasks(k).filter(t=>t.waiting&&open(t)).length;
+    const cur=p.phases&&(p.phases.find(ph=>ph.s<=0&&ph.e>=0)||p.phases.find(ph=>ph.s>0));
+    const st=p.status==='paused'?'<span class="status paused"><i></i>Pozastaveno</span>':p.status==='done'?'<span class="status done"><i></i>Hotovo</span>':cur?`<span class="status active"><i></i>${cur.name}</span>`:'<span class="status"><i></i>Bez fází</span>';
+    return `<div class="prow" data-proj="${k}">
+      <div><div class="pname"><i class="sq" style="--c:${p.color}"></i><b>${p.name}</b></div>
+        ${nx?`<div class="pnext">${nx.flame||over(nx)?ic('flame','xs'):''}<span class="lbl">Další:</span><span>${nx.title}</span>${nx.due!=null?`<span class="lbl">· ${dayName(nx.due)}</span>`:''}</div>`:`<div class="pnext"><span class="lbl">${p.status==='done'?'Uzavřený projekt':'Žádný otevřený úkol'}</span></div>`}</div>
+      <div class="c-status">${st}</div>
+      <div class="c-due">${dueCell(p)}</div>
+      <div class="c-prog"><div class="prog" style="--c:${p.color}"><div class="track"><i style="width:${s.n?s.d/s.n*100:0}%"></i></div><span>${s.d}/${s.n}</span></div></div>
+      <div class="c-sig sig">${h?`<span class="f" title="Hoří">${ic('flame','xs')}${h}</span>`:''}${w?`<span class="h" title="Čeká na ostatní">${ic('hour','xs')}${w}</span>`:''}${!h&&!w?'<span class="none">—</span>':''}</div>
+    </div>`;
+  };
+  const group=(title,list,o={})=>{
+    if(!list.length)return '';
+    const isOpen=o.key?!S.collapsed[o.key]:true;
+    const head=o.key?`<button class="tog ${isOpen?'open':''}" data-coll="${o.key}">${ic('chev','xs')}${title}<span class="n">${list.length}</span></button>`:`${o.c?`<i class="thr" style="--c:${o.c}"></i>`:''}${title}<span class="n">${list.length}</span>`;
+    return `<section class="pgroup"><div class="pgh">${head}</div>${isOpen?`<div class="ptable">${list.sort(sortDue).map(prow).join('')}</div>`:''}</section>`;
+  };
+  const cntA=Object.values(PR).filter(p=>p.status==='active').length;
+  const head=`<div class="ph"><div><div class="eyebrow"><b>${cntA} aktivních</b> · 1 pozastavený · 1 hotový</div><h1 class="d">Projekty</h1></div>
+    <div class="actions">${filterSeg('pfilter')}<div class="seg"><button class="${S.pview==='list'?'on':''}" data-seg="pview" data-val="list">${ic('list','s')}Seznam</button><button class="${S.pview==='loom'?'on':''}" data-seg="pview" data-val="loom">${ic('loom','s')}Osnova</button></div><button class="btn pri" data-act="toast" data-msg="Nový projekt: název, prostor, termín a volitelně fáze">${ic('plus','s')}Nový projekt</button></div></div>`;
+  if(S.pview==='loom'){
+    const lanes=active.filter(([,p])=>p.due!=null).sort(sortDue);
+    return head+`<div class="loom">${loom(lanes.map(([k,p])=>{const s=pStats(k);return{label:`<i class="sq" style="--c:${p.color}"></i><span>${p.short||p.name}</span><small>${s.d}/${s.n}</small>`,key:k,c:p.color,s:p.start,e:p.due,prog:s.n?s.d/s.n:0}}),-21,35,'portfolio')}</div>
+    <p class="lede" style="font-size:13px;color:var(--t3);margin-top:14px">Každý projekt je jedna nit od začátku po termín. Plná část = hotové úkoly, šrafovaná = zbývá. Svislá čára je dnešek.</p>`;
+  }
+  return head
+    +'<div class="pcol-h"><span>Projekt a další krok</span><span>Fáze</span><span>Termín</span><span>Průběh</span><span style="text-align:right">Signály</span></div>'
+    +group('Práce',active.filter(([,p])=>p.space==='work'),{c:'var(--w)'})
+    +group('Osobní',active.filter(([,p])=>p.space==='personal'),{c:'var(--p)'})
+    +group('Pozastavené',paused,{key:'paused'})
+    +group('Hotové',fin,{key:'finished'});
+}
+
+/* the loom: lanes of thread bars on a day axis */
+function loom(lanes,from,to,mode){
+  const span=to-from+1,pct=o=>(o-from)/span*100;
+  const weeks=[];for(let o=from;o<=to;o++){if(dOf(o).getDay()===1)weeks.push(o)}
+  const cols=weeks.map((o,i)=>{const next=weeks[i+1]??to+1;return `${next-o}fr`});
+  const lead0=weeks[0]-from;
+  const axis=`<div class="axis" style="grid-template-columns:${mode==='portfolio'?'200px':'170px'} ${lead0?lead0+'fr ':''}${cols.join(' ')}"><div style="border:0"></div>${lead0?'<div></div>':''}${weeks.map(o=>`<div>${dOf(o).getDate()}. ${dOf(o).getMonth()+1}.</div>`).join('')}</div>`;
+  const weekend=[];for(let o=from;o<=to;o++){const g=dOf(o).getDay();if(g===6)weekend.push(`<span class="weekend" style="left:${pct(o)}%;width:${2/span*100}%"></span>`)}
+  const rowsH=lanes.map(l=>`<div class="lane"><div class="ln" ${l.key?`data-proj="${l.key}"`:''}>${l.label}</div><div class="tr">${weekend.join('')}
+      <div class="bar-l ${l.paused?'paused':''}" style="--c:${l.c};left:${pct(Math.max(l.s,from))}%;width:${(Math.min(l.e,to)-Math.max(l.s,from)+1)/span*100}%" ${l.key?`data-proj="${l.key}"`:''} title="${l.title||''}"><i style="width:${l.prog*100}%"></i></div>
+      ${l.flag?`<span class="flag" style="--c:${l.c};left:${pct(l.e+1)}%"></span>`:''}
+    </div></div>`).join('');
+  return `<div class="loom-scroll"><div class="loom-inner">${axis}<div style="position:relative">${rowsH}<div style="position:absolute;top:0;bottom:0;left:${mode==='portfolio'?'200px':'170px'};right:0;pointer-events:none"><span class="needle" data-l="dnes" style="left:${pct(0)+.5/span*100}%"></span></div></div></div></div>`;
+}
+
+function viewProject(){
+  const k=S.projectId,p=PR[k],s=pStats(k),tasks=pTasks(k);
+  const nx=pNext(k);
+  const hots=tasks.filter(hot).length;
+  const ev=S.events.filter(e=>e.proj===k&&e.d>=0).sort((a,b)=>a.d-b.d||a.s-b.s);
+  const waits=tasks.filter(t=>t.waiting&&open(t));
+  const phases=p.phases||[{id:null,name:'Úkoly',s:p.start,e:p.due}];
+  const props=`<div class="props">
+    <button class="prop"><i class="thr" style="--c:${SP[p.space].c};width:14px"></i><b>${SP[p.space].name}</b></button>
+    <button class="prop"><span class="k">Stav</span><b>${p.status==='active'?'Aktivní':p.status==='paused'?'Pozastaveno':'Hotovo'}</b></button>
+    ${p.due!=null?`<button class="prop ${p.due<=7?'warn':''}"><span class="k">Termín</span><b>${short(p.due)}</b><span class="k">· ${rel(p.due)}</span></button>`:`<button class="prop ghost">${ic('plus','xs')}Termín</button>`}
+    ${p.goal?`<button class="prop">${ic('target','xs')}<b>${p.goal}</b></button>`:`<button class="prop ghost">${ic('plus','xs')}Cíl</button>`}
+    <button class="prop"><b>${s.d}/${s.n}</b><span class="k">hotovo</span></button>
+  </div>`;
+  const tabs=`<div class="tabs">
+    <button class="tab ${S.ptab==='list'?'on':''}" data-ptab="list">${ic('list','s')}Úkoly <span class="n">${tasks.filter(open).length}</span></button>
+    <button class="tab ${S.ptab==='kanban'?'on':''}" data-ptab="kanban">${ic('cols','s')}Kanban</button>
+    ${p.phases?`<button class="tab ${S.ptab==='loom'?'on':''}" data-ptab="loom">${ic('loom','s')}Osnova</button>`:''}
+  </div>`;
+  let main='';
+  if(S.ptab==='kanban'){
+    const cols=[['todo','Udělat',t=>open(t)&&!t.waiting&&t.status!=='doing'],['doing','Rozpracováno',t=>open(t)&&t.status==='doing'],['wait','Čeká',t=>open(t)&&t.waiting],['done','Hotovo',t=>t.done]];
+    main=`<div class="kan">${cols.map(([id,l,fn])=>{const a=tasks.filter(fn).sort(byU);return `<div class="kcol"><h4>${l} <span>${a.length}</span></h4>${a.map(t=>`<div class="kc" data-open="${t.id}">${t.flame?`<span style="color:var(--flame)">${ic('flame','xs')}</span> `:''}${t.prio===3&&!t.done?'<span class="pri">!</span>':''}${t.title}<div class="meta">${metaHTML(t,{hideProj:true})}</div></div>`).join('')}</div>`}).join('')}</div>`;
+  } else if(S.ptab==='loom'&&p.phases){
+    const lanes=phases.map(ph=>{const a=tasks.filter(t=>t.phase===ph.id);return{label:`<span>${ph.name}</span><small>${a.filter(t=>t.done).length}/${a.length}</small>`,c:p.color,s:ph.s,e:ph.e,prog:a.length?a.filter(t=>t.done).length/a.length:0,title:`${short(ph.s)} – ${short(ph.e)}`}});
+    lanes[lanes.length-1].flag=true;
+    main=`<div class="loom ploom">${loom(lanes,Math.min(p.start,-14),Math.max(p.due+4,14),'project')}</div>
+      <p class="lede" style="font-size:13px;color:var(--t3);margin-top:14px">Fáze projektu na časové ose. Tečkovaná značka na konci je termín projektu.</p>`;
+  } else {
+    main=phases.map(ph=>{
+      const a=tasks.filter(t=>ph.id?t.phase===ph.id:true).sort((x,y)=>(x.done-y.done)||((x.waiting?1:0)-(y.waiting?1:0))||byU(x,y));
+      const d=a.filter(t=>t.done).length;
+      const isDone=a.length&&d===a.length;
+      const cur=ph.id&&ph.s<=0&&ph.e>=0;
+      const key='ph:'+k+':'+ph.id;
+      const isOpen=S.collapsed[key]===undefined?!isDone:!S.collapsed[key];
+      return `<section class="phase ${isDone?'done':''} ${cur?'cur':''}" style="--c:${p.color}">
+        <div class="phh"><button class="tog ${isOpen?'open':''}" data-coll="${key}" data-default="${isDone?1:0}">${ic('chev','s')}${ph.name}</button>
+          ${ph.id?`<span class="dates">${cur?'probíhá · ':''}${short(ph.s)} – ${short(ph.e)}</span>`:''}
+          <span class="pp"><span class="track"><i style="width:${a.length?d/a.length*100:0}%"></i></span>${d}/${a.length}</span></div>
+        ${isOpen?`<div class="rows">${a.map(t=>row(t,{hideProj:true})).join('')}</div><button class="add" data-act="toast" data-msg="Nový úkol se přidá do fáze ${ph.name}"><span class="ring">${ic('plus','xs')}</span>Přidat úkol${ph.id?` do fáze`:''}</button>`:''}
+      </section>`}).join('');
+  }
+  const rail=`<div class="stack">
+    ${nx?`<div class="next" style="--c:${p.color}"><div class="lbl">${nx.flame?`<span style="color:var(--flame)">${ic('flame','xs')}</span>`:''}Další krok</div><div class="tt">${nx.title}</div><div class="meta">${metaHTML(nx,{hideProj:true})}</div><button class="btn" data-done="${nx.id}">${CK.replace('<svg','<svg class="i s" style="stroke:currentColor;stroke-width:2.2;fill:none"')}Hotovo</button></div>`:''}
+    ${ev.length?`<div class="card"><h3>Nadcházející</h3><div class="rail-list">${ev.map(e=>`<div class="ri"><span class="bar" style="width:2px;height:16px;border-radius:2px;background:${SP[e.space].c}"></span>${e.t}<time>${dayName(e.d)} ${fmtH(e.s)}</time></div>`).join('')}</div></div>`:''}
+    ${waits.length?`<div class="card"><h3>${ic('hour','xs')}Čeká na ostatní</h3><div class="rail-list">${waits.map(t=>`<div class="ri" data-open="${t.id}">${t.title}<small>${t.waiting.who}</small></div>`).join('')}</div></div>`:''}
+    ${p.notes?`<div class="card"><h3>Poznámky<button class="more" data-act="toast" data-msg="Nová poznámka v projektu">+ Nová</button></h3><div class="rail-list">${p.notes.map(n=>`<div class="ri"><span class="doc">${ic('doc','xs')}</span>${n}</div>`).join('')}</div></div>`:''}
+  </div>`;
+  return `
+  <div class="crumb"><button data-nav="projects">Projekty</button>${ic('chev','xs')}<span>${SP[p.space].name}</span></div>
+  <div class="ph" style="margin-bottom:0"><div style="min-width:0;flex:1">
+    <div class="ptitle"><i class="sq" style="--c:${p.color}"></i><h1 class="d">${p.name}</h1></div>
+    ${p.brief?`<p class="lede">${p.brief}</p>`:''}
+    ${props}</div>
+    <div class="actions"><button class="icon-btn" title="Další akce">${ic('more')}</button></div></div>
+  ${tabs}
+  ${S.ptab==='list'?`<div class="dgrid"><div>${main}</div>${rail}</div>`:main}`;
+}
+
+function viewCal(){
+  const f=S.filter;
+  const days=[0,1,2,3,4,5,6];
+  const H0=7,H1=22,RH=48;
+  const head=`<div class="chead"><div></div>${days.map(d=>{const dt=dOf(d);return `<div class="${d===0?'today':''}">${DS[dt.getDay()]}<b>${dt.getDate()}.</b></div>`}).join('')}</div>`;
+  const band=`<div class="cband"><div class="lbl">úkoly</div>${days.map(d=>{
+    const ts=S.tasks.filter(t=>!t.someday&&t.due===d&&inF(t,f)).sort(byU);
+    const shown=ts.slice(0,4);
+    return `<div>${shown.map(t=>`<div class="ct ${t.done?'done':''} ${t.flame?'hot':''}" data-open="${t.id}" style="--c:${SP[t.space].c}"><span class="mini" style="border-color:${SP[t.space].c}"></span><span>${t.title}</span></div>`).join('')}${ts.length>4?`<div class="ct" style="background:none;color:var(--t3)">+${ts.length-4} další</div>`:''}</div>`}).join('')}</div>`;
+  const hours=[];for(let h=H0;h<H1;h++)hours.push(`<div>${h}:00</div>`);
+  const grid=`<div class="cgrid"><div class="hours">${hours.join('')}</div>${days.map(d=>{
+    const ev=S.events.filter(e=>e.d===d&&inF(e,f));
+    return `<div class="dcol ${d===0?'today':''}" style="height:${(H1-H0)*RH}px">${ev.map(e=>`<div class="ce" style="--c:${e.proj?PR[e.proj].color:SP[e.space].c};top:${(e.s-H0)*RH+1}px;height:${Math.max(24,(e.e-e.s)*RH-3)}px"><b>${e.t}</b>${(e.e-e.s)>=.75?`<time>${fmtH(e.s)}–${fmtH(e.e)}</time>`:''}</div>`).join('')}${d===0?`<span class="nowline" style="top:${(NOW-H0)*RH}px"></span>`:''}</div>`}).join('')}</div>`;
+  const agendaM=days.map(d=>{
+    const ev=S.events.filter(e=>e.d===d&&inF(e,f)).sort((a,b)=>a.s-b.s);
+    const ts=S.tasks.filter(t=>!t.someday&&t.due===d&&inF(t,f)).sort(byU);
+    if(!ev.length&&!ts.length)return '';
+    return `<section class="sect"><div class="sh">${d===0?'Dnes':d===1?'Zítra':longD(d)}<span class="n">${ev.length+ts.filter(open).length}</span></div>
+      <div class="card" style="padding:10px 14px">${ev.map(e=>`<div class="ag"><time>${fmtH(e.s)}</time><span class="bar" style="--c:${SP[e.space].c}"></span><div>${e.t}</div></div>`).join('')}</div>
+      ${rows(ts,{thread:true,ctx:'cal'})}</section>`}).join('');
+  return `
+  <div class="ph"><div><div class="eyebrow"><b>28. září – 4. října</b> · 40. týden</div><h1 class="d">Kalendář</h1></div>
+    <div class="actions">${filterSeg()}<div class="seg"><button data-act="toast" data-msg="Den">Den</button><button class="on">Týden</button><button data-act="toast" data-msg="Měsíc">Měsíc</button></div>
+    <button class="icon-btn">${ic('left','s')}</button><button class="btn" style="height:34px">Dnes</button><button class="icon-btn">${ic('right','s')}</button></div></div>
+  <div class="cal"><div class="cal-scroll"><div class="cal-in">${head}${band}<div style="max-height:600px;overflow-y:auto">${grid}</div></div></div></div>
+  <div class="agenda-m">${agendaM}</div>`;
+}
+
+function viewRefl(){
+  return `<div class="ph"><div><div class="eyebrow"><b>Pondělí 28. září</b></div><h1 class="d">Reflexe</h1><p class="lede">V tomto kole se Reflexe jen převlékne do nového vizuálního jazyka. Místo smajlíků dostane náladu jako řadu teček s týdenní křivkou a historie bude vypadat jako deník, ne jako seznam karet.</p></div></div>`;
+}
+
+/* ============ drawer ============ */
+function drawerHTML(t){
+  const p=t.proj?PR[t.proj]:null;
+  return `<div class="scrim" data-act="close"></div>
+  <aside class="drawer" role="dialog" aria-label="${t.title}">
+    <div class="dr-top">${p?`<i class="sq" style="--c:${p.color}"></i>${p.short||p.name}${t.phase&&p.phases?` ${ic('chev','xs')} ${p.phases.find(x=>x.id===t.phase).name}`:''}`:`<i class="thr" style="--c:${SP[t.space].c}"></i>${SP[t.space].name}`}
+      <span class="sp"></span><button class="icon-btn" title="Otevřít na celou stránku">${ic('expand','s')}</button><button class="icon-btn" data-act="close" title="Zavřít (Esc)">${ic('x','s')}</button></div>
+    <div class="dr-body">
+      <div class="dr-title ${t.done?'done':''}"><button class="ck" data-done="${t.id}">${CK}</button><h2>${t.title}</h2></div>
+      <dl class="pgrid">
+        <dt>Termín</dt><dd><span class="chip">${t.due==null?'Bez termínu':`${dayName(t.due)}${t.time?' '+t.time:''}`}</span>${t.due!=null&&t.due<0&&!t.done?'<span class="m danger">po termínu</span>':''}</dd>
+        <dt>Hoří</dt><dd><button class="chip ${t.flame?'flame-on':'muted'}" data-flame="${t.id}">${ic('flame','xs')}${t.flame?'Ano':'Ne'}</button></dd>
+        <dt>Priorita</dt><dd><span class="chip">${t.prio===3?'<span class="pri">!</span>Vysoká':t.prio===1?'Nízká':'Střední'}</span></dd>
+        <dt>Prostor</dt><dd><span class="chip"><i class="thr" style="--c:${SP[t.space].c}"></i>${SP[t.space].name}</span></dd>
+        ${p?`<dt>Projekt</dt><dd><span class="chip"><i class="sq" style="--c:${p.color}"></i>${p.short||p.name}</span></dd>`:''}
+        ${t.tag?`<dt>Tag</dt><dd><span class="chip">#${TAGS[t.tag].name}</span></dd>`:''}
+        <dt>Čeká na</dt><dd>${t.waiting?`<span class="chip">${ic('hour','xs')}${t.waiting.who} · ${-t.waiting.since} dní</span>`:'<span class="chip muted">Nikoho</span>'}</dd>
+        ${t.repeat?`<dt>Opakování</dt><dd><span class="chip">${ic('repeat','xs')}${t.repeat}</span></dd>`:''}
+      </dl>
+      ${t.steps?`<h4 class="dr-h">Kroky · ${t.steps.filter(s=>s[1]).length}/${t.steps.length}</h4><div class="steps">${t.steps.map((s,i)=>`<div class="step ${s[1]?'done':''}" data-step="${t.id}:${i}"><span class="ck">${CK}</span><span>${s[0]}</span></div>`).join('')}<button class="add" style="height:38px;padding:0 6px"><span class="ring" style="width:17px;height:17px">${ic('plus','xs')}</span>Přidat krok</button></div>`:`<h4 class="dr-h">Kroky</h4><div class="steps"><button class="add" style="height:38px;padding:0 6px"><span class="ring" style="width:17px;height:17px">${ic('plus','xs')}</span>Rozdělit na kroky</button></div>`}
+      <h4 class="dr-h">Poznámka</h4><div class="note">${t.note||'<span style="color:var(--t3)">Napiš cokoli — odkazy, kontext, co domluvit…</span>'}</div>
+    </div>
+    <div class="dr-foot"><button class="btn ghost" data-act="toast" data-msg="Přesunuto na zítra">Na zítra</button><button class="btn ghost" data-act="toast" data-msg="Odloženo do Někdy">Někdy</button><span style="flex:1"></span><button class="btn pri" data-done="${t.id}">${t.done?'Vrátit':'Hotovo'}</button></div>
+  </aside>`;
+}
+
+const NOTES={
+  home:['<b>Velký nadpis a jedna věta</b> shrnou den místo lišty s drobným titulkem.','<b>Dvě nitě</b> — Osobní (jadeit) a Práce (okr) — ukazují průběh dne zvlášť.','<b>Program dne</b> je časová osa s jehlou „teď“, ne seznam v krabici.','Seznamy leží přímo na ploše; karty jen pro souhrny vpravo.'],
+  todo:['<b>Osobní / Práce jako velké záložky</b> s barevnou nití místo malého přepínače.','<b>Zadávací řádek nahoře</b> — rozumí datu, #tagu i „!“.','<b>Každý význam má vlastní tvar:</b> nit = prostor, čtvereček = projekt, #text = tag, „!“ = vysoká priorita. Žádná barevná tečka navíc.','Úkoly z projektů se v Osobním seskupují pod projektem, volné pod tagem.'],
+  cal:['<b>Úkoly jsou konečně v kalendáři</b> — pás „úkoly“ nad mřížkou, jak jsi původně chtěl.','Události jsou barvené podle projektu, bez projektu podle prostoru.','Na telefonu se kalendář mění na přehled po dnech.'],
+  projects:['<b>Tabulka místo karet:</b> u každého projektu hned vidíš další krok, stav, termín s odpočtem, průběh a co hoří.','<b>Stav projektu</b> (aktivní / pozastavený / hotový) místo archivace. Pozastavené a hotové jsou sbalené dole.','<b>Pohled Osnova</b> — všechny projekty jako nitě na časové ose. Hned vidíš, co se kde překrývá a co končí.','Seřazeno podle termínu, rozděleno na Práci a Osobní.'],
+  project:['<b>Projekt jako stránka:</b> velký název, krátký brief a vlastnosti jako klikací čipy. Prázdná vlastnost je nenápadné „+ Termín“.','<b>Fáze projektu</b> seskupují úkoly (Příprava → Nabídka → Implementace → Předání). Hotová fáze se sbalí sama.','<b>Další krok</b> vpravo nahoře — jedním klikem hotovo.','<b>Osnova</b> ukáže fáze na časové ose s dneškem a termínem.','Kanban je záložka projektu, ne samostatná stránka.','Detail úkolu se otevře z boku a nepřeskočí tě jinam.'],
+  refl:['Reflexe zatím jen dostane nový vizuální jazyk.']
+};
+
+/* ============ render ============ */
+function render(){
+  renderSide();renderTabbar();
+  const v={home:viewHome,todo:viewTodo,cal:viewCal,projects:viewProjects,project:viewProject,refl:viewRefl}[S.view]();
+  document.getElementById('view').innerHTML=v;
+  const t=S.drawer?byId(S.drawer):null;
+  const key=S.view;
+  document.getElementById('layer').innerHTML=(t?drawerHTML(t):'')
+    +(S.notes?`<div class="notes" role="dialog" aria-label="Co je jinak"><button class="icon-btn x" data-act="notes">${ic('x','s')}</button><h4>Co je jinak</h4><p>${{home:'Domů',todo:'To-do',cal:'Kalendář',projects:'Projekty',project:'Detail projektu',refl:'Reflexe'}[key]}</p><ul>${NOTES[key].map(n=>`<li>${n}</li>`).join('')}</ul></div>`:'')
+    +(S.toast?`<div class="toast" role="status">${S.toast}</div>`:'');
+}
+let tt;function toast(m){S.toast=m;clearTimeout(tt);tt=setTimeout(()=>{S.toast=null;render()},2200);render()}
+function go(v){S.view=v;S.drawer=null;render();document.getElementById('main').scrollTop=0}
+
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-done],[data-flame],[data-open],[data-nav],[data-proj],[data-seg],[data-space],[data-coll],[data-ptab],[data-step],[data-act]');
+  if(!el)return;
+  const d=el.dataset;
+  if(d.done){const t=byId(d.done);t.done=!t.done;if(t.done&&t.flame)t.flame=false;render();return}
+  if(d.flame){const t=byId(d.flame);t.flame=!t.flame;render();return}
+  if(d.step){const [id,i]=d.step.split(':');const t=byId(id);t.steps[i][1]=!t.steps[i][1];render();return}
+  if(d.open){S.drawer=+d.open;render();return}
+  if(d.nav){go(d.nav);return}
+  if(d.proj){S.projectId=d.proj;S.ptab='list';go('project');return}
+  if(d.seg){S[d.seg]=d.val;render();return}
+  if(d.space){S.space=d.space;render();return}
+  if(d.coll){const cur=S.collapsed[d.coll];S.collapsed[d.coll]=cur===undefined?(d.default!=='1'):!cur;render();return}
+  if(d.ptab){S.ptab=d.ptab;render();return}
+  switch(d.act){
+    case 'close':S.drawer=null;render();break;
+    case 'notes':S.notes=!S.notes;render();break;
+    case 'toast':toast(d.msg);break;
+    case 'capture':toast('Zachytit: jedno pole, rozumí datu, #tagu, #práce a „!“');break;
+  }
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&(S.drawer||S.notes)){S.drawer=null;S.notes=false;render()}
+  if(e.target.id==='qa'&&e.key==='Enter'&&e.target.value.trim()){
+    const v=e.target.value.trim();const flame=/(^|\s)!(\s|$)/.test(v);
+    S.tasks.push(T(v.replace(/(^|\s)!(\s|$)/,' ').replace(/#\S+/g,'').replace(/\b(zítra|dnes)\b/i,'').replace(/\s+/g,' ').trim()||v,{space:S.space,due:/zítra/i.test(v)?1:0,flame}));
+    toast('Přidáno');
+  }
+});
+render();
+</script>
+</body></html>
