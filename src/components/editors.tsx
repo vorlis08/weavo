@@ -39,7 +39,7 @@ export function InlineTitle({
           ;(e.target as HTMLTextAreaElement).blur()
         }
       }}
-      className="w-full resize-none overflow-hidden bg-transparent text-[24px] font-semibold leading-tight tracking-[-0.025em] text-ink outline-none placeholder:text-ink-3"
+      className="w-full resize-none overflow-hidden bg-transparent text-2xl font-semibold leading-tight tracking-[-0.025em] text-ink outline-none placeholder:text-ink-3"
     />
   )
 }
@@ -81,14 +81,14 @@ export function InlineBody({
           setEditing(false)
           if (draft !== value) onCommit(draft)
         }}
-        className="w-full resize-none overflow-hidden rounded-lg bg-surface-2 p-2.5 text-[13.5px] leading-relaxed text-ink outline-none placeholder:text-ink-3"
+        className="w-full resize-none overflow-hidden rounded-lg bg-surface-2 p-2.5 text-base leading-relaxed text-ink outline-none placeholder:text-ink-3"
       />
     )
   }
   return (
     <div
       onClick={() => setEditing(true)}
-      className="min-h-[1.5em] cursor-text whitespace-pre-line text-[13.5px] leading-relaxed text-ink"
+      className="min-h-[1.5em] cursor-text whitespace-pre-line text-base leading-relaxed text-ink"
     >
       {value ? (
         <LinkifiedText text={value} onFollow={onFollow ?? (() => {})} />
@@ -101,7 +101,7 @@ export function InlineBody({
 
 export function PropRow({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex gap-3 py-[7px] text-[12.5px]">
+    <div className="flex gap-3 py-[7px] text-sm">
       <span className="w-[78px] shrink-0 pt-1 text-ink-3">{label}</span>
       <span className="flex min-w-0 flex-1 items-center">{children}</span>
     </div>
@@ -139,7 +139,7 @@ export function TagEditor({
       {tags.map((tag) => (
         <span
           key={tag}
-          className="inline-flex h-[22px] items-center gap-1.5 rounded-md bg-surface-3 pl-2 pr-1 text-[11px] text-ink-2"
+          className="inline-flex h-[22px] items-center gap-1.5 rounded-md bg-surface-3 pl-2 pr-1 text-xs text-ink-2"
         >
           <span className="h-1.5 w-1.5 rounded-full" style={{ background: allTags[tag]?.color }} />
           {allTags[tag]?.name ?? tag}
@@ -165,7 +165,7 @@ export function TagEditor({
         onBlur={add}
         list={listId}
         placeholder={tags.length ? '' : tr.editors.addTag}
-        className="h-[22px] w-20 min-w-[60px] flex-1 bg-transparent text-[11.5px] text-ink outline-none placeholder:text-ink-3"
+        className="h-[22px] w-20 min-w-[60px] flex-1 bg-transparent text-xs text-ink outline-none placeholder:text-ink-3"
       />
       <datalist id={listId}>
         {available.map((t) => (

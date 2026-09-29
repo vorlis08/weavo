@@ -90,15 +90,15 @@ export function WeekGrid({
               key={d.toISOString()}
               className={cn('flex-1 border-l border-line py-2 text-center', today && 'bg-iris/[0.05]')}
             >
-              <div className={cn('text-[11px] tracking-[0.04em]', today ? 'text-iris-2' : 'text-ink-3')}>
+              <div className={cn('text-xs tracking-[0.04em]', today ? 'text-iris-2' : 'text-ink-3')}>
                 {d.toLocaleDateString(dateLocale(), { weekday: 'short' }).toUpperCase()}
               </div>
               {today ? (
-                <span className="mt-0.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-iris text-[12px] font-bold text-[#0b0c0e]">
+                <span className="mt-0.5 inline-flex h-[22px] w-[22px] items-center justify-center rounded-full bg-iris text-sm font-bold text-[#0b0c0e]">
                   {d.getDate()}
                 </span>
               ) : (
-                <div className="mt-0.5 text-[13px] font-semibold">{d.getDate()}</div>
+                <div className="mt-0.5 text-sm font-semibold">{d.getDate()}</div>
               )}
             </div>
           )
@@ -110,7 +110,7 @@ export function WeekGrid({
           <div className="w-12 shrink-0">
             {hours.map((h) => (
               <div key={h} className="pr-2 text-right" style={{ height: ROW_H }}>
-                <span className="mono relative -top-1.5 text-[11px] text-ink-3">
+                <span className="mono relative -top-1.5 text-xs text-ink-3">
                   {String(h).padStart(2, '0')}
                 </span>
               </div>
@@ -161,14 +161,14 @@ export function WeekGrid({
                         borderLeft: `2px solid ${hex}`,
                       }}
                     >
-                      <div className="flex items-center gap-1 truncate text-[11px] font-medium text-ink">
+                      <div className="flex items-center gap-1 truncate text-xs font-medium text-ink">
                         {conflicts[ev.id] && (
                           <TriangleAlert size={11} strokeWidth={1.8} className="shrink-0 text-rose" />
                         )}
                         {ev.title}
                       </div>
                       {height > 26 && (
-                        <div className="mono mt-px text-[9.5px] text-ink-2">
+                        <div className="mono mt-px text-xs text-ink-2">
                           {fmtTime(ev.start!)}
                           {ev.end ? `–${fmtTime(ev.end)}` : ''}
                         </div>

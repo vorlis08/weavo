@@ -169,7 +169,7 @@ export function Tour() {
         style={cardStyle}
       >
         <div className="flex items-center gap-2">
-          <span className="mono text-[10px] text-ink-3">
+          <span className="mono text-xs text-ink-3">
             {step + 1} / {STEPS.length}
           </span>
           <button
@@ -180,13 +180,13 @@ export function Tour() {
             <X size={14} />
           </button>
         </div>
-        <h3 className="mt-1 text-[15px] font-semibold">{content[step].title}</h3>
-        <p className="mt-1.5 text-[12.75px] leading-relaxed text-ink-2">{content[step].body}</p>
+        <h3 className="mt-1 text-lg font-semibold">{content[step].title}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{content[step].body}</p>
         <div className="mt-3.5 flex items-center gap-2">
           {step > 0 && (
             <button
               onClick={() => setStep((v) => Math.max(0, v - 1))}
-              className="flex h-8 items-center gap-1 rounded-lg px-2 text-[12px] text-ink-2 hover:text-ink"
+              className="flex h-8 items-center gap-1 rounded-lg px-2 text-sm text-ink-2 hover:text-ink"
             >
               <ChevronLeft size={13} />
               {tr.common.back}
@@ -195,7 +195,7 @@ export function Tour() {
           {!last && (
             <button
               onClick={endTour}
-              className="h-8 rounded-lg px-2 text-[12px] text-ink-3 hover:text-ink-2"
+              className="h-8 rounded-lg px-2 text-sm text-ink-3 hover:text-ink-2"
             >
               {tr.common.skip}
             </button>
@@ -203,7 +203,7 @@ export function Tour() {
           <button
             onClick={next}
             className={cn(
-              'ml-auto h-8 rounded-lg bg-iris px-3.5 text-[12.5px] font-semibold text-[#0b0c0e] hover:bg-iris-2',
+              'ml-auto h-8 rounded-lg bg-iris px-3.5 text-sm font-semibold text-[#0b0c0e] hover:bg-iris-2',
             )}
           >
             {last ? tr.common.finish : tr.common.next}

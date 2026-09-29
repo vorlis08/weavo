@@ -130,7 +130,7 @@ export function CommandPalette() {
             }
           }}
           placeholder={t.palette.placeholder}
-          className="w-full bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
+          className="w-full bg-transparent text-base text-ink outline-none placeholder:text-ink-3"
         />
       </div>
       <div ref={listRef} className="max-h-[52vh] overflow-y-auto p-1.5">
@@ -140,17 +140,17 @@ export function CommandPalette() {
             onMouseEnter={() => setSel(i)}
             onClick={r.run}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-[13px]',
+              'flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm',
               i === sel ? 'bg-surface-2 text-ink' : 'text-ink-2',
             )}
           >
             <span className="text-ink-3">{r.icon}</span>
             <span className="flex-1 truncate">{r.label}</span>
-            {r.hint && <span className="mono text-[10px] capitalize text-ink-3">{r.hint}</span>}
+            {r.hint && <span className="mono text-xs capitalize text-ink-3">{r.hint}</span>}
           </button>
         ))}
         {rows.length === 0 && (
-          <p className="px-3 py-6 text-center text-[12.5px] text-ink-3">{t.palette.noMatches}</p>
+          <p className="px-3 py-6 text-center text-sm text-ink-3">{t.palette.noMatches}</p>
         )}
       </div>
     </Modal>

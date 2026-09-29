@@ -86,7 +86,7 @@ export function GoogleConnect() {
   if (!google.connected) {
     return (
       <div className="flex flex-col gap-3">
-        <p className="text-[12.5px] leading-relaxed text-ink-2">{t.google.intro}</p>
+        <p className="text-sm leading-relaxed text-ink-2">{t.google.intro}</p>
         <TextField
           value={clientId}
           onChange={(e) => setClientId(e.target.value)}
@@ -101,15 +101,15 @@ export function GoogleConnect() {
             href={SETUP_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2"
+            className="flex items-center gap-1 text-xs text-iris hover:text-iris-2"
           >
             {t.google.getClientId} <ExternalLink size={11} />
           </a>
         </div>
         {google.lastError && (
-          <p className="rounded-lg bg-rose/10 px-3 py-2 text-[11.5px] text-rose">{google.lastError}</p>
+          <p className="rounded-lg bg-rose/10 px-3 py-2 text-xs text-rose">{google.lastError}</p>
         )}
-        <p className="text-[11px] leading-relaxed text-ink-3">{t.google.originHint(location.origin)}</p>
+        <p className="text-xs leading-relaxed text-ink-3">{t.google.originHint(location.origin)}</p>
       </div>
     )
   }
@@ -125,8 +125,8 @@ export function GoogleConnect() {
           <Avatar name={google.name ?? google.email ?? 'G'} size={36} />
         )}
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[13px]">{google.name ?? google.email}</div>
-          <div className="truncate text-[11px] text-ink-3">{google.email}</div>
+          <div className="truncate text-sm">{google.name ?? google.email}</div>
+          <div className="truncate text-xs text-ink-3">{google.email}</div>
         </div>
         <Button variant="ghost" onClick={disconnect}>
           <LogOut size={13} />
@@ -142,7 +142,7 @@ export function GoogleConnect() {
           <span
             key={scope}
             className={cn(
-              'inline-flex h-[22px] items-center gap-1 rounded-md px-2 text-[11px]',
+              'inline-flex h-[22px] items-center gap-1 rounded-md px-2 text-xs',
               scopeOk(scope) ? 'bg-sage/12 text-sage' : 'bg-surface-3 text-ink-3',
             )}
           >
@@ -152,7 +152,7 @@ export function GoogleConnect() {
         ))}
       </div>
 
-      <label className="flex items-center gap-2.5 text-[12.5px] text-ink-2">
+      <label className="flex items-center gap-2.5 text-sm text-ink-2">
         <Checkbox
           checked={google.calendarSyncEnabled}
           onChange={() => updateGoogle({ calendarSyncEnabled: !google.calendarSyncEnabled })}
@@ -166,25 +166,25 @@ export function GoogleConnect() {
           {t.google.syncNow}
         </Button>
         {google.lastCalendarSync && (
-          <span className="text-[11px] text-ink-3">{t.google.syncedAgo(fmtAgo(google.lastCalendarSync))}</span>
+          <span className="text-xs text-ink-3">{t.google.syncedAgo(fmtAgo(google.lastCalendarSync))}</span>
         )}
       </div>
 
       <div className="border-t border-line pt-3">
-        <div className="mb-1.5 text-[12px]">{t.google.gmailQueryLabel}</div>
+        <div className="mb-1.5 text-sm">{t.google.gmailQueryLabel}</div>
         <TextField
           defaultValue={google.gmailQuery}
           onBlur={(e) => updateGoogle({ gmailQuery: e.target.value.trim() || 'is:starred' })}
           placeholder="is:starred"
           spellCheck={false}
         />
-        <Link to="/mail" className="mt-2 inline-flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2">
+        <Link to="/mail" className="mt-2 inline-flex items-center gap-1 text-xs text-iris hover:text-iris-2">
           {t.google.openMail}
         </Link>
       </div>
 
       {google.lastError && (
-        <p className="rounded-lg bg-rose/10 px-3 py-2 text-[11.5px] text-rose">{google.lastError}</p>
+        <p className="rounded-lg bg-rose/10 px-3 py-2 text-xs text-rose">{google.lastError}</p>
       )}
     </div>
   )

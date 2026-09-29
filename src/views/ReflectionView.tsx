@@ -36,7 +36,7 @@ export function MoodPicker({
           key={m.value}
           onClick={() => onChange(m.value)}
           className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg border text-[18px] transition-colors',
+            'flex h-9 w-9 items-center justify-center rounded-lg border text-xl transition-colors',
             value === m.value
               ? 'border-iris/50 bg-iris/14'
               : 'border-line bg-surface-2 hover:border-line-2',
@@ -68,11 +68,11 @@ function TodayCard() {
     <section className="rounded-xl border border-line bg-surface p-5">
       <div className="flex items-center gap-2">
         <Sparkles size={15} strokeWidth={1.6} className="text-iris-2" />
-        <h2 className="text-[15px]">{t.reflection.todayTitle}</h2>
+        <h2 className="text-lg">{t.reflection.todayTitle}</h2>
       </div>
-      <p className="mt-1 text-[12px] text-ink-3">{fmtLongDate(today)}</p>
+      <p className="mt-1 text-sm text-ink-3">{fmtLongDate(today)}</p>
 
-      <div className="mt-3.5 flex items-center gap-2.5 text-[12px] text-ink-2">
+      <div className="mt-3.5 flex items-center gap-2.5 text-sm text-ink-2">
         <ListChecks size={14} strokeWidth={1.6} className="shrink-0 text-ink-3" />
         {activity.completed.length === 0 && activity.events.length === 0 ? (
           <span>{t.reflection.summaryNone}</span>
@@ -97,7 +97,7 @@ function TodayCard() {
           onBlur={commit}
           placeholder={t.reflection.notePlaceholder}
           rows={4}
-          className="w-full resize-none rounded-lg border border-line bg-surface-2 p-3 text-[13px] leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+          className="w-full resize-none rounded-lg border border-line bg-surface-2 p-3 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
         />
       </div>
     </section>
@@ -121,14 +121,14 @@ function HistoryRow({ entry }: { entry: Reflection }) {
         ) : (
           <ChevronRight size={13} className="shrink-0 text-ink-3" />
         )}
-        <span className="w-[150px] shrink-0 text-[12.5px] text-ink-2">{fmtLongDate(d)}</span>
-        {mood && <span className="text-[15px]">{mood.emoji}</span>}
+        <span className="w-[150px] shrink-0 text-sm text-ink-2">{fmtLongDate(d)}</span>
+        {mood && <span className="text-lg">{mood.emoji}</span>}
         {!open && entry.note && (
-          <span className="min-w-0 flex-1 truncate text-[12px] text-ink-3">{entry.note}</span>
+          <span className="min-w-0 flex-1 truncate text-sm text-ink-3">{entry.note}</span>
         )}
       </button>
       {open && (
-        <div className="px-3.5 pb-3.5 text-[12.5px] leading-relaxed text-ink-2">
+        <div className="px-3.5 pb-3.5 text-sm leading-relaxed text-ink-2">
           {entry.note ? <p className="whitespace-pre-line">{entry.note}</p> : <p className="text-ink-3">{t.reflection.noNote}</p>}
         </div>
       )}
@@ -152,7 +152,7 @@ export function ReflectionView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.nav.reflection}</h1>
+        <h1 className="text-lg">{t.nav.reflection}</h1>
         <ReflectionTabs />
       </TopBar>
       <div className="flex-1 overflow-y-auto px-7 py-6">
@@ -161,7 +161,7 @@ export function ReflectionView() {
           <div>
             <SectionLabel className="mb-2.5">{t.reflection.historyTitle}</SectionLabel>
             {history.length === 0 ? (
-              <p className="text-[12.5px] text-ink-3">{t.reflection.emptyHistory}</p>
+              <p className="text-sm text-ink-3">{t.reflection.emptyHistory}</p>
             ) : (
               <div className="flex flex-col gap-2">
                 {history.map((r) => (

@@ -9,10 +9,6 @@ export function setDateLang(lang: Lang) {
 const locale = () => (LANG === 'cs' ? 'cs-CZ' : 'en-US')
 export const dateLocale = () => locale()
 
-const REL: Record<Lang, { today: string; tomorrow: string; yesterday: string }> = {
-  cs: { today: 'Dnes', tomorrow: 'Zítra', yesterday: 'Včera' },
-  en: { today: 'Today', tomorrow: 'Tomorrow', yesterday: 'Yesterday' },
-}
 const AGO: Record<Lang, (s: string) => string> = {
   cs: (s) => `před ${s}`,
   en: (s) => `${s} ago`,
@@ -79,19 +75,63 @@ export function fmtMonth(d: Date | string, style: 'long' | 'short' = 'long') {
   return cap(s.replace(/\.$/, ''))
 }
 
+/** "27. srpna" / "27 Aug" — with a day, Czech months take the genitive */
 export function fmtDayMonth(d: Date | string) {
   const x = new Date(d)
   return LANG === 'cs'
-    ? `${x.getDate()}. ${fmtMonth(x, 'long').toLowerCase()}`
+    ? x.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long' })
     : `${x.getDate()} ${fmtMonth(x, 'short')}`
 }
 
-/** "Wednesday, 27 August" / "středa 27. srpna" */
+/** "Středa 27. srpna" / "Wednesday, 27 August" */
 export function fmtLongDate(d: Date | string) {
   const x = new Date(d)
   return LANG === 'cs'
-    ? `${fmtWeekday(x)} ${x.getDate()}. ${fmtMonth(x).toLowerCase()}`
+    ? cap(x.toLocaleDateString('cs-CZ', { weekday: 'long', day: 'numeric', month: 'long' }))
     : `${fmtWeekday(x)}, ${x.getDate()} ${fmtMonth(x)}`
+}
+
+/** compact date for lists: "pá 25. 9." / "Fri 25 Sep" */
+export function fmtShort(d: Date | string) {
+  const x = new Date(d)
+  if (LANG === 'cs') {
+    const wd = x.toLocaleDateString('cs-CZ', { weekday: 'short' }).replace(/\.$/, '').toLowerCase()
+    return `${wd} ${x.getDate()}. ${x.getMonth() + 1}.`
+  }
+  return `${x.toLocaleDateString('en-US', { weekday: 'short' })} ${x.getDate()} ${fmtMonth(x, 'short')}`
+}
+
+/** whole days from today to the date (negative = past) */
+export function daysUntil(d: Date | string, now = new Date()) {
+  return Math.round((startOfDay(d).getTime() - startOfDay(now).getTime()) / DAY_MS)
+}
+
+const REL_LOWER: Record<Lang, [string, string, string]> = {
+  cs: ['dnes', 'zítra', 'včera'],
+  en: ['today', 'tomorrow', 'yesterday'],
+}
+
+/** "dnes" / "zítra" / "včera", otherwise the compact date */
+export function fmtRelDay(d: Date | string, now = new Date()) {
+  const n = daysUntil(d, now)
+  const [today, tomorrow, yesterday] = REL_LOWER[LANG]
+  return n === 0 ? today : n === 1 ? tomorrow : n === -1 ? yesterday : fmtShort(d)
+}
+
+function czPlural(n: number, forms: [string, string, string]) {
+  return n === 1 ? forms[0] : n >= 2 && n <= 4 ? forms[1] : forms[2]
+}
+
+/** "za 12 dní" / "in 12 days", "před 3 dny" / "3 days ago" */
+export function fmtCountdown(d: Date | string, now = new Date()) {
+  const n = daysUntil(d, now)
+  const [today, tomorrow, yesterday] = REL_LOWER[LANG]
+  if (n === 0) return today
+  if (n === 1) return tomorrow
+  if (n === -1) return yesterday
+  if (LANG === 'cs')
+    return n > 0 ? `za ${n} ${czPlural(n, ['den', 'dny', 'dní'])}` : `před ${-n} dny`
+  return n > 0 ? `in ${n} days` : `${-n} days ago`
 }
 
 export function fmtTime(d: Date | string) {
@@ -111,19 +151,11 @@ export function fmtAgo(iso: string) {
 export function fmtDue(iso?: string): { label: string; overdue: boolean } | null {
   if (!iso) return null
   const due = new Date(iso)
-  const now = new Date()
   const hasTime = due.getHours() !== 0 || due.getMinutes() !== 0
-  const time = hasTime ? ` ${fmtTime(due)}` : ''
-  const overdue = due.getTime() < now.getTime()
-  const rel = REL[LANG]
-  let day: string
-  if (isSameDay(due, now)) day = rel.today
-  else if (isSameDay(due, addDays(now, 1))) day = rel.tomorrow
-  else if (isSameDay(due, addDays(now, -1))) day = rel.yesterday
-  else if (due.getFullYear() === now.getFullYear())
-    day = `${fmtWeekday(due, 'short')} ${fmtDayMonth(due)}`
-  else day = `${fmtDayMonth(due)} ${due.getFullYear()}`
-  return { label: `${day}${time}`, overdue }
+  return {
+    label: `${fmtRelDay(due)}${hasTime ? ` ${fmtTime(due)}` : ''}`,
+    overdue: due.getTime() < Date.now(),
+  }
 }
 
 export function toLocalInput(d: Date | string) {

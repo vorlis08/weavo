@@ -23,8 +23,8 @@ export default defineConfig(({ command }) => ({
         name: 'Weavo',
         short_name: 'Weavo',
         description: 'A calm calendar that unifies events, tasks, and notes.',
-        theme_color: '#0a0b0d',
-        background_color: '#0a0b0d',
+        theme_color: '#0f0f13',
+        background_color: '#0f0f13',
         display: 'standalone',
         icons: [
           { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' },

@@ -58,7 +58,7 @@ function CardBody({ item }: { item: Item }) {
         done && 'opacity-60',
       )}
     >
-      <div className="mb-1.5 flex items-center gap-[7px] text-[10px] text-ink-3">
+      <div className="mb-1.5 flex items-center gap-[7px] text-xs text-ink-3">
         {project ? (
           <>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: project.color }} />
@@ -79,18 +79,18 @@ function CardBody({ item }: { item: Item }) {
             style={{ background: PRIORITY_COLOR[item.priority] }}
           />
         )}
-        <div className={cn('text-[12.5px] leading-snug text-ink', done && 'text-ink-2 line-through')}>
+        <div className={cn('text-sm leading-snug text-ink', done && 'text-ink-2 line-through')}>
           {item.title}
         </div>
       </div>
       <div className="mt-2 flex items-center gap-2.5 empty:hidden">
         {openBlockerCount > 0 && (
-          <span className="mono text-[10px] text-rose">
+          <span className="mono text-xs text-rose">
             {t.board.blocked}{openBlockerCount > 1 ? ` ×${openBlockerCount}` : ''}
           </span>
         )}
         {item.checklist && item.checklist.length > 0 && (
-          <span className="mono text-[10px] text-ink-3">
+          <span className="mono text-xs text-ink-3">
             {checkDone}/{item.checklist.length}
           </span>
         )}
@@ -146,7 +146,7 @@ function Column({
         className="flex items-center gap-2 px-[13px] pb-2.5 pt-3"
       >
         <span
-          className={cn('text-[12.5px] font-semibold', col.key === 'done' && 'text-ink-2')}
+          className={cn('text-sm font-semibold', col.key === 'done' && 'text-ink-2')}
           style={{ color: col.accent ?? undefined }}
         >
           {colLabel(t, col.key)}
@@ -189,14 +189,14 @@ function Column({
             }}
             rows={2}
             placeholder={t.board.newTask}
-            className="resize-none rounded-lg border border-line bg-surface-2 px-2.5 py-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+            className="resize-none rounded-lg border border-line bg-surface-2 px-2.5 py-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
           />
         )}
 
         {items.length === 0 && !adding && (
           <button
             onClick={() => setAdding(true)}
-            className="flex items-center gap-1.5 px-0.5 py-1 text-[11.5px] text-ink-3 hover:text-ink-2"
+            className="flex items-center gap-1.5 px-0.5 py-1 text-xs text-ink-3 hover:text-ink-2"
           >
             <Plus size={12} />
             {t.board.addTask}
@@ -218,16 +218,16 @@ export function Board() {
   return (
     <>
       <TopBar>
-        <h1 className="flex items-center gap-2 text-[16px]">
+        <h1 className="flex items-center gap-2 text-lg">
           {project && (
             <span className="h-[7px] w-[7px] rounded-full" style={{ background: project.color }} />
           )}
           {project ? t.board.boardSuffix(project.name) : t.board.title}
         </h1>
-        <button onClick={() => setParams({})} className="text-[11.5px] text-ink-3 hover:text-ink-2">
+        <button onClick={() => setParams({})} className="text-xs text-ink-3 hover:text-ink-2">
           {t.common.clearFilter}
         </button>
-        <span className="mono ml-auto text-[11px] text-ink-3">{t.board.dragHint}</span>
+        <span className="mono ml-auto text-xs text-ink-3">{t.board.dragHint}</span>
       </TopBar>
       <BoardColumns projectId={projectFilter} />
     </>

@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Flame, Hourglass, Repeat } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { fmtDayMonth, fmtDue, isSameDay } from '@/lib/date'
+import { daysUntil, fmtRelDay, fmtShort, fmtTime } from '@/lib/date'
 import { isOnToday } from '@/lib/selectors'
 import { PRIORITY_RANK, SPACE_COLOR } from '@/lib/types'
 import type { Item, Space, TaskPriority, WeavoData } from '@/lib/types'
-import { PRIORITY_COLOR, SourceBadge } from './items'
-import { Checkbox, Dot, Segmented, cn } from './ui'
+import { SourceBadge } from './items'
+import { Checkbox, ProjectGlyph, Segmented, SpaceThread, cn } from './ui'
 
 const rank = (p?: TaskPriority) => (p ? PRIORITY_RANK[p] : 3)
 
@@ -23,26 +23,48 @@ export function byUrgency(a: Item, b: Item) {
   )
 }
 
-/** the due label for a to-do row: overdue in rose, "for Wednesday" inside a lead window */
-function DueLabel({ item, data }: { item: Item; data: WeavoData }) {
+const hasTime = (iso: string) => {
+  const d = new Date(iso)
+  return d.getHours() !== 0 || d.getMinutes() !== 0
+}
+
+const metaCls = 'inline-flex items-center gap-1.5 whitespace-nowrap'
+
+/**
+ * The due label of a row. Overdue reads in rose, a task showing early in its
+ * lead window reads "for Wednesday" in jade; on the today list a plain
+ * "today" is left out because the list already says it.
+ */
+export function DueLabel({ item, data, ctx }: { item: Item; data: WeavoData; ctx?: 'today' }) {
   const t = useT()
-  if (!item.due) return null
-  const due = new Date(item.due)
-  const now = new Date()
-  const d = fmtDue(item.due)!
-  if (item.status !== 'done' && d.overdue && !isSameDay(due, now))
-    return <span className="mono text-[10.5px] text-rose">{d.label}</span>
-  if (!isSameDay(due, now) && due > now && isOnToday(data, item))
+  if (!item.due || item.status === 'done') return null
+  const n = daysUntil(item.due)
+  const time = hasTime(item.due) ? ` ${fmtTime(item.due)}` : ''
+  if (n < 0)
     return (
-      <span className="text-[11px] text-sage">
-        {t.todo.dueFor(due.getDay())} · {fmtDayMonth(due)}
+      <span className={cn(metaCls, 'text-rose')}>
+        {t.todo.overdueLabel} · {fmtRelDay(item.due)}
       </span>
     )
-  if (isSameDay(due, now)) {
-    const hasTime = due.getHours() !== 0 || due.getMinutes() !== 0
-    return hasTime ? <span className="mono text-[10.5px] text-ink-3">{d.label}</span> : null
-  }
-  return <span className="mono text-[10.5px] text-ink-3">{d.label}</span>
+  if (n > 0 && ctx === 'today' && isOnToday(data, item))
+    return (
+      <span className={cn(metaCls, 'text-sage')}>
+        {t.todo.dueFor(new Date(item.due).getDay())} · {fmtShort(item.due)}
+      </span>
+    )
+  if (n === 0)
+    return ctx === 'today' && !time ? null : (
+      <span className={cn(metaCls, 'text-ink-2')}>
+        {fmtRelDay(item.due)}
+        {time}
+      </span>
+    )
+  return (
+    <span className={metaCls}>
+      {fmtRelDay(item.due)}
+      {time}
+    </span>
+  )
 }
 
 export function FlameButton({ item, always }: { item: Item; always?: boolean }) {
@@ -55,31 +77,33 @@ export function FlameButton({ item, always }: { item: Item; always?: boolean }) 
         toggleFlame(item.id)
       }}
       title={item.flame ? t.todo.flameOff : t.todo.flameOn}
+      aria-label={item.flame ? t.todo.flameOff : t.todo.flameOn}
       aria-pressed={!!item.flame}
       className={cn(
-        'flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-all hover:bg-surface-3',
-        item.flame
-          ? 'text-flame'
-          : 'text-ink-3 hover:text-ink-2 focus-visible:opacity-100',
-        !item.flame && !always && 'opacity-0 group-hover:opacity-100',
+        'flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg transition-[opacity,color,background-color] hover:bg-surface-3',
+        item.flame ? 'text-flame' : 'text-ink-4 hover:text-ink-2 focus-visible:opacity-100',
+        !item.flame && !always && 'opacity-0 group-hover/row:opacity-100 max-md:hidden',
       )}
     >
-      <Flame size={15} strokeWidth={1.7} fill={item.flame ? 'currentColor' : 'none'} fillOpacity={0.3} />
+      <Flame size={16} strokeWidth={1.7} fill={item.flame ? 'currentColor' : 'none'} fillOpacity={0.28} />
     </button>
   )
 }
 
-/** one task on a to-do list — checkbox, title, context chips, due, flame toggle */
+/** one task — checkbox, title, context, due, flame toggle */
 export function TodoRow({
   item,
   showSpace,
-  hideContext,
+  hideProject,
+  hideTags,
+  ctx,
 }: {
   item: Item
-  /** colored stripe for lists that mix both spaces */
+  /** a colored thread on the left, for lists that mix both spaces */
   showSpace?: boolean
-  /** drop the tag/project chips when the section already groups by them */
-  hideContext?: boolean
+  hideProject?: boolean
+  hideTags?: boolean
+  ctx?: 'today'
 }) {
   const t = useT()
   const navigate = useNavigate()
@@ -87,56 +111,72 @@ export function TodoRow({
   const toggleDone = useStore((s) => s.toggleDone)
   const done = item.status === 'done'
   const project = item.projectId ? data.projects[item.projectId] : undefined
-  const waitDays = item.waitingFor
-    ? Math.max(0, Math.floor((Date.now() - new Date(item.waitingFor.since).getTime()) / 86_400_000))
-    : 0
+  const waitDays = item.waitingFor ? Math.max(0, -daysUntil(item.waitingFor.since)) : 0
+  const steps = item.checklist ?? []
 
   return (
     <div
       onClick={() => navigate(`/item/${item.id}`)}
-      className="group flex min-h-[42px] cursor-pointer items-center gap-2.5 border-t border-line px-3 py-[7px] first:border-t-0 hover:bg-surface-2"
+      className={cn(
+        'group/row relative flex min-h-12 cursor-pointer items-center gap-3 rounded-[11px] py-2 pl-3 pr-2 transition-colors hover:bg-surface',
+        'before:absolute before:left-11 before:right-2.5 before:top-0 before:h-px before:bg-line first:before:hidden hover:before:opacity-0',
+      )}
     >
       {showSpace && (
-        <span className="h-5 w-[3px] shrink-0 rounded-full" style={{ background: SPACE_COLOR[item.space] }} />
+        <span
+          className="absolute bottom-3 left-0 top-3 w-[2px] rounded-full"
+          style={{ background: SPACE_COLOR[item.space] }}
+        />
       )}
       <Checkbox checked={done} onChange={() => toggleDone(item.id)} />
       <div className="min-w-0 flex-1">
-        <div className={cn('truncate text-[13px]', done && 'text-ink-3 line-through')}>{item.title}</div>
-        <div className="mt-px flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-ink-3 empty:hidden">
-          {!hideContext && project && (
-            <span className="flex items-center gap-1.5">
-              <Dot color={project.color} className="h-1.5 w-1.5" />
+        <div
+          className={cn(
+            'truncate text-base leading-snug transition-colors max-md:whitespace-normal',
+            done && 'text-ink-3 line-through decoration-ink-4',
+          )}
+        >
+          {item.priority === 'high' && !done && (
+            <span className="mr-1.5 font-bold text-rose" title={t.priority.high}>
+              !
+            </span>
+          )}
+          {item.title}
+        </div>
+        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-ink-3 empty:hidden">
+          {!hideProject && project && (
+            <span className={metaCls}>
+              <ProjectGlyph color={project.color} />
               {project.name}
             </span>
           )}
-          {!hideContext &&
+          {!hideTags &&
             item.tags.map((id) =>
               data.tags[id] ? (
-                <span key={id} className="flex items-center gap-1.5">
-                  <Dot color={data.tags[id].color} className="h-1.5 w-1.5" />
-                  {data.tags[id].name}
+                <span key={id} className={metaCls}>
+                  #{data.tags[id].name}
                 </span>
               ) : null,
             )}
-          <DueLabel item={item} data={data} />
+          <DueLabel item={item} data={data} ctx={ctx} />
           {item.repeat && item.repeat !== 'none' && (
-            <span className="flex items-center gap-1">
-              <Repeat size={11} />
-              {t.repeat[item.repeat]}
+            <span className={metaCls}>
+              <Repeat size={12} />
+              {t.repeat[item.repeat].toLowerCase()}
             </span>
           )}
           {item.waitingFor && (
-            <span className="flex items-center gap-1 text-amber">
-              <Hourglass size={11} />
-              {t.todo.waitingOn(item.waitingFor.who)} · {t.todo.waitingDays(waitDays)}
+            <span className={cn(metaCls, 'text-ink-2')}>
+              <Hourglass size={12} className="text-amber" />
+              {item.waitingFor.who} · {t.todo.waitingDays(waitDays)}
             </span>
+          )}
+          {steps.length > 0 && !done && (
+            <span className={metaCls}>{t.todo.stepsCount(steps.filter((s) => s.done).length, steps.length)}</span>
           )}
         </div>
       </div>
-      {item.source && <SourceBadge source={item.source} size={12} />}
-      {item.priority && (
-        <Dot color={PRIORITY_COLOR[item.priority]} title={t.priority[item.priority]} />
-      )}
+      {item.source && <SourceBadge source={item.source} size={13} />}
       <FlameButton item={item} />
     </div>
   )
@@ -145,59 +185,57 @@ export function TodoRow({
 export function TodoList({
   items,
   empty,
-  hot,
   showSpace,
-  hideContext,
+  hideProject,
+  hideTags,
+  ctx,
 }: {
   items: Item[]
   empty?: string
-  hot?: boolean
   showSpace?: boolean
-  hideContext?: boolean
+  hideProject?: boolean
+  hideTags?: boolean
+  ctx?: 'today'
 }) {
-  const t = useT()
+  if (!items.length) return empty ? <p className="pb-1 pl-11 pt-1 text-base text-ink-3">{empty}</p> : null
   return (
-    <div
-      className={cn(
-        'overflow-hidden rounded-xl border bg-surface',
-        hot ? 'border-flame/35' : 'border-line',
-      )}
-    >
-      {items.length ? (
-        items.map((it) => (
-          <TodoRow key={it.id} item={it} showSpace={showSpace} hideContext={hideContext} />
-        ))
-      ) : (
-        <div className="px-3.5 py-3 text-[12.5px] text-ink-3">{empty ?? t.todo.emptySection}</div>
-      )}
+    <div className="flex flex-col">
+      {items.map((it) => (
+        <TodoRow key={it.id} item={it} showSpace={showSpace} hideProject={hideProject} hideTags={hideTags} ctx={ctx} />
+      ))}
     </div>
   )
 }
 
-/** a titled block on the to-do page; hidden when empty unless it has an empty message */
+/** a titled group of tasks; hidden when empty unless it has an empty message */
 export function TodoSection({
   title,
   icon,
-  dot,
+  glyph,
   hint,
   items,
   hot,
   empty,
-  hideContext,
   showSpace,
+  hideProject,
+  hideTags,
+  ctx,
   collapsible,
   defaultOpen = true,
   children,
 }: {
   title: string
   icon?: ReactNode
-  dot?: string
+  /** a project square or space thread before the title */
+  glyph?: ReactNode
   hint?: string
   items: Item[]
   hot?: boolean
   empty?: string
-  hideContext?: boolean
   showSpace?: boolean
+  hideProject?: boolean
+  hideTags?: boolean
+  ctx?: 'today'
   collapsible?: boolean
   defaultOpen?: boolean
   children?: ReactNode
@@ -207,59 +245,65 @@ export function TodoSection({
   const openCount = items.filter((it) => it.status !== 'done').length
   const head = (
     <>
-      {collapsible && (
-        <ChevronRight size={13} className={cn('transition-transform', open && 'rotate-90')} />
-      )}
+      {collapsible && <ChevronRight size={14} className={cn('transition-transform', open && 'rotate-90')} />}
       {icon}
-      {dot && <Dot color={dot} />}
+      {glyph}
       {title}
-      <span className="mono text-[10.5px] font-normal text-ink-3">{openCount}</span>
+      <span className="font-medium text-ink-3">{openCount}</span>
     </>
   )
   return (
-    <section className="mb-6">
-      <div
-        className={cn(
-          'flex items-center gap-2 px-1 pb-2 text-[12px] font-semibold',
-          hot ? 'text-flame' : 'text-ink-2',
-        )}
-      >
+    <section className="mb-8">
+      <div className={cn('flex items-center gap-2.5 px-3 pb-2 text-sm font-semibold', hot ? 'text-flame' : 'text-ink-2')}>
         {collapsible ? (
-          <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2 hover:text-ink">
+          <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2.5 hover:text-ink" aria-expanded={open}>
             {head}
           </button>
         ) : (
           head
         )}
-        {hint && <span className="ml-auto text-[11px] font-normal text-ink-3">{hint}</span>}
+        {hint && <span className="ml-auto text-sm font-normal text-ink-3 max-sm:hidden">{hint}</span>}
       </div>
       {(!collapsible || open) &&
         (children ?? (
-          <TodoList items={items} empty={empty} hot={hot} hideContext={hideContext} showSpace={showSpace} />
+          <TodoList
+            items={items}
+            empty={empty}
+            showSpace={showSpace}
+            hideProject={hideProject}
+            hideTags={hideTags}
+            ctx={ctx}
+          />
         ))}
     </section>
   )
 }
 
+/** progress as a thread; split shows personal and work side by side */
 export function ProgressBar({ items, split }: { items: Item[]; split?: boolean }) {
   const n = items.length || 1
-  const doneOf = (sp?: Space) =>
-    items.filter((it) => it.status === 'done' && (!sp || it.space === sp)).length
+  const doneOf = (sp?: Space) => items.filter((it) => it.status === 'done' && (!sp || it.space === sp)).length
   return (
-    <div className="flex h-1.5 flex-1 overflow-hidden rounded-full bg-surface-3">
+    <div className="flex h-1 flex-1 overflow-hidden rounded-full bg-surface-3">
       {split ? (
         <>
-          <i className="h-full transition-[width]" style={{ width: `${(doneOf('personal') / n) * 100}%`, background: SPACE_COLOR.personal }} />
-          <i className="h-full transition-[width]" style={{ width: `${(doneOf('work') / n) * 100}%`, background: SPACE_COLOR.work }} />
+          <i
+            className="h-full transition-[width] duration-500"
+            style={{ width: `${(doneOf('personal') / n) * 100}%`, background: SPACE_COLOR.personal }}
+          />
+          <i
+            className="h-full transition-[width] duration-500"
+            style={{ width: `${(doneOf('work') / n) * 100}%`, background: SPACE_COLOR.work }}
+          />
         </>
       ) : (
-        <i className="h-full bg-sage transition-[width]" style={{ width: `${(doneOf() / n) * 100}%` }} />
+        <i className="h-full bg-iris transition-[width] duration-500" style={{ width: `${(doneOf() / n) * 100}%` }} />
       )}
     </div>
   )
 }
 
-/** Osobní / Práce / (Vše) switch shared by Home and Calendar */
+/** Vše / Osobní / Práce — shared by Home and Calendar */
 export function SpaceFilterSwitch() {
   const t = useT()
   const value = useStore((s) => s.data.settings.spaceFilter)
@@ -268,8 +312,24 @@ export function SpaceFilterSwitch() {
     <Segmented
       options={[
         { value: 'all', label: t.spaces.all },
-        { value: 'personal', label: <><Dot color={SPACE_COLOR.personal} className="h-1.5 w-1.5" />{t.spaces.personal}</> },
-        { value: 'work', label: <><Dot color={SPACE_COLOR.work} className="h-1.5 w-1.5" />{t.spaces.work}</> },
+        {
+          value: 'personal',
+          label: (
+            <>
+              <SpaceThread color={SPACE_COLOR.personal} />
+              {t.spaces.personal}
+            </>
+          ),
+        },
+        {
+          value: 'work',
+          label: (
+            <>
+              <SpaceThread color={SPACE_COLOR.work} />
+              {t.spaces.work}
+            </>
+          ),
+        },
       ]}
       value={value}
       onChange={(v) => updateSettings({ spaceFilter: v })}

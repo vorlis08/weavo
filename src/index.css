@@ -1,27 +1,62 @@
 @import 'tailwindcss';
 
+/*
+ * Weavo design tokens — "two threads": personal (jade) and work (ochre) woven
+ * through the day. Iris is reserved for interaction (buttons, focus, selection),
+ * never for data. Every meaning has its own shape: a thread = space, a rounded
+ * square = project, #text = tag, "!" = high priority.
+ */
 @theme {
-  --color-bg: #0a0b0d;
-  --color-surface: #131418;
-  --color-surface-2: #1a1c21;
-  --color-surface-3: #23262d;
+  --color-bg: #0f0f13;
+  --color-side: #121217;
+  --color-surface: #17171d;
+  --color-surface-2: #1e1e26;
+  --color-surface-3: #272730;
+  --color-surface-4: #31313b;
 
-  --color-line: #ffffff10;
-  --color-line-2: #ffffff1c;
+  --color-line: rgb(255 255 255 / 0.065);
+  --color-line-2: rgb(255 255 255 / 0.11);
+  --color-line-3: rgb(255 255 255 / 0.18);
 
-  --color-ink: #eaebee;
-  --color-ink-2: #969ba5;
-  --color-ink-3: #61656e;
+  --color-ink: #efeef4;
+  --color-ink-2: #b0aebf;
+  --color-ink-3: #8a889e;
+  --color-ink-4: #5e5c70;
 
-  --color-iris: #8d93ef;
-  --color-iris-2: #a6abf4;
-  --color-amber: #dfa871;
-  --color-rose: #de8892;
-  --color-sage: #83c79d;
-  --color-flame: #ff8a5c;
+  --color-iris: #9ea0f7;
+  --color-iris-2: #b6b8ff;
+  --color-iris-ink: #12121c;
+
+  --color-personal: #6fd0b0;
+  --color-work: #e7b45f;
+  --color-flame: #ff7a59;
+  --color-rose: #f2838f;
+  --color-amber: #e7b45f;
+  --color-sage: #6fd0b0;
 
   --font-sans: 'Hanken Grotesk', -apple-system, 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', 'Hanken Grotesk', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* one type scale for the whole app — default names so tailwind-merge understands them */
+  --text-xs: 12px;
+  --text-xs--line-height: 1.45;
+  --text-sm: 13px;
+  --text-sm--line-height: 1.45;
+  --text-base: 14px;
+  --text-base--line-height: 1.5;
+  --text-lg: 16px;
+  --text-lg--line-height: 1.45;
+  --text-xl: 20px;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 1.2;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 1.12;
+  --text-4xl: 40px;
+  --text-4xl--line-height: 1.05;
+
+  --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 @layer base {
@@ -40,11 +75,11 @@
     background: var(--color-bg);
     color: var(--color-ink);
     font-family: var(--font-sans);
-    font-size: 13.5px;
+    font-size: 14px;
     line-height: 1.5;
-    letter-spacing: -0.005em;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    font-variant-numeric: tabular-nums;
   }
 
   h1,
@@ -52,31 +87,80 @@
   h3,
   h4 {
     font-weight: 600;
-    letter-spacing: -0.021em;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 
   ::selection {
     background: color-mix(in oklab, var(--color-iris) 40%, transparent);
   }
 
+  :focus-visible {
+    outline: 2px solid var(--color-iris);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-surface-3) transparent;
+    scrollbar-color: var(--color-surface-4) transparent;
   }
   *::-webkit-scrollbar {
-    width: 9px;
-    height: 9px;
+    width: 10px;
+    height: 10px;
   }
   *::-webkit-scrollbar-thumb {
-    background: var(--color-surface-3);
+    background: var(--color-surface-4);
     border-radius: 999px;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     background-clip: content-box;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
   }
 }
 
+/* numbers that line up — dates, counts, times. Sans, not monospace. */
 @utility mono {
-  font-family: var(--font-mono);
-  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* page and section titles */
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.028em;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(40px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-up {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }

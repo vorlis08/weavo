@@ -12,8 +12,9 @@ import {
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { parseCapture } from '@/lib/parse'
+import { resolveHashes } from '@/lib/capture'
 import { fmtDayMonth, fmtTime, fmtWeekday } from '@/lib/date'
-import type { Item, ItemKind, Project, Space } from '@/lib/types'
+import type { Item, ItemKind, Space } from '@/lib/types'
 import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import { Modal } from './overlays'
 import { Button, Checkbox, Dot, Kbd, Segmented, cn } from './ui'
@@ -28,7 +29,7 @@ function Pill({
   return (
     <span
       className={cn(
-        'inline-flex h-[27px] items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-[11.75px]',
+        'inline-flex h-[27px] items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-xs',
         tone === 'iris' && 'border-iris/30 bg-iris/12 text-iris-2',
         tone === 'default' && 'border-line bg-surface-2 text-ink-2',
         tone === 'suggest' && 'border-dashed border-line-2 bg-transparent text-ink-3',
@@ -92,23 +93,7 @@ export function QuickCapture() {
   const chosenSpace = parsed.space ?? spacePick
 
   // each #word is a tag of the chosen space, else an existing project, else (first one) a new project
-  const resolved = useMemo(() => {
-    const tagIds: string[] = []
-    let project: Project | undefined
-    let newProject: string | undefined
-    for (const h of parsed.hashes) {
-      const low = h.toLowerCase()
-      const tag = Object.values(data.tags).find((tg) => tg.space === chosenSpace && tg.name.toLowerCase() === low)
-      if (tag) {
-        if (!tagIds.includes(tag.id)) tagIds.push(tag.id)
-        continue
-      }
-      const p = Object.values(data.projects).find((x) => x.name.toLowerCase() === low)
-      if (p && !project) project = p
-      else if (!p && !project && !newProject) newProject = h
-    }
-    return { tagIds, project, newProject }
-  }, [parsed.hashes, data.tags, data.projects, chosenSpace])
+  const resolved = useMemo(() => resolveHashes(parsed.hashes, chosenSpace, data), [parsed.hashes, chosenSpace, data])
   const existingProject = resolved.project
   const space = existingProject?.space ?? chosenSpace
   const burning = flame || parsed.flame
@@ -204,7 +189,7 @@ export function QuickCapture() {
           }}
           rows={2}
           placeholder={t.capture.placeholder}
-          className="w-full resize-none bg-transparent text-[16px] leading-[1.5] text-ink outline-none placeholder:text-ink-3"
+          className="w-full resize-none bg-transparent text-lg leading-[1.5] text-ink outline-none placeholder:text-ink-3"
         />
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -224,7 +209,7 @@ export function QuickCapture() {
               onClick={() => setFlame((f) => !f)}
               title={t.todo.flameOn}
               className={cn(
-                'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] transition-colors',
+                'flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-sm transition-colors',
                 burning ? 'border-flame/50 bg-flame/12 text-flame' : 'border-line text-ink-3 hover:text-ink-2',
               )}
             >
@@ -265,7 +250,7 @@ export function QuickCapture() {
         {conflict && (
           <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose/12 px-2.5 py-[9px]">
             <TriangleAlert size={13} strokeWidth={1.7} className="shrink-0 text-rose" />
-            <span className="text-[11.5px] text-ink-2">
+            <span className="text-xs text-ink-2">
               {t.capture.overlaps(conflict.title, conflict.start ? fmtTime(conflict.start) : '')}
             </span>
           </div>
@@ -277,7 +262,7 @@ export function QuickCapture() {
           <button
             type="button"
             onClick={() => setLeaveUnsorted((v) => !v)}
-            className="flex items-center gap-2 text-[12.5px] text-ink-2"
+            className="flex items-center gap-2 text-sm text-ink-2"
           >
             <Checkbox checked={leaveUnsorted} onChange={() => setLeaveUnsorted((v) => !v)} />
             {t.capture.leaveUnsorted}
@@ -294,10 +279,10 @@ export function QuickCapture() {
       </div>
 
       <div className="flex items-center gap-4 border-t border-line bg-surface-2 px-[18px] py-[9px]">
-        <span className="text-[10px] text-ink-3">
+        <span className="text-xs text-ink-3">
           <Kbd>↵</Kbd> {t.capture.hintCapture}&nbsp;·&nbsp;<Kbd>⇧↵</Kbd> {t.capture.hintNewline}&nbsp;·&nbsp;<Kbd>esc</Kbd> {t.capture.hintClose}
         </span>
-        <span className="mono ml-auto text-[10px] text-ink-3">{t.capture.parsedLive}</span>
+        <span className="mono ml-auto text-xs text-ink-3">{t.capture.parsedLive}</span>
       </div>
     </Modal>
   )

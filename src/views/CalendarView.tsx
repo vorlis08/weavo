@@ -83,11 +83,11 @@ export function CalendarView() {
           <Button variant="ghost" square onClick={() => step(1)}>
             <ChevronRight size={16} />
           </Button>
-          <Button className="h-[30px] text-[12px]" onClick={() => setAnchor(new Date())}>
+          <Button className="h-[30px] text-sm" onClick={() => setAnchor(new Date())}>
             {t.common.today}
           </Button>
         </div>
-        <h1 className="text-[16px]">{heading}</h1>
+        <h1 className="text-lg">{heading}</h1>
         <div className="ml-auto flex items-center gap-2">
           <SpaceFilterSwitch />
           <Segmented
@@ -107,7 +107,7 @@ export function CalendarView() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col overflow-hidden p-[18px]">
-          <div className="grid grid-cols-7 border-b border-line pb-2 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink-3">
+          <div className="grid grid-cols-7 border-b border-line pb-2 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">
             {weekDays.map((d) => (
               <div key={d.toISOString()} className="text-center">
                 {d.toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-US', { weekday: 'short' })}
@@ -143,7 +143,7 @@ export function CalendarView() {
                 >
                   <span
                     className={cn(
-                      'flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-semibold',
+                      'flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold',
                       today ? 'bg-iris text-[#0b0c0e]' : 'text-ink-2',
                     )}
                   >
@@ -156,7 +156,7 @@ export function CalendarView() {
                         ev.stopPropagation()
                         navigate(`/item/${e.id}`)
                       }}
-                      className="flex items-center gap-1 truncate rounded px-1 py-px text-[10px] text-ink-2 hover:text-ink"
+                      className="flex items-center gap-1 truncate rounded px-1 py-px text-xs text-ink-2 hover:text-ink"
                       style={{
                         background:
                           (e.projectId && projects[e.projectId]?.color
@@ -178,7 +178,7 @@ export function CalendarView() {
                     </span>
                   ))}
                   {dayEvents.length > 3 && (
-                    <span className="px-1 text-[10px] text-ink-3">
+                    <span className="px-1 text-xs text-ink-3">
                       +{dayEvents.length - 3} {lang === 'cs' ? 'dalších' : 'more'}
                     </span>
                   )}

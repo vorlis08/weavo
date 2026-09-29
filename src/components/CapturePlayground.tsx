@@ -38,7 +38,7 @@ function Chip({
   return (
     <span
       className={cn(
-        'inline-flex h-[26px] items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-[11.5px]',
+        'inline-flex h-[26px] items-center gap-1.5 whitespace-nowrap rounded-lg border px-2.5 text-xs',
         on
           ? 'border-iris/30 bg-iris/12 text-iris-2'
           : 'border-line bg-surface-2 text-ink-2',
@@ -68,7 +68,7 @@ export function CapturePlayground() {
 
   return (
     <div className="my-5 overflow-hidden rounded-2xl border border-line-2 bg-surface">
-      <div className="mono flex items-center gap-2 border-b border-line px-4 py-2.5 text-[10px] uppercase tracking-[0.13em] text-ink-3">
+      <div className="mono flex items-center gap-2 border-b border-line px-4 py-2.5 text-xs uppercase tracking-[0.13em] text-ink-3">
         <span className="text-iris">✦</span> {t.playground.header}
         <span className="ml-auto normal-case tracking-normal text-ink-3">{t.playground.sandbox}</span>
       </div>
@@ -79,7 +79,7 @@ export function CapturePlayground() {
           onChange={(e) => setText(e.target.value)}
           rows={2}
           spellCheck={false}
-          className="w-full resize-none bg-transparent text-[16px] leading-snug text-ink outline-none"
+          className="w-full resize-none bg-transparent text-lg leading-snug text-ink outline-none"
           aria-label="Quick capture example text"
         />
 
@@ -111,7 +111,7 @@ export function CapturePlayground() {
             </Chip>
           )}
           {!whenLabel && !parsed.projectName && (
-            <span className="text-[11.5px] text-ink-3">
+            <span className="text-xs text-ink-3">
               {t.playground.nothingDetected(parsed.title)}
             </span>
           )}
@@ -124,7 +124,7 @@ export function CapturePlayground() {
             key={ex}
             onClick={() => setText(ex)}
             className={cn(
-              'rounded-full border px-2.5 py-1 text-[11px] transition-colors',
+              'rounded-full border px-2.5 py-1 text-xs transition-colors',
               text === ex
                 ? 'border-iris/40 bg-iris/12 text-iris-2'
                 : 'border-line text-ink-3 hover:border-line-2 hover:text-ink-2',

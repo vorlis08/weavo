@@ -37,7 +37,7 @@ export function Subtasks({ parentId }: { parentId: string }) {
             <Link
               to={`/item/${k.id}`}
               className={cn(
-                'min-w-0 flex-1 truncate text-[12.5px] hover:text-iris-2',
+                'min-w-0 flex-1 truncate text-sm hover:text-iris-2',
                 done && 'text-ink-3 line-through',
               )}
             >
@@ -68,7 +68,7 @@ export function Subtasks({ parentId }: { parentId: string }) {
           }}
           onBlur={commit}
           placeholder={t.detail.newSubtaskPh}
-          className="flex-1 bg-transparent text-[12px] text-ink outline-none placeholder:text-ink-3"
+          className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
         />
       </div>
     </div>

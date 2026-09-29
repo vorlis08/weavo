@@ -55,7 +55,7 @@ export function Timeline() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">{t.timeline.title}</h1>
+          <h1 className="text-lg">{t.timeline.title}</h1>
         </TopBar>
         <EmptyState
           icon={<GanttChartSquare size={22} strokeWidth={1.5} />}
@@ -72,7 +72,7 @@ export function Timeline() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.timeline.title}</h1>
+        <h1 className="text-lg">{t.timeline.title}</h1>
         <span className="mono text-ink-3">{t.timeline.lanes(lanes.length)}</span>
       </TopBar>
 
@@ -89,10 +89,10 @@ export function Timeline() {
                   className="shrink-0 border-l border-line py-1 text-center"
                   style={{ width: DAY_W }}
                 >
-                  <div className={`text-[9px] ${today ? 'text-iris-2' : 'text-ink-3'}`}>
+                  <div className={`text-xs ${today ? 'text-iris-2' : 'text-ink-3'}`}>
                     {d.toLocaleDateString(dateLocale(), { weekday: 'narrow' })}
                   </div>
-                  <div className={`text-[10px] font-medium ${today ? 'text-iris-2' : 'text-ink-2'}`}>
+                  <div className={`text-xs font-medium ${today ? 'text-iris-2' : 'text-ink-2'}`}>
                     {d.getDate()}
                   </div>
                 </div>
@@ -110,7 +110,7 @@ export function Timeline() {
             const color = project?.color ?? '#6b7280'
             return (
               <div key={key} className="mt-3">
-                <div className="mb-1 flex items-center gap-2 pl-1 text-[11px] font-semibold">
+                <div className="mb-1 flex items-center gap-2 pl-1 text-xs font-semibold">
                   <span className="h-2 w-2 rounded-full" style={{ background: color }} />
                   {project?.name ?? t.common.noProject}
                 </div>
@@ -123,7 +123,7 @@ export function Timeline() {
                     <div key={it.id} className="flex items-center" style={{ height: ROW_H }}>
                       <button
                         onClick={() => navigate(`/item/${it.id}`)}
-                        className="w-40 shrink-0 truncate pr-2 text-left text-[11.5px] text-ink-2 hover:text-ink"
+                        className="w-40 shrink-0 truncate pr-2 text-left text-xs text-ink-2 hover:text-ink"
                       >
                         {it.title}
                       </button>

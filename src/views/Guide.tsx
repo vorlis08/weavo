@@ -372,12 +372,12 @@ export function Guide() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.nav.guide}</h1>
+        <h1 className="text-lg">{t.nav.guide}</h1>
         <a
           href="https://github.com/vorlis08/weavo"
           target="_blank"
           rel="noreferrer"
-          className="mono ml-auto text-[11px] text-ink-3 hover:text-ink-2"
+          className="mono ml-auto text-xs text-ink-3 hover:text-ink-2"
         >
           {t.common.source}
         </a>
@@ -387,10 +387,10 @@ export function Guide() {
         <div className="mx-auto max-w-[760px]">
           <section className="pb-4">
             <SectionLabel className="mb-2.5">{g.what}</SectionLabel>
-            <h2 className="text-[24px] font-semibold leading-tight tracking-[-0.025em] text-balance">
+            <h2 className="text-2xl font-semibold leading-tight tracking-[-0.025em] text-balance">
               {g.headline}
             </h2>
-            <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{g.intro}</p>
+            <p className="mt-3 text-lg leading-relaxed text-ink-2">{g.intro}</p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button variant="accent" onClick={startTour}>
                 <Sparkles size={13} />
@@ -412,8 +412,8 @@ export function Guide() {
           {g.sections.map((sec) => (
             <section key={sec.id} id={sec.id} className="border-t border-line py-9">
               <SectionLabel className="mb-2.5">{sec.eyebrow}</SectionLabel>
-              <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-balance">{sec.title}</h2>
-              <div className="mt-3 space-y-3 text-[14px] leading-relaxed text-ink-2">
+              <h2 className="text-2xl font-semibold tracking-[-0.02em] text-balance">{sec.title}</h2>
+              <div className="mt-3 space-y-3 text-base leading-relaxed text-ink-2">
                 {sec.paras?.map((p, i) => (
                   <p key={i}>
                     <MD text={p} />
@@ -439,8 +439,8 @@ export function Guide() {
                           >
                             <Icon size={16} strokeWidth={1.6} />
                           </span>
-                          <div className="mt-2.5 text-[14px] font-medium text-ink">{r.name}</div>
-                          <p className="mt-1 text-[12.5px] leading-snug text-ink-2">{r.body}</p>
+                          <div className="mt-2.5 text-base font-medium text-ink">{r.name}</div>
+                          <p className="mt-1 text-sm leading-snug text-ink-2">{r.body}</p>
                         </div>
                       )
                     })}
@@ -455,19 +455,19 @@ export function Guide() {
                         to={v.to}
                         className="group rounded-xl border border-line bg-surface p-3.5 transition-colors hover:border-line-2"
                       >
-                        <div className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
+                        <div className="flex items-center gap-2 text-base font-medium text-ink">
                           <v.icon size={15} strokeWidth={1.6} className="text-ink-3 group-hover:text-iris-2" />
                           {t.nav[v.key]}
                         </div>
-                        <p className="mt-1 text-[12px] leading-snug text-ink-2">{g.viewBlurbs[v.key]}</p>
+                        <p className="mt-1 text-sm leading-snug text-ink-2">{g.viewBlurbs[v.key]}</p>
                       </Link>
                     ))}
                     <div className="rounded-xl border border-line bg-surface p-3.5">
-                      <div className="flex items-center gap-2 text-[13.5px] font-medium text-ink">
+                      <div className="flex items-center gap-2 text-base font-medium text-ink">
                         <Mail size={15} strokeWidth={1.6} className="text-ink-3" />
                         {t.nav.mail}
                       </div>
-                      <p className="mt-1 text-[12px] leading-snug text-ink-2">{g.mailBlurb}</p>
+                      <p className="mt-1 text-sm leading-snug text-ink-2">{g.mailBlurb}</p>
                     </div>
                   </div>
                 )}
@@ -485,7 +485,7 @@ export function Guide() {
                     ).map(([k, label], i) => (
                       <div
                         key={i}
-                        className={cn('flex items-center gap-4 px-4 py-2.5 text-[13px]', i > 0 && 'border-t border-line')}
+                        className={cn('flex items-center gap-4 px-4 py-2.5 text-sm', i > 0 && 'border-t border-line')}
                       >
                         <span className="w-[190px] shrink-0">{k}</span>
                         <span className="text-ink-2">{label}</span>
@@ -517,7 +517,7 @@ export function Guide() {
             </section>
           ))}
 
-          <div className="flex items-center gap-3 border-t border-line py-8 text-[12px] text-ink-3">
+          <div className="flex items-center gap-3 border-t border-line py-8 text-sm text-ink-3">
             <Command size={14} />
             {g.footer}
             <Button variant="ghost" className="ml-auto" onClick={startTour}>

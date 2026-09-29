@@ -13,16 +13,21 @@ export type RepeatFreq = 'none' | 'daily' | 'weekly' | 'monthly'
 export type Space = 'personal' | 'work'
 export const SPACES: Space[] = ['personal', 'work']
 export type SpaceFilter = 'all' | Space
-export const SPACE_COLOR: Record<Space, string> = { personal: '#a6abf4', work: '#dfa871' }
+/** the two threads — personal jade, work ochre */
+export const SPACE_COLOR: Record<Space, string> = { personal: '#6fd0b0', work: '#e7b45f' }
 
-export type AccentName ='iris' | 'amber' | 'rose' | 'sage' | 'blue'
+export type AccentName = 'cornflower' | 'terracotta' | 'lavender' | 'pink' | 'leaf' | 'sky' | 'sand' | 'slate'
 
+/** project identity colors — muted, and distinct from the space threads and the semantic colors */
 export const PROJECT_COLORS: { name: AccentName; value: string }[] = [
-  { name: 'iris', value: '#8d93ef' },
-  { name: 'amber', value: '#dfa871' },
-  { name: 'sage', value: '#83c79d' },
-  { name: 'rose', value: '#de8892' },
-  { name: 'blue', value: '#7cc1e8' },
+  { name: 'cornflower', value: '#7fa7e0' },
+  { name: 'terracotta', value: '#e07a5f' },
+  { name: 'lavender', value: '#b794f4' },
+  { name: 'pink', value: '#e58fb5' },
+  { name: 'leaf', value: '#8bc47a' },
+  { name: 'sky', value: '#5fb7d6' },
+  { name: 'sand', value: '#c9b86a' },
+  { name: 'slate', value: '#9aa4b5' },
 ]
 
 export const TAG_COLORS = ['#7fb2f0', '#d9c26f', '#83c79d', '#c49bf0', '#6fc3c9', '#de8892', '#dfa871', '#9fc46e']

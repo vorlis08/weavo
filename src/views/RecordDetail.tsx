@@ -55,9 +55,9 @@ function WaitingInput({ itemId, who, since }: { itemId: string; who?: string; si
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
         placeholder={t.todo.waitingPh}
-        className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+        className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
       />
-      {who && since && <span className="text-[10.5px] text-amber">{t.todo.since(fmtDue(since)?.label ?? '')}</span>}
+      {who && since && <span className="text-xs text-amber">{t.todo.since(fmtDue(since)?.label ?? '')}</span>}
     </span>
   )
 }
@@ -136,9 +136,9 @@ export function RecordDetail() {
           <Button variant="ghost" square onClick={() => navigate(-1)}>
             <ChevronLeft size={16} />
           </Button>
-          <h1 className="text-[16px]">{t.detail.notFoundTitle}</h1>
+          <h1 className="text-lg">{t.detail.notFoundTitle}</h1>
         </TopBar>
-        <div className="flex flex-1 items-center justify-center text-[13px] text-ink-2">
+        <div className="flex flex-1 items-center justify-center text-sm text-ink-2">
           {t.detail.notFoundBody}
         </div>
       </>
@@ -159,7 +159,7 @@ export function RecordDetail() {
         <Button variant="ghost" square onClick={() => navigate(-1)}>
           <ChevronLeft size={16} />
         </Button>
-        <div className="flex items-center gap-1.5 text-[12.5px] text-ink-3">
+        <div className="flex items-center gap-1.5 text-sm text-ink-3">
           {project ? (
             <Link to={`/project/${project.id}`} className="flex items-center gap-1.5 hover:text-ink-2">
               <Dot color={project.color} />
@@ -180,7 +180,7 @@ export function RecordDetail() {
         </div>
         <div className="ml-auto flex items-center gap-2">
           {(item.due || item.start) && (
-            <Button variant="ghost" className="text-[12px]" onClick={() => navigate('/calendar')}>
+            <Button variant="ghost" className="text-sm" onClick={() => navigate('/calendar')}>
               <CalendarDays size={13} />
               {t.nav.calendar}
             </Button>
@@ -260,7 +260,7 @@ export function RecordDetail() {
                   href={item.externalUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-[11.5px] text-iris hover:text-iris-2"
+                  className="inline-flex items-center gap-1 text-xs text-iris hover:text-iris-2"
                 >
                   {t.detail.openExternal} <ExternalLink size={11} />
                 </a>
@@ -268,7 +268,7 @@ export function RecordDetail() {
             </div>
 
             {item.readOnlyExternal && (
-              <div className="mb-3 mt-1 rounded-lg bg-surface-2 px-3 py-2 text-[11.5px] text-ink-3">
+              <div className="mb-3 mt-1 rounded-lg bg-surface-2 px-3 py-2 text-xs text-ink-3">
                 {t.detail.mirrorBanner}
               </div>
             )}
@@ -287,7 +287,7 @@ export function RecordDetail() {
             </div>
 
             {(due || item.start) && (
-              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-ink-2">
+              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-2">
                 {item.kind === 'event' && item.start && (
                   <span className="mono">
                     {new Date(item.start).toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' })}
@@ -303,7 +303,7 @@ export function RecordDetail() {
             {conflictIds.length > 0 && (
               <div className="mt-3 flex items-center gap-2 rounded-lg bg-rose/12 px-3 py-2">
                 <TriangleAlert size={13} strokeWidth={1.7} className="shrink-0 text-rose" />
-                <span className="text-[12px] text-ink-2">
+                <span className="text-sm text-ink-2">
                   {t.detail.overlapsPrefix}{' '}
                   {conflictIds.map((c, i) => (
                     <span key={c.id}>
@@ -322,7 +322,7 @@ export function RecordDetail() {
               <div className="mt-4 flex gap-2.5 rounded-xl border border-iris/25 bg-iris/12 px-[15px] py-3">
                 <Sparkles size={17} strokeWidth={1.6} className="mt-px shrink-0 text-iris" />
                 <div className="flex-1">
-                  <div className="text-[12.75px] leading-normal text-ink">
+                  <div className="text-sm leading-normal text-ink">
                     <b className="font-semibold">
                       {t.detail.freeSlot(
                         `${suggestion.slot.start.toLocaleDateString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short' })} ${fmtTime(suggestion.slot.start.toISOString())}–${fmtTime(suggestion.slot.end.toISOString())}`,
@@ -333,7 +333,7 @@ export function RecordDetail() {
                   <div className="mt-2.5 flex gap-2">
                     <Button
                       variant="accent"
-                      className="h-7 text-[11.5px]"
+                      className="h-7 text-xs"
                       onClick={() => {
                         createItem({
                           kind: 'event',
@@ -349,7 +349,7 @@ export function RecordDetail() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="h-7 text-[11.5px]"
+                      className="h-7 text-xs"
                       onClick={() => updateItem(item.id, { due: suggestion.slot.end.toISOString() })}
                     >
                       {t.detail.setAsDue}
@@ -373,7 +373,7 @@ export function RecordDetail() {
                 <div className="mt-6 flex items-center gap-2">
                   <SectionLabel>{t.detail.checklist}</SectionLabel>
                   {item.checklist && item.checklist.length > 0 && (
-                    <span className="mono text-[10px] text-ink-3">
+                    <span className="mono text-xs text-ink-3">
                       {item.checklist.filter((c) => c.done).length}/{item.checklist.length}
                     </span>
                   )}
@@ -397,7 +397,7 @@ export function RecordDetail() {
                           })
                         }
                         className={cn(
-                          'flex-1 bg-transparent text-[12.5px] outline-none',
+                          'flex-1 bg-transparent text-sm outline-none',
                           c.done && 'text-ink-3 line-through',
                         )}
                       />
@@ -417,7 +417,7 @@ export function RecordDetail() {
                         checklist: [...(item.checklist ?? []), { id: uid(), text: t.detail.newChecklistItem, done: false }],
                       })
                     }
-                    className="flex items-center gap-1.5 px-1 py-1 text-[11.5px] text-ink-3 hover:text-ink-2"
+                    className="flex items-center gap-1.5 px-1 py-1 text-xs text-ink-3 hover:text-ink-2"
                   >
                     <Plus size={12} />
                     {t.detail.addItem}
@@ -427,7 +427,7 @@ export function RecordDetail() {
                 <div className="mt-6 flex items-center gap-2">
                   <SectionLabel>{t.detail.subtasks}</SectionLabel>
                   {kids.length > 0 && (
-                    <span className="mono text-[10px] text-ink-3">
+                    <span className="mono text-xs text-ink-3">
                       {kids.filter((k) => k.status === 'done').length}/{kids.length}
                     </span>
                   )}
@@ -440,7 +440,7 @@ export function RecordDetail() {
                   <SectionLabel>{t.detail.dependencies}</SectionLabel>
                   <button
                     onClick={() => setPickDep(true)}
-                    className="flex items-center gap-1 text-[11px] text-iris hover:text-iris-2"
+                    className="flex items-center gap-1 text-xs text-iris hover:text-iris-2"
                   >
                     <Plus size={11} />
                     {t.detail.addBlockedBy}
@@ -449,7 +449,7 @@ export function RecordDetail() {
                 <div className="mt-2.5 flex flex-col gap-3">
                   {(item.blockedBy ?? []).length > 0 && (
                     <div>
-                      <SectionLabel className="mb-1.5 text-[9.5px]">{t.detail.blockedBy}</SectionLabel>
+                      <SectionLabel className="mb-1.5 text-xs">{t.detail.blockedBy}</SectionLabel>
                       <div className="flex flex-col gap-2">
                         {(item.blockedBy ?? []).map((bid) => {
                           const b = data.items[bid]
@@ -457,10 +457,10 @@ export function RecordDetail() {
                           return (
                             <div key={bid} className="group flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5">
                               <GitBranch size={14} strokeWidth={1.7} className="shrink-0 text-rose" />
-                              <Link to={`/item/${bid}`} className="min-w-0 flex-1 truncate text-[12.5px] hover:text-iris-2">
+                              <Link to={`/item/${bid}`} className="min-w-0 flex-1 truncate text-sm hover:text-iris-2">
                                 {b.title}
                               </Link>
-                              <span className="mono text-[10px] text-ink-3">
+                              <span className="mono text-xs text-ink-3">
                                 {b.status === 'done' ? t.detail.doneState : t.detail.openState}
                               </span>
                               <button
@@ -481,13 +481,13 @@ export function RecordDetail() {
                   )}
                   {blocks.length > 0 && (
                     <div>
-                      <SectionLabel className="mb-1.5 text-[9.5px]">{t.detail.blocks(blocks.length)}</SectionLabel>
+                      <SectionLabel className="mb-1.5 text-xs">{t.detail.blocks(blocks.length)}</SectionLabel>
                       <div className="flex flex-col gap-2">
                         {blocks.map((b) => (
                           <Link
                             key={b.id}
                             to={`/item/${b.id}`}
-                            className="flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-[12.5px] hover:border-line-2"
+                            className="flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm hover:border-line-2"
                           >
                             <ArrowRight size={14} strokeWidth={1.7} className="shrink-0 text-ink-2" />
                             <span className="truncate">{b.title}</span>
@@ -497,7 +497,7 @@ export function RecordDetail() {
                     </div>
                   )}
                   {(item.blockedBy ?? []).length === 0 && blocks.length === 0 && (
-                    <p className="text-[11.5px] text-ink-3">{t.detail.noDependencies}</p>
+                    <p className="text-xs text-ink-3">{t.detail.noDependencies}</p>
                   )}
                 </div>
               </>
@@ -511,19 +511,19 @@ export function RecordDetail() {
                     <Link key={n.id} to={`/item/${n.id}`} className="rounded-lg border border-line bg-surface-2 px-3 py-2.5 hover:border-line-2">
                       <div className="flex items-center gap-2">
                         <ArrowRight size={13} className="text-ink-3" />
-                        <span className="text-[12.5px] font-medium">{n.title}</span>
-                        <span className="ml-auto text-[10px] text-ink-3">{t.detail.linksTo}</span>
+                        <span className="text-sm font-medium">{n.title}</span>
+                        <span className="ml-auto text-xs text-ink-3">{t.detail.linksTo}</span>
                       </div>
                     </Link>
                   ))}
                   {links.linkedFrom.map((n) => (
                     <Link key={n.id} to={`/item/${n.id}`} className="rounded-lg border border-line bg-surface-2 px-3 py-2.5 hover:border-line-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] font-medium">{n.title}</span>
-                        <span className="ml-auto text-[10px] text-ink-3">{t.detail.mentionsThis}</span>
+                        <span className="text-sm font-medium">{n.title}</span>
+                        <span className="ml-auto text-xs text-ink-3">{t.detail.mentionsThis}</span>
                       </div>
                       {n.body && (
-                        <p className="mt-1 line-clamp-2 text-[11.5px] text-ink-2">{n.body}</p>
+                        <p className="mt-1 line-clamp-2 text-xs text-ink-2">{n.body}</p>
                       )}
                     </Link>
                   ))}
@@ -560,7 +560,7 @@ export function RecordDetail() {
                     <button
                       onClick={() => useStore.getState().toggleFlame(item.id)}
                       className={cn(
-                        'flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-[12px] transition-colors',
+                        'flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-sm transition-colors',
                         item.flame
                           ? 'border-flame/50 bg-flame/12 text-flame'
                           : 'border-line text-ink-2 hover:border-line-2 hover:text-ink',
@@ -652,7 +652,7 @@ export function RecordDetail() {
                           due: e.target.value ? new Date(e.target.value).toISOString() : undefined,
                         })
                       }
-                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
                     />
                   </PropRow>
                 </>
@@ -663,7 +663,7 @@ export function RecordDetail() {
                       type="datetime-local"
                       value={item.start ? toLocalInput(item.start) : ''}
                       onChange={(e) => updateItem(item.id, { start: new Date(e.target.value).toISOString() })}
-                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
                     />
                   </PropRow>
                   <Divider />
@@ -672,7 +672,7 @@ export function RecordDetail() {
                       type="datetime-local"
                       value={item.end ? toLocalInput(item.end) : ''}
                       onChange={(e) => updateItem(item.id, { end: new Date(e.target.value).toISOString() })}
-                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                      className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
                     />
                   </PropRow>
                   <Divider />
@@ -694,17 +694,17 @@ export function RecordDetail() {
               <div className="rounded-xl border border-line bg-surface px-[15px] py-3.5">
                 <div className="mb-1 flex items-center gap-2">
                   <Bell size={13} strokeWidth={1.6} className="text-ink-2" />
-                  <h3 className="text-[14px]">{t.detail.reminders}</h3>
+                  <h3 className="text-base">{t.detail.reminders}</h3>
                 </div>
                 {reminders.map((r) => (
                   <div key={r.id} className="group flex items-center gap-2 border-t border-line py-2 first:border-0">
-                    <span className="flex-1 text-[12px] text-ink">
+                    <span className="flex-1 text-sm text-ink">
                       {r.trigger.type === 'at'
                         ? t.detail.remAt(new Date(r.trigger.at).toLocaleString(dateLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))
                         : r.trigger.type === 'before_due'
                           ? t.detail.remBeforeDue(humanMinutes(t, r.trigger.minutes))
                           : t.detail.remBeforeStart(humanMinutes(t, r.trigger.minutes))}
-                      {r.firedAt && <span className="mono ml-1.5 text-[10px] text-amber">{t.detail.remFired}</span>}
+                      {r.firedAt && <span className="mono ml-1.5 text-xs text-amber">{t.detail.remFired}</span>}
                     </span>
                     <button
                       onClick={() => deleteReminder(r.id)}
@@ -716,7 +716,7 @@ export function RecordDetail() {
                 ))}
                 <Menu
                   trigger={({ toggle }) => (
-                    <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-[11px] text-iris hover:text-iris-2">
+                    <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-xs text-iris hover:text-iris-2">
                       <Plus size={11} />
                       {t.detail.addReminder}
                     </button>

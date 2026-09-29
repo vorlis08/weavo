@@ -38,7 +38,7 @@ export function GoalView() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">{t.goals.notFoundTitle}</h1>
+          <h1 className="text-lg">{t.goals.notFoundTitle}</h1>
         </TopBar>
         <EmptyState title={t.goals.notFoundTitle} hint={t.goals.notFoundBody} />
       </>
@@ -68,10 +68,10 @@ export function GoalView() {
             className="h-7 w-[220px]"
           />
         ) : (
-          <h1 className="text-[16px]">{goal.title}</h1>
+          <h1 className="text-lg">{goal.title}</h1>
         )}
         {goal.archived && (
-          <span className="mono text-[10px] uppercase tracking-wider text-ink-3">{t.goals.archivedTag}</span>
+          <span className="mono text-xs uppercase tracking-wider text-ink-3">{t.goals.archivedTag}</span>
         )}
         <div className="ml-auto flex items-center gap-2">
           <Menu
@@ -109,7 +109,7 @@ export function GoalView() {
 
       <div className="flex-1 overflow-y-auto px-8 py-8">
         <div className="mx-auto max-w-[720px]">
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-[12px] text-ink-3">
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-sm text-ink-3">
             <label className="flex items-center gap-2">
               <span>{t.goals.targetDate}</span>
               <input
@@ -120,7 +120,7 @@ export function GoalView() {
                     targetDate: e.target.value ? new Date(e.target.value + 'T00:00').toISOString() : undefined,
                   })
                 }
-                className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
               />
             </label>
 
@@ -145,12 +145,12 @@ export function GoalView() {
                 <div className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-3">
                   <div className="h-full rounded-full" style={{ width: `${stats.pct}%`, background: goal.color }} />
                 </div>
-                <span className="mono text-[10.5px]">{stats.pct}%</span>
+                <span className="mono text-xs">{stats.pct}%</span>
               </div>
             )}
           </div>
 
-          <div className="mt-6 min-h-[2em] text-[14px]">
+          <div className="mt-6 min-h-[2em] text-base">
             <InlineBody
               value={goal.description ?? ''}
               onCommit={(v) => updateGoal(goal.id, { description: v || undefined })}
@@ -161,12 +161,12 @@ export function GoalView() {
           <div className="mt-9">
             <div className="mb-2 flex items-center gap-2">
               <SectionLabel>{t.goals.linkedProjects}</SectionLabel>
-              {linked.length > 0 && <span className="text-ink-3/70 text-[10.5px]">· {linked.length}</span>}
+              {linked.length > 0 && <span className="text-ink-3/70 text-xs">· {linked.length}</span>}
             </div>
 
             <div className="rounded-xl border border-line bg-surface p-1.5">
               {linked.length === 0 ? (
-                <p className="px-2 py-2.5 text-[12px] text-ink-3">{t.goals.noLinkedProjects}</p>
+                <p className="px-2 py-2.5 text-sm text-ink-3">{t.goals.noLinkedProjects}</p>
               ) : (
                 linked.map((p) => <LinkedProjectRow key={p.id} projectId={p.id} onUnlink={() => updateProject(p.id, { goalId: undefined })} />)
               )}
@@ -217,10 +217,10 @@ function LinkedProjectRow({ projectId, onUnlink }: { projectId: string; onUnlink
   return (
     <div className="group flex items-center gap-2.5 rounded-md px-2 py-2 hover:bg-surface-2">
       <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: project.color }} />
-      <Link to={`/project/${project.id}`} className="min-w-0 flex-1 truncate text-[12.5px] hover:text-iris-2">
+      <Link to={`/project/${project.id}`} className="min-w-0 flex-1 truncate text-sm hover:text-iris-2">
         {project.name}
       </Link>
-      <span className="mono shrink-0 text-[10px] text-ink-3">{t.project.tasksSummary(stats.done, stats.total)}</span>
+      <span className="mono shrink-0 text-xs text-ink-3">{t.project.tasksSummary(stats.done, stats.total)}</span>
       <button onClick={onUnlink} className="shrink-0 text-ink-3 opacity-0 hover:text-rose group-hover:opacity-100">
         <X size={12} />
       </button>

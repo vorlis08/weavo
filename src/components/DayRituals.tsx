@@ -24,7 +24,7 @@ function PlanRow({ item, children }: { item: Item; children: ReactNode }) {
   return (
     <div className="flex items-center gap-2.5 border-t border-line py-2.5 first:border-t-0">
       <span className="h-5 w-[3px] shrink-0 rounded-full" style={{ background: SPACE_COLOR[item.space] }} />
-      <span className="min-w-0 flex-1 truncate text-[13px]">{item.title}</span>
+      <span className="min-w-0 flex-1 truncate text-sm">{item.title}</span>
       <div className="flex shrink-0 gap-1">{children}</div>
     </div>
   )
@@ -34,7 +34,7 @@ function Mini({ onClick, children }: { onClick: () => void; children: ReactNode 
   return (
     <button
       onClick={onClick}
-      className="h-6 rounded-md border border-line-2 px-2 text-[11.5px] text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
+      className="h-6 rounded-md border border-line-2 px-2 text-xs text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
     >
       {children}
     </button>
@@ -59,7 +59,7 @@ function Footer({
   const t = useT()
   return (
     <div className="mt-5 flex items-center gap-2">
-      <span className="mono text-[11px] text-ink-3">{t.rituals.step(step + 1, steps)}</span>
+      <span className="mono text-xs text-ink-3">{t.rituals.step(step + 1, steps)}</span>
       <div className="ml-auto flex gap-2">
         {step > 0 ? (
           <Button onClick={onBack}>{t.rituals.back}</Button>
@@ -78,8 +78,8 @@ function Footer({
 
 const Heading = ({ title, hint }: { title: string; hint: string }) => (
   <>
-    <h2 className="text-[16px] font-semibold tracking-[-0.02em]">{title}</h2>
-    <p className="mb-4 mt-1 text-[12.5px] text-ink-2">{hint}</p>
+    <h2 className="text-lg font-semibold tracking-[-0.02em]">{title}</h2>
+    <p className="mb-4 mt-1 text-sm text-ink-2">{hint}</p>
   </>
 )
 
@@ -120,7 +120,7 @@ function PlanDay({ onClose }: { onClose: () => void }) {
               </PlanRow>
             ))
           ) : (
-            <p className="text-[12.5px] text-ink-3">{t.rituals.overdueNone}</p>
+            <p className="text-sm text-ink-3">{t.rituals.overdueNone}</p>
           )}
         </>
       )}
@@ -134,14 +134,14 @@ function PlanDay({ onClose }: { onClose: () => void }) {
               </PlanRow>
             ))
           ) : (
-            <p className="text-[12.5px] text-ink-3">{t.rituals.hotNone}</p>
+            <p className="text-sm text-ink-3">{t.rituals.hotNone}</p>
           )}
         </>
       )}
       {step === 2 && (
         <>
           <Heading title={t.rituals.dayTitle} hint={new Date().toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })} />
-          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-[12px] text-ink-2">
+          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-sm text-ink-2">
             {[
               [todayTasks(data).filter((it) => it.status !== 'done').length, t.rituals.tasks],
               [hot.length, t.rituals.burning],
@@ -149,7 +149,7 @@ function PlanDay({ onClose }: { onClose: () => void }) {
               [events.filter((e) => e.space === 'work').length, t.rituals.meetings],
             ].map(([n, label]) => (
               <span key={label}>
-                <b className="block text-[18px] font-semibold text-ink">{n}</b>
+                <b className="block text-xl font-semibold text-ink">{n}</b>
                 {label}
               </span>
             ))}
@@ -213,26 +213,26 @@ function CloseDay({ onClose }: { onClose: () => void }) {
               </PlanRow>
             ))
           ) : (
-            <p className="text-[12.5px] text-ink-3">{t.rituals.leftNone}</p>
+            <p className="text-sm text-ink-3">{t.rituals.leftNone}</p>
           )}
         </>
       )}
       {step === 1 && (
         <>
           <Heading title={t.rituals.moodTitle} hint={t.rituals.moodHint} />
-          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-[12px] text-ink-2">
+          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-sm text-ink-2">
             <span>
-              <b className="block text-[18px] font-semibold text-ink">
+              <b className="block text-xl font-semibold text-ink">
                 {today.filter((it) => it.status === 'done').length}/{today.length}
               </b>
               {t.rituals.doneCount}
             </span>
             <span>
-              <b className="block text-[18px] font-semibold text-ink">{activity.events.length}</b>
+              <b className="block text-xl font-semibold text-ink">{activity.events.length}</b>
               {t.rituals.events}
             </span>
           </div>
-          <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.07em] text-ink-3">
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.07em] text-ink-3">
             {t.reflection.moodLabel}
           </div>
           <MoodPicker value={mood} onChange={setMood} />
@@ -241,7 +241,7 @@ function CloseDay({ onClose }: { onClose: () => void }) {
             onChange={(e) => setNote(e.target.value)}
             placeholder={t.reflection.notePlaceholder}
             rows={4}
-            className="mt-4 w-full resize-y rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-[13px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+            className="mt-4 w-full resize-y rounded-lg border border-line bg-surface-2 px-3 py-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
           />
         </>
       )}
@@ -276,22 +276,22 @@ export function DayRituals() {
     <button
       onClick={() => setOpen(kind)}
       className={cn(
-        'flex min-w-[220px] flex-1 items-center gap-3 rounded-xl border bg-surface px-4 py-3 text-left transition-colors hover:border-line-2',
-        (kind === 'close') === evening && !done ? 'border-line-2' : 'border-line',
+        'flex items-center gap-3.5 rounded-[14px] border bg-surface px-4 py-3.5 text-left transition-colors hover:border-line-3 hover:bg-surface-2',
+        (kind === 'close') === evening && !done ? 'border-amber/35' : 'border-line',
       )}
     >
       <span
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px]"
         style={{ background: `color-mix(in oklab, ${tone} 16%, transparent)`, color: tone }}
       >
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-semibold">{title}</span>
-        <span className="block truncate text-[11.5px] text-ink-3">{hint}</span>
+        <span className="block text-base font-semibold">{title}</span>
+        <span className="block truncate text-sm text-ink-3">{hint}</span>
       </span>
       {done && (
-        <span className="flex shrink-0 items-center gap-1 text-[11px] text-sage">
+        <span className="flex shrink-0 items-center gap-1 text-sm text-sage">
           <Check size={12} />
           {t.rituals.doneToday}
         </span>
@@ -301,7 +301,7 @@ export function DayRituals() {
 
   return (
     <>
-      <div className="mb-3.5 flex flex-wrap gap-3.5">
+      <div className="mb-9 grid gap-3 sm:grid-cols-2">
         {tile('plan', <Sun size={17} />, t.rituals.plan, t.rituals.planHint, lastPlanned === key, 'var(--color-amber)')}
         {tile('close', <Moon size={17} />, t.rituals.close, t.rituals.closeHint, lastClosed === key, 'var(--color-iris-2)')}
       </div>

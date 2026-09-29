@@ -26,9 +26,9 @@ function TagRow({ tag, onDelete }: { tag: Tag; onDelete: () => void }) {
         onChange={(e) => setName(e.target.value)}
         onBlur={() => name.trim() && name.trim() !== tag.name && updateTag(tag.id, { name: name.trim() })}
         onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-1.5 text-[13px] text-ink outline-none focus:bg-surface-2"
+        className="h-7 min-w-0 flex-1 rounded-md bg-transparent px-1.5 text-sm text-ink outline-none focus:bg-surface-2"
       />
-      <label className="flex items-center gap-1.5 text-[11.5px] text-ink-3">
+      <label className="flex items-center gap-1.5 text-xs text-ink-3">
         {t.tagSettings.lead}
         <input
           type="number"
@@ -39,7 +39,7 @@ function TagRow({ tag, onDelete }: { tag: Tag; onDelete: () => void }) {
             const n = Math.max(0, Math.min(14, Number(e.target.value) || 0))
             updateTag(tag.id, { leadDays: n || undefined })
           }}
-          className="mono h-7 w-12 rounded-md border border-line bg-surface-2 px-1.5 text-center text-[12px] text-ink outline-none focus:border-iris/50"
+          className="mono h-7 w-12 rounded-md border border-line bg-surface-2 px-1.5 text-center text-sm text-ink outline-none focus:border-iris/50"
         />
         {t.tagSettings.daysShort}
       </label>
@@ -70,7 +70,7 @@ export function TagSettings() {
 
   return (
     <div>
-      <p className="mb-3 text-[11.5px] leading-relaxed text-ink-3">{t.tagSettings.hint}</p>
+      <p className="mb-3 text-xs leading-relaxed text-ink-3">{t.tagSettings.hint}</p>
       <div className="mb-2">
         <Segmented
           options={SPACES.map((sp) => ({
@@ -93,7 +93,7 @@ export function TagSettings() {
         onBlur={add}
         placeholder={t.tagSettings.newTag}
         className={cn(
-          'mt-2 h-8 w-full rounded-lg border border-dashed border-line-2 bg-transparent px-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50',
+          'mt-2 h-8 w-full rounded-lg border border-dashed border-line-2 bg-transparent px-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50',
         )}
       />
       <ConfirmDialog
@@ -117,7 +117,7 @@ export function GoogleSpaceSetting() {
   const space = useStore((s) => s.data.google.space)
   const updateGoogle = useStore((s) => s.updateGoogle)
   return (
-    <div className="mt-3 flex items-center gap-3 border-t border-line pt-3 text-[12.5px] text-ink-2">
+    <div className="mt-3 flex items-center gap-3 border-t border-line pt-3 text-sm text-ink-2">
       <span className="flex-1">{t.tagSettings.googleSpace}</span>
       <Segmented
         options={SPACES.map((sp) => ({ value: sp, label: t.spaces[sp] }))}

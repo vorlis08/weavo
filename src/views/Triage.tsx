@@ -33,7 +33,7 @@ export function Triage() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.triage.title}</h1>
+        <h1 className="text-lg">{t.triage.title}</h1>
         {unsorted.length > 0 && (
           <span className="mono text-ink-3">{t.triage.toProcess(unsorted.length)}</span>
         )}
@@ -58,7 +58,7 @@ export function Triage() {
                 </span>
                 <button
                   onClick={() => navigate(`/item/${it.id}`)}
-                  className="min-w-0 flex-1 truncate text-left text-[13px] hover:text-iris-2"
+                  className="min-w-0 flex-1 truncate text-left text-sm hover:text-iris-2"
                 >
                   {it.title}
                 </button>
@@ -66,7 +66,7 @@ export function Triage() {
                 <Select
                   value={it.projectId ?? ''}
                   onChange={(e) => updateItem(it.id, { projectId: e.target.value || undefined })}
-                  className={cn('h-7 w-[140px] text-[11.5px]')}
+                  className={cn('h-7 w-[140px] text-xs')}
                 >
                   <option value="">{t.common.noProject}</option>
                   {projects.map((p) => (

@@ -25,8 +25,8 @@ function Row({ label, hint, children }: { label: string; hint?: string; children
   return (
     <div className="flex items-center gap-4 border-t border-line py-3 first:border-0 first:pt-0 last:pb-0">
       <div className="flex-1">
-        <div className="text-[13px]">{label}</div>
-        {hint && <div className="mt-0.5 text-[11.5px] text-ink-3">{hint}</div>}
+        <div className="text-sm">{label}</div>
+        {hint && <div className="mt-0.5 text-xs text-ink-3">{hint}</div>}
       </div>
       <div className="shrink-0">{children}</div>
     </div>
@@ -70,7 +70,7 @@ export function SettingsView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.settings.title}</h1>
+        <h1 className="text-lg">{t.settings.title}</h1>
       </TopBar>
 
       <div className="flex-1 overflow-y-auto px-8 py-7">
@@ -214,7 +214,7 @@ export function SettingsView() {
             </Row>
           </Group>
 
-          <p className="pb-4 text-center text-[11px] text-ink-3">
+          <p className="pb-4 text-center text-xs text-ink-3">
             Weavo · <a href="https://github.com/vorlis08/weavo" target="_blank" rel="noreferrer">{t.settings.sourceLink}</a>
           </p>
         </div>

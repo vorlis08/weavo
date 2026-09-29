@@ -70,7 +70,7 @@ export function ProjectView() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">{t.project.notFoundTitle}</h1>
+          <h1 className="text-lg">{t.project.notFoundTitle}</h1>
         </TopBar>
         <EmptyState title={t.project.notFoundTitle} hint={t.project.notFoundBody} />
       </>
@@ -117,17 +117,17 @@ export function ProjectView() {
             className="h-7 w-[220px]"
           />
         ) : (
-          <h1 className="text-[16px]">{project.name}</h1>
+          <h1 className="text-lg">{project.name}</h1>
         )}
         {project.archived && (
-          <span className="mono text-[10px] uppercase tracking-wider text-ink-3">
+          <span className="mono text-xs uppercase tracking-wider text-ink-3">
             {t.project.archivedTag}
           </span>
         )}
         <div className="ml-auto flex items-center gap-2">
           <Button
             variant="ghost"
-            className="text-[12px]"
+            className="text-sm"
             onClick={() => navigate(`/board?project=${project.id}`)}
           >
             <Columns3 size={13} />
@@ -173,7 +173,7 @@ export function ProjectView() {
       <div className="flex-1 overflow-y-auto px-8 py-8">
         <div className="mx-auto max-w-[720px]">
           {/* properties */}
-          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-[12px] text-ink-3">
+          <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-sm text-ink-3">
             <div className="flex items-center gap-2">
               <span>{t.spaces.label}</span>
               <Segmented
@@ -198,7 +198,7 @@ export function ProjectView() {
                       : undefined,
                   })
                 }
-                className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-[11.5px] text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
               />
               {project.due && <DueChip due={project.due} />}
             </label>
@@ -245,7 +245,7 @@ export function ProjectView() {
                     style={{ width: `${stats.pct}%`, background: project.color }}
                   />
                 </div>
-                <span className="mono text-[10.5px]">{stats.pct}%</span>
+                <span className="mono text-xs">{stats.pct}%</span>
                 {stats.overdue > 0 && (
                   <span className="text-rose">{t.project.overdueSummary(stats.overdue)}</span>
                 )}
@@ -254,7 +254,7 @@ export function ProjectView() {
           </div>
 
           {/* page body — free-form doc */}
-          <div className="mt-6 min-h-[2em] text-[14px]">
+          <div className="mt-6 min-h-[2em] text-base">
             <InlineBody
               value={project.description ?? ''}
               onCommit={(v) => updateProject(project.id, { description: v || undefined })}
@@ -352,7 +352,7 @@ function Section({
       <div className="group mb-2 flex items-center gap-1.5">
         <button
           onClick={onToggle}
-          className="flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-3 hover:text-ink-2"
+          className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.1em] text-ink-3 hover:text-ink-2"
         >
           {sec.collapsed ? <ChevronRight size={13} /> : <ChevronDown size={13} />}
           {sectionLabel(t, sec.id)}
@@ -382,14 +382,14 @@ function Section({
         <div className="rounded-xl border border-line bg-surface p-1.5">
           {sec.id === 'done' &&
             (list.length === 0 ? (
-              <p className="px-1.5 py-2 text-[12px] text-ink-3">—</p>
+              <p className="px-1.5 py-2 text-sm text-ink-3">—</p>
             ) : (
               list.map((it) => <CompletedRow key={it.id} item={it} />)
             ))}
 
           {sec.id === 'events' &&
             (list.length === 0 ? (
-              <p className="px-1.5 py-2 text-[12px] text-ink-3">—</p>
+              <p className="px-1.5 py-2 text-sm text-ink-3">—</p>
             ) : (
               list.map((it) => (
                 <Link
@@ -397,7 +397,7 @@ function Section({
                   to={`/item/${it.id}`}
                   className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 hover:bg-surface-2"
                 >
-                  <span className="mono w-24 shrink-0 text-[11px] text-ink-3">
+                  <span className="mono w-24 shrink-0 text-xs text-ink-3">
                     {new Date(it.start!).toLocaleDateString(dateLocale(), {
                       weekday: 'short',
                       day: 'numeric',
@@ -405,7 +405,7 @@ function Section({
                     {!it.allDay && ` ${fmtTime(it.start!)}`}
                     {isSameDay(it.start!, new Date()) && ' ·'}
                   </span>
-                  <span className="truncate text-[12.5px]">{it.title}</span>
+                  <span className="truncate text-sm">{it.title}</span>
                 </Link>
               ))
             ))}
@@ -416,7 +416,7 @@ function Section({
                 <Link
                   key={it.id}
                   to={`/item/${it.id}`}
-                  className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 text-[12.5px] hover:bg-surface-2"
+                  className="flex items-center gap-2.5 rounded-md px-1.5 py-1.5 text-sm hover:bg-surface-2"
                 >
                   <span className="truncate">{it.title}</span>
                 </Link>
@@ -463,7 +463,7 @@ function InlineAdd({
         }}
         onBlur={commit}
         placeholder={placeholder}
-        className="flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-3"
+        className="flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
       />
     </div>
   )
@@ -491,14 +491,14 @@ function ProjectTaskRow({ item, onDelete }: { item: Item; onDelete: () => void }
         <Link
           to={`/item/${item.id}`}
           className={cn(
-            'min-w-0 flex-1 truncate text-[12.5px] hover:text-iris-2',
+            'min-w-0 flex-1 truncate text-sm hover:text-iris-2',
             done && 'text-ink-3 line-through',
           )}
         >
           {item.title}
         </Link>
         {kids.length > 0 && (
-          <span className="mono shrink-0 text-[10px] text-ink-3">
+          <span className="mono shrink-0 text-xs text-ink-3">
             {doneKids}/{kids.length}
           </span>
         )}

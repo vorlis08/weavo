@@ -45,7 +45,7 @@ export function ProjectTag({
   const project = useStore((s) => (projectId ? s.data.projects[projectId] : undefined))
   if (!project) return null
   return (
-    <span className={cn('flex items-center gap-1.5 text-[11px] text-ink-3', className)}>
+    <span className={cn('flex items-center gap-1.5 text-xs text-ink-3', className)}>
       <Dot color={project.color} />
       {project.name}
     </span>
@@ -58,7 +58,7 @@ export function DueChip({ due, className }: { due?: string; className?: string }
   return (
     <span
       className={cn(
-        'mono shrink-0 text-[10.5px]',
+        'mono shrink-0 text-xs',
         d.overdue ? 'text-rose' : 'text-ink-3',
         className,
       )}
@@ -91,13 +91,13 @@ export function TaskRow({ item }: { item: Item }) {
       )}
       <span
         className={cn(
-          'min-w-0 flex-1 truncate text-[12.5px]',
+          'min-w-0 flex-1 truncate text-sm',
           done && 'text-ink-3 line-through',
         )}
       >
         {item.title}
       </span>
-      {isBlocked && <span className="mono shrink-0 text-[10px] text-rose">{t.board.blocked}</span>}
+      {isBlocked && <span className="mono shrink-0 text-xs text-rose">{t.board.blocked}</span>}
       {item.priority && <Dot color={PRIORITY_COLOR[item.priority]} title={t.priority[item.priority]} />}
       {item.source && <SourceBadge source={item.source} />}
       {project && <Dot color={project.color} />}
@@ -114,7 +114,7 @@ export function CompletedRow({ item }: { item: Item }) {
       className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left opacity-45 transition-opacity hover:opacity-70"
     >
       <CircleCheck size={15} strokeWidth={1.6} className="shrink-0 text-sage" />
-      <span className="min-w-0 flex-1 truncate text-[12.5px] line-through">{item.title}</span>
+      <span className="min-w-0 flex-1 truncate text-sm line-through">{item.title}</span>
     </button>
   )
 }

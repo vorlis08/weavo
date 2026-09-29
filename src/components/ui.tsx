@@ -6,20 +6,23 @@ import type {
   TextareaHTMLAttributes,
 } from 'react'
 import { Check } from 'lucide-react'
+import { twMerge } from 'tailwind-merge'
 import { initials, tintFor } from '@/lib/util'
 
+/** join class names; later classes win over conflicting earlier ones */
 export function cn(...parts: (string | false | null | undefined)[]) {
-  return parts.filter(Boolean).join(' ')
+  return twMerge(parts.filter(Boolean).join(' '))
 }
 
 export function SectionLabel({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn('text-[10.5px] font-semibold uppercase tracking-[0.1em] text-ink-3', className)}>
+    <div className={cn('text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3', className)}>
       {children}
     </div>
   )
 }
 
+/** round dot — used for tags and plain color markers */
 export function Dot({ color, className, title }: { color: string; className?: string; title?: string }) {
   return (
     <span
@@ -28,6 +31,22 @@ export function Dot({ color, className, title }: { color: string; className?: st
       style={{ background: color }}
     />
   )
+}
+
+/** rounded square — a project's identity mark, never used for anything else */
+export function ProjectGlyph({ color, className, title }: { color: string; className?: string; title?: string }) {
+  return (
+    <span
+      title={title}
+      className={cn('inline-block h-[9px] w-[9px] shrink-0 rounded-[3px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.18)]', className)}
+      style={{ background: color }}
+    />
+  )
+}
+
+/** short horizontal thread — marks personal vs work */
+export function SpaceThread({ color, className }: { color: string; className?: string }) {
+  return <span className={cn('inline-block h-[2px] w-3 shrink-0 rounded-full', className)} style={{ background: color }} />
 }
 
 export function Badge({
@@ -39,14 +58,14 @@ export function Badge({
 }) {
   const tones = {
     default: 'bg-surface-3 text-ink-2',
-    accent: 'bg-iris text-[#0b0c0e]',
+    accent: 'bg-iris text-iris-ink',
     rose: 'bg-rose/15 text-rose',
     amber: 'bg-amber/15 text-amber',
   }
   return (
     <span
       className={cn(
-        'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10.5px] font-semibold',
+        'inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold',
         tones[tone],
       )}
     >
@@ -74,8 +93,8 @@ export function Chip({
       onClick={onClick}
       title={title}
       className={cn(
-        'inline-flex h-[23px] items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-surface-2 px-[9px] text-[11.5px] text-ink-2',
-        onClick && 'transition-colors hover:border-line-2 hover:text-ink',
+        'inline-flex h-7 items-center gap-2 whitespace-nowrap rounded-lg border border-line bg-surface px-2.5 text-sm text-ink-2',
+        onClick && 'transition-colors hover:border-line-3 hover:text-ink',
         className,
       )}
       style={style}
@@ -87,20 +106,22 @@ export function Chip({
 
 type BtnProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'default' | 'accent' | 'ghost' | 'danger'
+  size?: 'sm' | 'md'
   square?: boolean
 }
-export function Button({ variant = 'default', square, className, children, ...rest }: BtnProps) {
+export function Button({ variant = 'default', size = 'md', square, className, children, ...rest }: BtnProps) {
   const variants = {
-    default: 'border-line-2 bg-surface-2 text-ink hover:bg-surface-3',
-    accent: 'border-transparent bg-iris text-[#0b0c0e] font-semibold hover:bg-iris-2',
+    default: 'border-line-2 bg-surface text-ink hover:border-line-3 hover:bg-surface-2',
+    accent: 'border-transparent bg-iris text-iris-ink font-semibold hover:bg-iris-2',
     ghost: 'border-transparent bg-transparent text-ink-2 hover:bg-surface-2 hover:text-ink',
     danger: 'border-transparent bg-rose/15 text-rose hover:bg-rose/25',
   }
   return (
     <button
       className={cn(
-        'inline-flex h-8 items-center justify-center gap-[7px] rounded-lg border px-[13px] text-[12.5px] font-medium transition-colors active:translate-y-px disabled:pointer-events-none disabled:opacity-40',
-        square && 'w-8 px-0',
+        'inline-flex items-center justify-center gap-2 rounded-[10px] border font-medium transition-colors active:translate-y-px disabled:pointer-events-none disabled:opacity-40',
+        size === 'md' ? 'h-9 px-3.5 text-sm' : 'h-8 px-3 text-sm',
+        square && (size === 'md' ? 'w-9 px-0' : 'w-8 px-0'),
         variants[variant],
         className,
       )}
@@ -111,14 +132,17 @@ export function Button({ variant = 'default', square, className, children, ...re
   )
 }
 
+/** round checkbox; completing fills it with the accent */
 export function Checkbox({
   checked,
   onChange,
   className,
+  size = 'md',
 }: {
   checked: boolean
   onChange?: () => void
   className?: string
+  size?: 'sm' | 'md'
 }) {
   return (
     <span
@@ -138,12 +162,13 @@ export function Checkbox({
         }
       }}
       className={cn(
-        'flex h-4 w-4 shrink-0 cursor-pointer items-center justify-center rounded-[5px] border-[1.5px] transition-colors',
-        checked ? 'border-iris bg-iris text-[#0b0c0e]' : 'border-line-2 hover:border-iris',
+        'flex shrink-0 cursor-pointer items-center justify-center rounded-full border-[1.6px] transition-[background-color,border-color,transform] duration-200 active:scale-90',
+        size === 'md' ? 'h-5 w-5' : 'h-[17px] w-[17px]',
+        checked ? 'border-iris bg-iris text-iris-ink' : 'border-ink-4 hover:border-ink-2',
         className,
       )}
     >
-      {checked && <Check size={11} strokeWidth={3} />}
+      {checked && <Check size={size === 'md' ? 12 : 10} strokeWidth={3.2} />}
     </span>
   )
 }
@@ -180,22 +205,25 @@ export function Segmented<T extends string>({
   value,
   onChange,
   size = 'sm',
+  className,
 }: {
   options: { value: T; label: ReactNode }[]
   value: T
   onChange: (v: T) => void
   size?: 'sm' | 'md'
+  className?: string
 }) {
   return (
-    <div className="flex gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5">
+    <div className={cn('inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-[3px]', className)}>
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
+          aria-pressed={value === o.value}
           className={cn(
-            'flex items-center gap-1.5 rounded-md px-[11px] font-medium transition-colors',
-            size === 'sm' ? 'h-6 text-[11.5px]' : 'h-7 text-[12px]',
-            value === o.value ? 'bg-surface-3 text-ink' : 'text-ink-2 hover:text-ink',
+            'flex items-center gap-2 whitespace-nowrap rounded-[7px] px-3 text-sm font-medium transition-colors',
+            size === 'sm' ? 'h-7' : 'h-8',
+            value === o.value ? 'bg-surface-3 text-ink' : 'text-ink-3 hover:text-ink',
           )}
         >
           {o.label}
@@ -207,14 +235,14 @@ export function Segmented<T extends string>({
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <span className="mono rounded border border-line px-1.5 py-px text-[10px] text-ink-3">
+    <span className="rounded-[5px] border border-line-2 px-1.5 py-px font-mono text-[10.5px] leading-[1.4] text-ink-3">
       {children}
     </span>
   )
 }
 
 const fieldCls =
-  'h-8 w-full rounded-lg border border-line bg-surface-2 px-2.5 text-[12.5px] text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-iris/50'
+  'h-9 w-full rounded-[10px] border border-line-2 bg-surface px-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-3 focus:border-iris/60'
 
 export function TextField(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(fieldCls, props.className)} />
@@ -224,11 +252,7 @@ export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       {...props}
-      className={cn(
-        fieldCls,
-        'h-auto min-h-[72px] resize-y py-2 leading-relaxed',
-        props.className,
-      )}
+      className={cn(fieldCls, 'h-auto min-h-[80px] resize-y py-2.5 leading-relaxed', props.className)}
     />
   )
 }
@@ -239,12 +263,12 @@ export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
       {...props}
       className={cn(
         fieldCls,
-        'cursor-pointer appearance-none bg-[length:12px] bg-[right_8px_center] bg-no-repeat pr-7',
+        'cursor-pointer appearance-none bg-[length:12px] bg-[right_10px_center] bg-no-repeat pr-8',
         props.className,
       )}
       style={{
         backgroundImage:
-          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2361656e' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a889e' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
         ...props.style,
       }}
     />
@@ -272,15 +296,15 @@ export function EmptyState({
   action?: ReactNode
 }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center p-10 text-center">
+    <div className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
       {icon && (
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-line bg-surface text-ink-3">
+        <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl border border-line bg-surface text-ink-3">
           {icon}
         </div>
       )}
-      <h2 className="text-[15px]">{title}</h2>
-      {hint && <p className="mt-1.5 max-w-[320px] text-[12.5px] leading-relaxed text-ink-2">{hint}</p>}
-      {action && <div className="mt-4">{action}</div>}
+      <h2 className="display text-xl">{title}</h2>
+      {hint && <p className="mt-2 max-w-[360px] text-sm leading-relaxed text-ink-2">{hint}</p>}
+      {action && <div className="mt-5">{action}</div>}
     </div>
   )
 }

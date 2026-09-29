@@ -46,8 +46,8 @@ export function ProjectsView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.project.overviewTitle}</h1>
-        <Button variant="accent" className="ml-auto h-[30px] text-[12px]" onClick={() => setDialog(true)}>
+        <h1 className="text-lg">{t.project.overviewTitle}</h1>
+        <Button variant="accent" className="ml-auto h-[30px] text-sm" onClick={() => setDialog(true)}>
           <Plus size={13} />
           {t.project.newProject}
         </Button>
@@ -97,13 +97,13 @@ export function ProjectsView() {
                       <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: p.color }} />
                       <button
                         onClick={() => navigate(`/project/${p.id}`)}
-                        className="min-w-0 flex-1 truncate text-left text-[12.5px] text-ink-2 hover:text-ink"
+                        className="min-w-0 flex-1 truncate text-left text-sm text-ink-2 hover:text-ink"
                       >
                         {p.name}
                       </button>
                       <button
                         onClick={() => updateProject(p.id, { archived: undefined })}
-                        className="flex items-center gap-1.5 text-[11px] text-ink-3 hover:text-ink-2"
+                        className="flex items-center gap-1.5 text-xs text-ink-3 hover:text-ink-2"
                       >
                         <ArchiveRestore size={13} />
                         {t.project.unarchive}
@@ -128,7 +128,7 @@ export function ProjectsView() {
               if (e.key === 'Enter') create()
             }}
             placeholder={t.project.newProjectName}
-            className="mt-1.5 h-8 w-full rounded-lg border border-line bg-surface-2 px-2.5 text-[12.5px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
+            className="mt-1.5 h-8 w-full rounded-lg border border-line bg-surface-2 px-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
           />
           <div className="mt-3.5">
             <Segmented
@@ -179,11 +179,11 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
     >
       <div className="flex items-center gap-2">
         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: project.color }} />
-        <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-ink">{project.name}</span>
+        <span className="min-w-0 flex-1 truncate text-base font-medium text-ink">{project.name}</span>
       </div>
 
       {project.description && (
-        <p className="mt-1.5 line-clamp-2 text-[11.5px] leading-relaxed text-ink-3">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-ink-3">
           {project.description}
         </p>
       )}
@@ -195,7 +195,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
             style={{ width: `${stats.pct}%`, background: project.color }}
           />
         </div>
-        <div className="mt-1.5 flex items-center gap-2 text-[10.5px] text-ink-3">
+        <div className="mt-1.5 flex items-center gap-2 text-xs text-ink-3">
           <span>{t.project.tasksSummary(stats.done, stats.total)}</span>
           {stats.overdue > 0 && (
             <span className="text-rose">{t.project.overdueSummary(stats.overdue)}</span>
@@ -203,7 +203,7 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         </div>
       </div>
 
-      <div className="mt-2.5 flex items-center gap-2 text-[10.5px] text-ink-3">
+      <div className="mt-2.5 flex items-center gap-2 text-xs text-ink-3">
         <span>{t.project.openSummary(stats.openTasks)}</span>
         {stats.nextDue && (
           <>

@@ -64,7 +64,7 @@ export function MailView() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">{t.mail.title}</h1>
+          <h1 className="text-lg">{t.mail.title}</h1>
         </TopBar>
         <EmptyState
           icon={<Mail size={22} strokeWidth={1.5} />}
@@ -83,9 +83,9 @@ export function MailView() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.mail.title}</h1>
+        <h1 className="text-lg">{t.mail.title}</h1>
         <span className="mono text-ink-3">{google.gmailQuery}</span>
-        <Button variant="ghost" className="ml-auto text-[12px]" onClick={load} disabled={loading}>
+        <Button variant="ghost" className="ml-auto text-sm" onClick={load} disabled={loading}>
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
           {t.mail.refresh}
         </Button>
@@ -94,7 +94,7 @@ export function MailView() {
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <div className="mx-auto max-w-[760px]">
           {error && (
-            <p className="mb-4 rounded-lg bg-rose/10 px-3 py-2 text-[12px] text-rose">{error}</p>
+            <p className="mb-4 rounded-lg bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
           )}
           {!loading && mail.length === 0 && !error && (
             <EmptyState
@@ -111,23 +111,23 @@ export function MailView() {
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">
-                    <span className="truncate text-[13px] font-medium">{m.subject}</span>
-                    <span className="mono shrink-0 text-[10px] text-ink-3">{fmtAgo(m.date)}</span>
+                    <span className="truncate text-sm font-medium">{m.subject}</span>
+                    <span className="mono shrink-0 text-xs text-ink-3">{fmtAgo(m.date)}</span>
                   </div>
-                  <div className="mt-0.5 truncate text-[11.5px] text-ink-3">{m.fromName}</div>
-                  <p className="mt-1 line-clamp-2 text-[12px] leading-relaxed text-ink-2">{m.snippet}</p>
+                  <div className="mt-0.5 truncate text-xs text-ink-3">{m.fromName}</div>
+                  <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-ink-2">{m.snippet}</p>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1.5">
                   <button
                     onClick={() => convert(m, 'task')}
-                    className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-[11px] text-ink-2 hover:text-ink"
+                    className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-xs text-ink-2 hover:text-ink"
                   >
                     <ListChecks size={12} />
                     {t.mail.toTask}
                   </button>
                   <button
                     onClick={() => convert(m, 'note')}
-                    className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-[11px] text-ink-2 hover:text-ink"
+                    className="flex items-center gap-1.5 rounded-lg border border-line-2 px-2 py-1 text-xs text-ink-2 hover:text-ink"
                   >
                     <FileText size={12} />
                     {t.mail.toNote}
@@ -136,7 +136,7 @@ export function MailView() {
                     href={m.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-[11px] text-ink-3 hover:text-ink-2"
+                    className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-ink-3 hover:text-ink-2"
                   >
                     <ExternalLink size={12} />
                     Gmail

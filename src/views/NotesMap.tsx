@@ -107,7 +107,7 @@ export function NotesMap() {
     return (
       <>
         <TopBar>
-          <h1 className="text-[16px]">{t.notesMap.title}</h1>
+          <h1 className="text-lg">{t.notesMap.title}</h1>
         </TopBar>
         <EmptyState
           icon={<Network size={22} strokeWidth={1.5} />}
@@ -126,7 +126,7 @@ export function NotesMap() {
   return (
     <>
       <TopBar>
-        <h1 className="text-[16px]">{t.notesMap.title}</h1>
+        <h1 className="text-lg">{t.notesMap.title}</h1>
         <span className="mono text-ink-3">
           {t.notesMap.stats(graph.nodes.length, graph.edges.length)}
         </span>
@@ -170,7 +170,7 @@ export function NotesMap() {
                 <text
                   x={r + 5}
                   y={4}
-                  className="fill-ink-2 text-[11px]"
+                  className="fill-ink-2 text-xs"
                   style={{ paintOrder: 'stroke', stroke: 'var(--color-bg)', strokeWidth: 3 }}
                 >
                   {n.title.length > 28 ? n.title.slice(0, 27) + '…' : n.title}

@@ -5,18 +5,20 @@ import { mainViews, moreViews } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { todayTasks } from '@/lib/selectors'
-import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
+import { PROJECT_COLORS, SPACE_COLOR } from '@/lib/types'
 import type { Space } from '@/lib/types'
-import { Badge, Dot, Kbd, SectionLabel, cn } from './ui'
+import { WeavoLogo } from './brand'
+import { Avatar, Badge, Kbd, ProjectGlyph, SpaceThread, cn } from './ui'
 
 const itemCls = (active: boolean) =>
   cn(
-    'flex h-[31px] items-center gap-2.5 rounded-md px-2.5 text-[12.75px] font-medium transition-colors',
-    active ? 'bg-iris/12 text-iris-2' : 'text-ink-2 hover:bg-surface-2 hover:text-ink',
+    'group flex h-9 w-full items-center gap-3 rounded-[9px] px-2.5 text-base font-medium transition-colors',
+    active ? 'bg-surface-2 text-ink [&>svg]:text-iris' : 'text-ink-2 hover:bg-surface hover:text-ink',
   )
 const navClass = ({ isActive }: { isActive: boolean }) => itemCls(isActive)
 
-export function Sidebar() {
+/** the sidebar; on phones the same content opens as a drawer (`onNavigate` closes it) */
+export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; className?: string }) {
   const t = useT()
   const navigate = useNavigate()
   const location = useLocation()
@@ -37,7 +39,7 @@ export function Sidebar() {
   const openToday = todayTasks(data).filter((it) => it.status !== 'done').length
   const countFor = (projectId: string) =>
     Object.values(data.items).filter(
-      (it) => it.projectId === projectId && it.kind === 'task' && it.status !== 'done',
+      (it) => it.projectId === projectId && it.kind === 'task' && it.status !== 'done' && !it.someday,
     ).length
   const unsortedCount = Object.values(data.items).filter((it) => it.unsorted).length
 
@@ -50,6 +52,7 @@ export function Sidebar() {
     const color = PROJECT_COLORS[Object.keys(projectsRec).length % PROJECT_COLORS.length].value
     const p = addProject(name, color, space)
     navigate(`/project/${p.id}`)
+    onNavigate?.()
   }
 
   const isActive = (path: string) =>
@@ -62,61 +65,61 @@ export function Sidebar() {
           : location.pathname.startsWith(path)
 
   return (
-    <aside className="flex w-[232px] shrink-0 flex-col overflow-y-auto border-r border-line bg-[#0c0d10] px-3.5 py-[18px]">
-      <div className="flex items-center gap-2.5 px-2 pb-4 pt-0.5">
-        <div className="flex h-[22px] w-[22px] items-center justify-center rounded-[7px] bg-gradient-to-br from-iris to-[#6f76d9]">
-          <svg viewBox="0 0 24 24" className="h-[13px] w-[13px]" fill="none" stroke="#0b0c0e" strokeWidth={2.3} strokeLinecap="round">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </div>
-        <span className="text-[14.5px] font-semibold tracking-[-0.02em]">Weavo</span>
+    <aside
+      className={cn(
+        'flex w-[236px] shrink-0 flex-col overflow-y-auto border-r border-line bg-side px-3 pb-3.5 pt-[18px]',
+        className,
+      )}
+      onClick={(e) => {
+        if (onNavigate && (e.target as HTMLElement).closest('a')) onNavigate()
+      }}
+    >
+      <div className="px-2.5 pb-[18px] pt-0.5">
+        <WeavoLogo />
       </div>
 
       <button
         data-tour="capture"
-        onClick={() => openCapture()}
-        className="mb-[7px] flex h-8 w-full items-center gap-[7px] rounded-lg bg-iris px-[13px] text-[12.5px] font-semibold text-[#0b0c0e] transition-colors hover:bg-iris-2"
+        onClick={() => {
+          onNavigate?.()
+          openCapture()
+        }}
+        className="mb-[18px] flex h-[38px] shrink-0 items-center gap-2.5 rounded-[10px] border border-line-2 bg-surface px-2.5 text-base text-ink-2 transition-colors hover:border-line-3 hover:bg-surface-2 hover:text-ink"
       >
-        <Plus size={16} strokeWidth={1.7} />
-        {t.capture.title}
-        <span className="mono ml-auto text-[10px] opacity-55">C</span>
+        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-iris text-iris-ink">
+          <Plus size={13} strokeWidth={2.4} />
+        </span>
+        {t.nav.capture}
+        <span className="ml-auto">
+          <Kbd>C</Kbd>
+        </span>
       </button>
 
-      <button
-        data-tour="search"
-        onClick={() => setPalette(true)}
-        className="mb-4 flex h-8 items-center gap-2.5 rounded-lg border border-line px-2.5 text-ink-3 transition-colors hover:border-line-2 hover:text-ink-2"
-      >
-        <Search size={13} strokeWidth={1.6} />
-        <span className="text-[12px]">{t.common.search}</span>
-        <span className="mono ml-auto text-[10px]">⌘K</span>
-      </button>
-
-      <nav data-tour="views" className="flex flex-col">
+      <nav data-tour="views" className="flex flex-col gap-px">
         {mainViews.map((v) => (
           <NavLink key={v.id} to={v.path} className={() => itemCls(isActive(v.path))}>
-            <v.icon size={16} strokeWidth={1.5} />
+            <v.icon size={18} strokeWidth={1.6} />
             {t.nav[v.id]}
             {v.id === 'todo' && openToday > 0 && (
-              <span className="mono ml-auto text-[11px] text-ink-3">{openToday}</span>
+              <span className="mono ml-auto text-sm font-normal text-ink-3">{openToday}</span>
             )}
           </NavLink>
         ))}
-        <button onClick={() => setMoreOpen((o) => !o)} className={itemCls(false)}>
-          <Ellipsis size={16} strokeWidth={1.5} />
+        <button onClick={() => setMoreOpen((o) => !o)} className={itemCls(false)} aria-expanded={moreOpen}>
+          <Ellipsis size={18} strokeWidth={1.6} />
           {t.nav.more}
-          <ChevronRight size={13} className={cn('ml-auto transition-transform', moreOpen && 'rotate-90')} />
+          <ChevronRight size={14} className={cn('ml-auto text-ink-3 transition-transform', moreOpen && 'rotate-90')} />
         </button>
         {moreOpen && (
-          <div className="flex flex-col pl-[26px]">
+          <div className="flex flex-col gap-px pl-[30px]">
             {moreViews.map((v) => (
-              <NavLink key={v.id} to={v.path} className={navClass}>
+              <NavLink key={v.id} to={v.path} className={(a) => cn(navClass(a), 'h-8 text-sm')}>
                 {t.nav[v.id]}
               </NavLink>
             ))}
             {data.google.connected && (
-              <NavLink to="/mail" className={navClass}>
-                <Mail size={14} strokeWidth={1.5} />
+              <NavLink to="/mail" className={(a) => cn(navClass(a), 'h-8 text-sm')}>
+                <Mail size={15} strokeWidth={1.6} />
                 {t.nav.mail}
               </NavLink>
             )}
@@ -124,85 +127,105 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div data-tour="projects" className="px-2.5 pb-1 pt-[17px]">
-        <NavLink
-          to="/projects"
-          className={({ isActive }) => cn('transition-colors', isActive ? 'text-iris-2' : 'hover:text-ink-2')}
-        >
-          <SectionLabel>{t.nav.projects}</SectionLabel>
-        </NavLink>
-      </div>
-      {SPACES.map((space) => {
-        const list = projects.filter((p) => p.space === space)
-        return (
-          <div key={space} className="mb-1">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 text-[10.5px] text-ink-3">
-              <Dot color={SPACE_COLOR[space]} className="h-[5px] w-[5px]" />
-              {t.spaces[space]}
-              <button
-                onClick={() => {
-                  setCreating((c) => (c === space ? null : space))
-                  setDraft('')
-                }}
-                className="ml-auto text-ink-3 transition-colors hover:text-ink-2"
-                title={t.nav.manageProjects}
-              >
-                <Plus size={12} />
-              </button>
-            </div>
-            {creating === space && (
-              <input
-                autoFocus
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onBlur={createProject}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') createProject()
-                  if (e.key === 'Escape') {
+      <div data-tour="projects">
+        {(['work', 'personal'] as Space[]).map((space) => {
+          const list = projects.filter((p) => p.space === space)
+          return (
+            <div key={space}>
+              <div className="group/sec flex items-center gap-2 px-2.5 pb-1.5 pt-[22px] text-sm font-medium text-ink-3">
+                <SpaceThread color={SPACE_COLOR[space]} className="w-3.5" />
+                {t.spaces[space]}
+                <button
+                  onClick={() => {
+                    setCreating((c) => (c === space ? null : space))
                     setDraft('')
-                    setCreating(null)
+                  }}
+                  className="ml-auto flex h-6 w-6 items-center justify-center rounded-md text-ink-3 opacity-60 transition hover:bg-surface-2 hover:text-ink group-hover/sec:opacity-100"
+                  title={t.nav.manageProjects}
+                  aria-label={t.nav.manageProjects}
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              {creating === space && (
+                <input
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onBlur={createProject}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') createProject()
+                    if (e.key === 'Escape') {
+                      setDraft('')
+                      setCreating(null)
+                    }
+                  }}
+                  placeholder={t.project.newProjectName}
+                  className="mx-1 mb-1 h-8 w-[calc(100%-8px)] rounded-lg border border-line-2 bg-surface px-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/60"
+                />
+              )}
+              {list.map((p) => (
+                <NavLink
+                  key={p.id}
+                  to={`/project/${p.id}`}
+                  className={({ isActive: a }) =>
+                    cn(
+                      'flex h-8 items-center gap-2.5 rounded-lg px-2.5 text-[13.5px] transition-colors',
+                      a ? 'bg-surface-2 text-ink' : 'text-ink-2 hover:bg-surface hover:text-ink',
+                    )
                   }
-                }}
-                placeholder={t.project.newProjectName}
-                className="mx-2.5 mb-1 h-7 w-[calc(100%-20px)] rounded-md border border-line bg-surface-2 px-2 text-[12px] text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
-              />
-            )}
-            {list.map((p) => (
-              <NavLink key={p.id} to={`/project/${p.id}`} className={navClass}>
-                <Dot color={p.color} />
-                <span className="truncate">{p.name}</span>
-                {countFor(p.id) > 0 && (
-                  <span className="mono ml-auto text-[11px] text-ink-3">{countFor(p.id)}</span>
-                )}
-              </NavLink>
-            ))}
-          </div>
-        )
-      })}
-      {projects.length === 0 && !creating && (
-        <p className="px-2.5 pb-1 text-[11px] leading-relaxed text-ink-3">{t.nav.addProjectHint}</p>
-      )}
+                >
+                  <ProjectGlyph color={p.color} />
+                  <span className="truncate">{p.name}</span>
+                  {countFor(p.id) > 0 && <span className="mono ml-auto text-sm text-ink-3">{countFor(p.id)}</span>}
+                </NavLink>
+              ))}
+              {list.length === 0 && creating !== space && (
+                <p className="px-2.5 py-1 text-sm text-ink-4">{t.nav.noProjectsInSpace}</p>
+              )}
+            </div>
+          )
+        })}
+      </div>
 
-      <div className="mt-auto border-t border-line pt-3">
+      <div className="mt-auto flex flex-col gap-px border-t border-line pt-3">
         {unsortedCount > 0 && (
           <NavLink to="/triage" className={navClass}>
-            <Inbox size={16} strokeWidth={1.5} />
+            <Inbox size={18} strokeWidth={1.6} />
             {t.nav.unsorted}
-            <Badge tone="accent">{unsortedCount}</Badge>
+            <span className="ml-auto">
+              <Badge tone="accent">{unsortedCount}</Badge>
+            </span>
           </NavLink>
         )}
+        <button
+          data-tour="search"
+          onClick={() => {
+            onNavigate?.()
+            setPalette(true)
+          }}
+          className={itemCls(false)}
+        >
+          <Search size={18} strokeWidth={1.6} />
+          {t.common.search}
+          <span className="ml-auto">
+            <Kbd>⌘K</Kbd>
+          </span>
+        </button>
         <NavLink to="/guide" className={navClass}>
-          <BookOpen size={16} strokeWidth={1.5} />
+          <BookOpen size={18} strokeWidth={1.6} />
           {t.nav.guide}
         </NavLink>
         <NavLink to="/settings" className={navClass} data-tour="settings">
-          <Settings size={16} strokeWidth={1.5} />
+          <Settings size={18} strokeWidth={1.6} />
           {t.nav.settings}
         </NavLink>
-      </div>
-
-      <div className="px-2.5 pt-2">
-        <Kbd>?</Kbd> <span className="text-[10px] text-ink-3">{t.nav.shortcuts}</span>
+        {data.settings.displayName && (
+          <div className="flex items-center gap-2.5 px-2.5 pt-2 text-sm text-ink-2">
+            <Avatar name={data.settings.displayName} size={24} />
+            {data.settings.displayName}
+          </div>
+        )}
       </div>
     </aside>
   )

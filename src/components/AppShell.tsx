@@ -40,8 +40,8 @@ function TourNudge() {
           <Sparkles size={14} />
         </span>
         <div>
-          <div className="text-[13px] font-medium">{t.tour.nudgeTitle}</div>
-          <p className="mt-0.5 text-[12px] leading-snug text-ink-2">{t.tour.nudgeBody}</p>
+          <div className="text-sm font-medium">{t.tour.nudgeTitle}</div>
+          <p className="mt-0.5 text-sm leading-snug text-ink-2">{t.tour.nudgeBody}</p>
         </div>
         <button
           onClick={endTour}
@@ -54,13 +54,13 @@ function TourNudge() {
       <div className="mt-3 flex gap-2">
         <button
           onClick={startTour}
-          className="h-8 flex-1 rounded-lg bg-iris text-[12.5px] font-semibold text-[#0b0c0e] hover:bg-iris-2"
+          className="h-8 flex-1 rounded-lg bg-iris text-sm font-semibold text-[#0b0c0e] hover:bg-iris-2"
         >
           {t.tour.take}
         </button>
         <button
           onClick={endTour}
-          className="h-8 rounded-lg px-3 text-[12px] text-ink-3 hover:text-ink-2"
+          className="h-8 rounded-lg px-3 text-sm text-ink-3 hover:text-ink-2"
         >
           {t.tour.later}
         </button>
@@ -145,7 +145,7 @@ export function AppShell() {
               ['?', t.shortcutsModal.thisList],
             ] as [string, string][]
           ).map(([k, label]) => (
-            <div key={k} className="flex items-center justify-between text-[12.5px]">
+            <div key={k} className="flex items-center justify-between text-sm">
               <span className="text-ink-2">{label}</span>
               <Kbd>{k}</Kbd>
             </div>

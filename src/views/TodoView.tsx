@@ -1,15 +1,16 @@
 import { useMemo, useState } from 'react'
 import { NavLink, useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, Clock9, Columns3, Flame, Hourglass, List, Plus, Repeat, Trash2 } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { ProgressBar, TodoSection, byUrgency } from '@/components/todo'
-import { Button, Dot, Segmented, cn } from '@/components/ui'
+import { Kbd, ProjectGlyph, Segmented, cn } from '@/components/ui'
 import { useConfirmDelete } from '@/components/useConfirmDelete'
 import { BoardColumns } from './Board'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { addDays, fmtDayMonth, fmtTime, isSameDay, startOfDay } from '@/lib/date'
+import { addDays, fmtLongDate, fmtTime, isSameDay, startOfDay } from '@/lib/date'
 import { isHot, isOnToday, isOverdue, todayTasks, waitingTasks } from '@/lib/selectors'
+import { taskFromLine } from '@/lib/capture'
 import { SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 
@@ -22,15 +23,11 @@ export function TodoView() {
   const data = useStore((s) => s.data)
   const { todoMode, workGroup } = data.settings
   const updateSettings = useStore((s) => s.updateSettings)
-  const openCapture = useStore((s) => s.openCapture)
 
   const now = new Date()
   const today = useMemo(() => todayTasks(data, space).sort(byUrgency), [data, space])
   const mine = useMemo(
-    () =>
-      Object.values(data.items).filter(
-        (it) => it.kind === 'task' && it.space === space && !it.parentId,
-      ),
+    () => Object.values(data.items).filter((it) => it.kind === 'task' && it.space === space && !it.parentId),
     [data.items, space],
   )
   const events = Object.values(data.items)
@@ -45,117 +42,166 @@ export function TodoView() {
   const noDate = mine.filter((it) => planned(it) && !it.due && !it.unsorted).sort(byUrgency)
   const waiting = waitingTasks(data, space)
   const someday = mine.filter((it) => it.someday && isOpen(it))
-
   const done = today.filter((it) => !isOpen(it)).length
 
-  return (
+  const actions = (
     <>
-      <TopBar>
-        <h1 className="text-[16px]">{t.todo.title}</h1>
-        <div className="flex gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5" data-tour="todo-space">
-          {(['personal', 'work'] as Space[]).map((sp) => (
-            <NavLink
-              key={sp}
-              to={sp === 'work' ? '/todo/work' : '/todo'}
-              end
-              className={cn(
-                'flex h-7 items-center gap-2 rounded-md px-3 text-[13px] font-semibold transition-colors',
-                space === sp ? 'bg-surface-3 text-ink' : 'text-ink-2 hover:text-ink',
-              )}
-            >
-              <Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />
-              {sp === 'work' ? t.spaces.workTodo : t.spaces.personal}
-            </NavLink>
+      {space === 'work' && todoMode === 'list' && (
+        <Segmented
+          options={[
+            { value: 'urgency', label: t.todo.byUrgency },
+            { value: 'project', label: t.todo.byProject },
+          ]}
+          value={workGroup}
+          onChange={(v) => updateSettings({ workGroup: v })}
+        />
+      )}
+      <Segmented
+        options={[
+          { value: 'list', label: <><List size={15} />{t.todo.list}</> },
+          { value: 'kanban', label: <><Columns3 size={15} />{t.todo.kanban}</> },
+        ]}
+        value={todoMode}
+        onChange={(v) => updateSettings({ todoMode: v })}
+      />
+    </>
+  )
+
+  const tabs = <SpaceTabs space={space} />
+
+  if (todoMode === 'kanban')
+    return (
+      <Page eyebrow={fmtLongDate(now)} title={t.todo.title} actions={actions} fill>
+        {tabs}
+        <BoardColumns space={space} />
+      </Page>
+    )
+
+  return (
+    <Page eyebrow={fmtLongDate(now)} title={t.todo.title} actions={actions}>
+      {tabs}
+      <QuickAdd space={space} />
+
+      <div className="mb-7 flex items-center gap-3.5">
+        <ProgressBar items={today} />
+        <span className="whitespace-nowrap text-sm text-ink-2">
+          <b className="font-semibold text-ink">{done}</b> {t.todo.ofDone(today.length)}
+        </span>
+      </div>
+
+      {events.length > 0 && (
+        <div className="-mt-1 mb-7 flex gap-2 overflow-x-auto pb-1">
+          {events.map((ev) => (
+            <EventPill key={ev.id} item={ev} />
           ))}
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          {space === 'work' && todoMode === 'list' && (
-            <Segmented
-              options={[
-                { value: 'urgency', label: t.todo.byUrgency },
-                { value: 'project', label: t.todo.byProject },
-              ]}
-              value={workGroup}
-              onChange={(v) => updateSettings({ workGroup: v })}
-            />
-          )}
-          <Segmented
-            options={[
-              { value: 'list', label: <><List size={13} />{t.todo.list}</> },
-              { value: 'kanban', label: <><Columns3 size={13} />{t.todo.kanban}</> },
-            ]}
-            value={todoMode}
-            onChange={(v) => updateSettings({ todoMode: v })}
-          />
-          <Button variant="accent" onClick={() => openCapture('task')}>
-            <Plus size={14} />
-            {t.todo.newTask}
-          </Button>
-        </div>
-      </TopBar>
-
-      {todoMode === 'kanban' ? (
-        <BoardColumns space={space} />
-      ) : (
-        <div className="flex-1 overflow-y-auto px-7 py-6">
-          <div className="mx-auto max-w-[860px]">
-            <p className="mb-4 text-[12.5px] text-ink-2">
-              {space === 'work' ? t.todo.subWork : t.todo.subPersonal}
-            </p>
-
-            <div className="mb-5 flex items-center gap-3">
-              <ProgressBar items={today} />
-              <span className="mono text-[12px] text-ink-2">{t.todo.progress(done, today.length)}</span>
-            </div>
-
-            {events.length > 0 && (
-              <div className="mb-6 flex gap-2 overflow-x-auto pb-1">
-                {events.map((ev) => (
-                  <EventPill key={ev.id} item={ev} />
-                ))}
-              </div>
-            )}
-
-            {space === 'personal' ? (
-              <PersonalSections today={today} />
-            ) : workGroup === 'project' ? (
-              <WorkByProject mine={mine} today={today} />
-            ) : (
-              <WorkByUrgency mine={mine} today={today} />
-            )}
-
-            {!(space === 'work' && workGroup === 'project') && (
-              <TodoSection
-                title={space === 'work' ? t.todo.thisWeek : t.todo.upcoming}
-                items={upcoming}
-              />
-            )}
-            {space === 'personal' && (
-              <TodoSection
-                title={t.todo.waiting}
-                icon={<Hourglass size={13} />}
-                hint={t.todo.waitingHint}
-                items={waiting}
-              />
-            )}
-            <TodoSection title={t.todo.noDate} items={noDate} />
-            <SomedaySection items={someday} space={space} />
-          </div>
-        </div>
       )}
-    </>
+
+      {space === 'personal' ? (
+        <PersonalSections today={today} />
+      ) : workGroup === 'project' ? (
+        <WorkByProject mine={mine} today={today} />
+      ) : (
+        <WorkByUrgency mine={mine} today={today} />
+      )}
+
+      {!(space === 'work' && workGroup === 'project') && (
+        <TodoSection title={space === 'work' ? t.todo.thisWeek : t.todo.upcoming} items={upcoming} />
+      )}
+      {space === 'personal' && (
+        <TodoSection
+          title={t.todo.waiting}
+          icon={<Hourglass size={14} />}
+          hint={t.todo.waitingHint}
+          items={waiting}
+        />
+      )}
+      <TodoSection title={t.todo.noDate} items={noDate} />
+      <SomedaySection items={someday} space={space} />
+    </Page>
+  )
+}
+
+/** Osobní / Práce as big tabs, each underlined with its thread */
+function SpaceTabs({ space }: { space: Space }) {
+  const t = useT()
+  const data = useStore((s) => s.data)
+  const count = (sp: Space) => todayTasks(data, sp).filter(isOpen).length
+  return (
+    <div className="mb-6 flex gap-7 border-b border-line" data-tour="todo-space">
+      {(['personal', 'work'] as Space[]).map((sp) => (
+        <NavLink
+          key={sp}
+          to={sp === 'work' ? '/todo/work' : '/todo'}
+          end
+          className={cn(
+            'display relative flex items-center gap-2.5 px-0.5 pb-3 text-xl tracking-[-0.02em] transition-colors',
+            space === sp ? 'text-ink' : 'text-ink-3 hover:text-ink-2',
+          )}
+        >
+          {sp === 'work' ? t.spaces.workTodo : t.spaces.personal}
+          <span className="rounded-full bg-surface-2 px-2 py-px font-sans text-sm font-semibold tracking-normal text-ink-2">
+            {count(sp)}
+          </span>
+          <span
+            className={cn(
+              'absolute -bottom-px left-0 right-0 h-[2px] origin-left rounded-full transition-transform duration-300 ease-out-soft',
+              space === sp ? 'scale-x-100' : 'scale-x-0',
+            )}
+            style={{ background: SPACE_COLOR[sp] }}
+          />
+        </NavLink>
+      ))}
+    </div>
+  )
+}
+
+/** one line in, a task out — understands dates, #tags and "!" */
+function QuickAdd({ space }: { space: Space }) {
+  const t = useT()
+  const data = useStore((s) => s.data)
+  const createItem = useStore((s) => s.createItem)
+  const toast = useStore((s) => s.toast)
+  const [draft, setDraft] = useState('')
+  function commit() {
+    const partial = taskFromLine(draft, space, data)
+    if (!partial) return
+    createItem(partial)
+    setDraft('')
+    toast(t.todo.added)
+  }
+  return (
+    <label className="mb-6 flex h-12 items-center gap-3 rounded-xl border border-line bg-surface px-3.5 text-ink-3 transition-colors focus-within:border-line-3">
+      <Plus size={16} />
+      <input
+        id="todo-quick-add"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={(e) => e.key === 'Enter' && commit()}
+        placeholder={t.todo.addPh}
+        autoComplete="off"
+        className="min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-3"
+      />
+      <span className="max-sm:hidden">
+        <Kbd>↵</Kbd>
+      </span>
+    </label>
   )
 }
 
 function EventPill({ item }: { item: Item }) {
   const navigate = useNavigate()
+  const past = item.end ? new Date(item.end) < new Date() : false
   return (
     <button
       onClick={() => navigate(`/item/${item.id}`)}
-      className="flex shrink-0 items-center gap-2.5 rounded-lg border border-line bg-surface py-1.5 pl-2 pr-3 text-[12.5px] hover:border-line-2"
+      className={cn(
+        'flex h-9 shrink-0 items-center gap-2.5 rounded-[10px] border border-line bg-surface pl-3 pr-3.5 text-[13.5px] transition-colors hover:border-line-3',
+        past && 'opacity-50',
+      )}
     >
-      <span className="h-5 w-[3px] rounded-full" style={{ background: SPACE_COLOR[item.space] }} />
-      {!item.allDay && <span className="mono text-[11px] text-ink-2">{fmtTime(item.start!)}</span>}
+      <span className="h-4 w-[2px] rounded-full" style={{ background: SPACE_COLOR[item.space] }} />
+      {!item.allDay && <span className="mono text-sm text-ink-3">{fmtTime(item.start!)}</span>}
       {item.title}
     </button>
   )
@@ -163,41 +209,66 @@ function EventPill({ item }: { item: Item }) {
 
 function PersonalSections({ today }: { today: Item[] }) {
   const t = useT()
-  const tags = useStore((s) => s.data.tags)
-  const personalTags = Object.values(tags)
+  const { tags, projects } = useStore((s) => s.data)
+  const tagOrder = Object.values(tags)
     .filter((tg) => tg.space === 'personal')
     .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
 
   const overdue = today.filter((it) => isOverdue(it))
-  const rest = today.filter((it) => !isOverdue(it) && !(it.repeat && it.repeat !== 'none'))
-  const routines = today.filter((it) => !isOverdue(it) && it.repeat && it.repeat !== 'none')
-  // a task with several tags sits under the first one in tag order
-  const home = (it: Item) => personalTags.find((tg) => it.tags.includes(tg.id))?.id
-  const untagged = rest.filter((it) => !home(it))
+  const routine = (it: Item) => !!it.repeat && it.repeat !== 'none'
+  const rest = today.filter((it) => !isOverdue(it) && !routine(it))
+  const routines = today.filter((it) => !isOverdue(it) && routine(it))
+
+  // group by project first, then by the first tag in tag order, the rest under "Other"
+  const byProject = new Map<string, Item[]>()
+  const byTag = new Map<string, Item[]>()
+  const other: Item[] = []
+  for (const it of rest) {
+    if (it.projectId && projects[it.projectId]) byProject.set(it.projectId, [...(byProject.get(it.projectId) ?? []), it])
+    else {
+      const tg = tagOrder.find((x) => it.tags.includes(x.id))
+      if (tg) byTag.set(tg.id, [...(byTag.get(tg.id) ?? []), it])
+      else other.push(it)
+    }
+  }
 
   return (
     <>
-      <TodoSection title={t.todo.overdue} icon={<Flame size={13} />} hot items={overdue} />
-      {personalTags.map((tg) => (
+      <TodoSection title={t.todo.overdue} icon={<Flame size={14} />} hot items={overdue} />
+      {[...byProject.entries()].map(([pid, list]) => (
         <TodoSection
-          key={tg.id}
-          title={tg.name}
-          dot={tg.color}
-          hint={tg.leadDays ? t.todo.leadHint(tg.leadDays) : undefined}
-          items={rest.filter((it) => home(it) === tg.id)}
-          hideContext
+          key={pid}
+          title={projects[pid].name}
+          glyph={<ProjectGlyph color={projects[pid].color} />}
+          items={list}
+          hideProject
+          ctx="today"
         />
       ))}
+      {tagOrder
+        .filter((tg) => byTag.has(tg.id))
+        .map((tg) => (
+          <TodoSection
+            key={tg.id}
+            title={`#${tg.name}`}
+            hint={tg.leadDays ? t.todo.leadHint(tg.leadDays) : undefined}
+            items={byTag.get(tg.id)!}
+            hideTags
+            ctx="today"
+          />
+        ))}
       <TodoSection
-        title={personalTags.length ? t.todo.noTag : t.todo.today}
-        items={untagged}
+        title={byProject.size || byTag.size ? t.todo.other : t.todo.today}
+        items={other}
+        ctx="today"
         empty={rest.length || overdue.length || routines.length ? undefined : t.todo.emptyToday}
       />
       <TodoSection
         title={t.todo.routines}
-        icon={<Repeat size={13} />}
+        icon={<Repeat size={14} />}
         hint={t.todo.routinesHint}
         items={routines}
+        ctx="today"
       />
     </>
   )
@@ -212,16 +283,16 @@ function WorkByUrgency({ mine, today }: { mine: Item[]; today: Item[] }) {
     <>
       <TodoSection
         title={t.todo.hot}
-        icon={<Flame size={13} />}
+        icon={<Flame size={14} />}
         hot
         hint={t.todo.hotHint}
         items={hot}
         empty={t.todo.emptyHot}
       />
-      <TodoSection title={t.todo.today} items={rest} empty={t.todo.emptyToday} />
+      <TodoSection title={t.todo.today} items={rest} empty={t.todo.emptyToday} ctx="today" />
       <TodoSection
         title={t.todo.waiting}
-        icon={<Hourglass size={13} />}
+        icon={<Hourglass size={14} />}
         hint={t.todo.waitingHint}
         items={waitingTasks(data, 'work')}
       />
@@ -244,10 +315,9 @@ function WorkByProject({ mine, today }: { mine: Item[]; today: Item[] }) {
         <TodoSection
           key={p.id}
           title={p.name}
-          dot={p.color}
-          hint={p.due ? t.todo.projectDue(fmtDayMonth(p.due)) : undefined}
+          glyph={<ProjectGlyph color={p.color} />}
           items={active.filter((it) => it.projectId === p.id)}
-          hideContext
+          hideProject
         />
       ))}
       <TodoSection title={t.todo.noProject} items={loose} />
@@ -272,47 +342,52 @@ function SomedaySection({ items, space }: { items: Item[]; space: Space }) {
   return (
     <TodoSection
       title={t.todo.someday}
-      icon={<Clock9 size={13} />}
+      icon={<Clock9 size={14} />}
       hint={t.todo.somedayHint}
       items={items}
       collapsible
       defaultOpen={false}
     >
-      <div className="overflow-hidden rounded-xl border border-line bg-surface">
-        <div className="flex items-center gap-2.5 px-3 py-2.5">
-          <Plus size={14} className="shrink-0 text-ink-3" />
+      <div className="flex flex-col">
+        {items.map((it) => (
+          <div
+            key={it.id}
+            className="group flex min-h-11 items-center gap-3 rounded-[11px] px-3 hover:bg-surface"
+          >
+            <span className="h-5 w-5 shrink-0 rounded-full border-[1.6px] border-dashed border-ink-4" />
+            <button
+              onClick={() => navigate(`/item/${it.id}`)}
+              className="min-w-0 flex-1 truncate text-left text-base hover:text-iris-2"
+            >
+              {it.title}
+            </button>
+            <button
+              onClick={() => updateItem(it.id, { someday: false })}
+              className="flex shrink-0 items-center gap-1 text-sm text-iris-2 opacity-0 transition-opacity hover:text-iris group-hover:opacity-100 max-md:opacity-100"
+            >
+              {t.todo.promote}
+              <ArrowRight size={13} />
+            </button>
+            <button
+              onClick={() => askDelete(it.id, it.title)}
+              className="shrink-0 text-ink-3 opacity-0 transition-opacity hover:text-rose group-hover:opacity-100"
+              aria-label={t.common.delete}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ))}
+        <label className="flex min-h-11 items-center gap-3 rounded-[11px] px-3 text-ink-3 hover:bg-surface">
+          <Plus size={16} className="mx-0.5" />
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && commit()}
             onBlur={commit}
             placeholder={t.todo.somedayAdd}
-            className="flex-1 bg-transparent text-[12.5px] text-ink outline-none placeholder:text-ink-3"
+            className="flex-1 bg-transparent text-base text-ink outline-none placeholder:text-ink-3"
           />
-        </div>
-        {items.map((it) => (
-          <div key={it.id} className="group flex items-center gap-2.5 border-t border-line px-3 py-2 hover:bg-surface-2">
-            <button
-              onClick={() => navigate(`/item/${it.id}`)}
-              className="min-w-0 flex-1 truncate text-left text-[12.5px] hover:text-iris-2"
-            >
-              {it.title}
-            </button>
-            <button
-              onClick={() => updateItem(it.id, { someday: false })}
-              className="flex shrink-0 items-center gap-1 text-[11px] text-iris opacity-0 hover:text-iris-2 group-hover:opacity-100"
-            >
-              {t.todo.promote}
-              <ArrowRight size={11} />
-            </button>
-            <button
-              onClick={() => askDelete(it.id, it.title)}
-              className="shrink-0 text-ink-3 opacity-0 hover:text-rose group-hover:opacity-100"
-            >
-              <Trash2 size={12} />
-            </button>
-          </div>
-        ))}
+        </label>
       </div>
       {dialog}
     </TodoSection>

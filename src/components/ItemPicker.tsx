@@ -50,7 +50,7 @@ export function ItemPicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t.picker.searchOrCreate}
-          className="w-full bg-transparent text-[13px] text-ink outline-none placeholder:text-ink-3"
+          className="w-full bg-transparent text-sm text-ink outline-none placeholder:text-ink-3"
         />
       </div>
       <div className="max-h-[50vh] overflow-y-auto p-1.5">
@@ -61,7 +61,7 @@ export function ItemPicker({
               onPick(it)
               reset()
             }}
-            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[12.5px] text-iris-2 hover:bg-iris/10"
+            className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-iris-2 hover:bg-iris/10"
           >
             <Plus size={14} />
             {t.picker.create(t.kind[kinds[0]].toLowerCase(), q.trim())}
@@ -75,7 +75,7 @@ export function ItemPicker({
               reset()
             }}
             className={cn(
-              'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[12.5px] text-ink-2 hover:bg-surface-2 hover:text-ink',
+              'flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-sm text-ink-2 hover:bg-surface-2 hover:text-ink',
             )}
           >
             <span className="text-ink-3">
@@ -85,7 +85,7 @@ export function ItemPicker({
           </button>
         ))}
         {matches.length === 0 && !q.trim() && (
-          <p className="px-2.5 py-6 text-center text-[12px] text-ink-3">{t.picker.nothingToPick}</p>
+          <p className="px-2.5 py-6 text-center text-sm text-ink-3">{t.picker.nothingToPick}</p>
         )}
       </div>
     </Modal>
