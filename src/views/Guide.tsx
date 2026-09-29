@@ -14,7 +14,7 @@ import {
   Sparkles,
   Sunrise,
 } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { Button, SectionLabel, cn } from '@/components/ui'
 import { CapturePlayground } from '@/components/CapturePlayground'
 import { useStore } from '@/lib/store'
@@ -370,24 +370,18 @@ export function Guide() {
   const toast = useStore((s) => s.toast)
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.nav.guide}</h1>
-        <a
-          href="https://github.com/vorlis08/weavo"
-          target="_blank"
-          rel="noreferrer"
-          className="mono ml-auto text-xs text-ink-3 hover:text-ink-2"
-        >
+    <Page
+      title={t.nav.guide}
+      width="narrow"
+      actions={
+        <a href="https://github.com/vorlis08/weavo" target="_blank" rel="noreferrer" className="text-sm text-ink-3 hover:text-ink-2">
           {t.common.source}
         </a>
-      </TopBar>
-
-      <div className="flex-1 overflow-y-auto px-8 py-8">
-        <div className="mx-auto max-w-[760px]">
+      }
+    >
           <section className="pb-4">
             <SectionLabel className="mb-2.5">{g.what}</SectionLabel>
-            <h2 className="text-2xl font-semibold leading-tight tracking-[-0.025em] text-balance">
+            <h2 className="display text-2xl leading-tight text-balance">
               {g.headline}
             </h2>
             <p className="mt-3 text-lg leading-relaxed text-ink-2">{g.intro}</p>
@@ -412,7 +406,7 @@ export function Guide() {
           {g.sections.map((sec) => (
             <section key={sec.id} id={sec.id} className="border-t border-line py-9">
               <SectionLabel className="mb-2.5">{sec.eyebrow}</SectionLabel>
-              <h2 className="text-2xl font-semibold tracking-[-0.02em] text-balance">{sec.title}</h2>
+              <h2 className="display text-2xl text-balance">{sec.title}</h2>
               <div className="mt-3 space-y-3 text-base leading-relaxed text-ink-2">
                 {sec.paras?.map((p, i) => (
                   <p key={i}>
@@ -525,8 +519,6 @@ export function Guide() {
               {g.replay}
             </Button>
           </div>
-        </div>
-      </div>
-    </>
+    </Page>
   )
 }

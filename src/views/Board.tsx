@@ -90,13 +90,14 @@ function CardBody({ item }: { item: Item }) {
 
 function DraggableCard({ item }: { item: Item }) {
   const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id })
   return (
     <div
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      onClick={() => navigate(`/item/${item.id}`)}
+      onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
       className={cn('cursor-grab touch-none active:cursor-grabbing', isDragging && 'opacity-30')}
     >
       <CardBody item={item} />

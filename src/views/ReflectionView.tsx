@@ -1,48 +1,49 @@
 import { useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, ListChecks, Sparkles } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { ChevronRight } from 'lucide-react'
+import { Card, Page } from '@/components/Page'
 import { ReflectionTabs } from '@/components/ReflectionTabs'
-import { SectionLabel, cn } from '@/components/ui'
+import { cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { dayActivity } from '@/lib/selectors'
-import { fmtLongDate } from '@/lib/date'
+import { addDays, dateLocale, fmtLongDate } from '@/lib/date'
 import type { Reflection } from '@/lib/types'
 
-const MOODS: { value: 1 | 2 | 3 | 4 | 5; emoji: string }[] = [
-  { value: 1, emoji: '😞' },
-  { value: 2, emoji: '🙁' },
-  { value: 3, emoji: '😐' },
-  { value: 4, emoji: '🙂' },
-  { value: 5, emoji: '😄' },
-]
+type Mood = 1 | 2 | 3 | 4 | 5
+/** rough → great, rose through ochre to jade */
+export const MOOD_COLOR: Record<Mood, string> = {
+  1: '#f2838f',
+  2: '#e9a07a',
+  3: '#e7b45f',
+  4: '#a9c77e',
+  5: '#6fd0b0',
+}
 
 export function dateKey(d: Date) {
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-export function MoodPicker({
-  value,
-  onChange,
-}: {
-  value?: 1 | 2 | 3 | 4 | 5
-  onChange: (v: 1 | 2 | 3 | 4 | 5) => void
-}) {
+/** five named steps instead of emoji faces */
+export function MoodPicker({ value, onChange }: { value?: Mood; onChange: (v: Mood) => void }) {
+  const t = useT()
   return (
-    <div className="flex gap-1.5">
-      {MOODS.map((m) => (
+    <div className="grid grid-cols-5 gap-1.5">
+      {([1, 2, 3, 4, 5] as Mood[]).map((m) => (
         <button
-          key={m.value}
-          onClick={() => onChange(m.value)}
+          key={m}
+          onClick={() => onChange(m)}
+          aria-pressed={value === m}
           className={cn(
-            'flex h-9 w-9 items-center justify-center rounded-lg border text-xl transition-colors',
-            value === m.value
-              ? 'border-iris/50 bg-iris/14'
-              : 'border-line bg-surface-2 hover:border-line-2',
+            'flex flex-col items-center gap-2 rounded-xl border px-1 py-2.5 text-sm transition-colors',
+            value === m ? 'border-line-3 bg-surface-3 text-ink' : 'border-line text-ink-3 hover:border-line-2 hover:text-ink-2',
           )}
         >
-          {m.emoji}
+          <span
+            className="h-3 w-3 rounded-full transition-transform"
+            style={{ background: MOOD_COLOR[m], transform: value === m ? 'scale(1.25)' : undefined, opacity: value && value !== m ? 0.45 : 1 }}
+          />
+          {t.reflection.moods[m - 1]}
         </button>
       ))}
     </div>
@@ -57,78 +58,92 @@ function TodayCard() {
   const key = dateKey(today)
   const entry = data.reflections[key]
   const [draft, setDraft] = useState(entry?.note ?? '')
-
-  const activity = useMemo(() => dayActivity(data, today), [data]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  function commit() {
-    if (draft !== (entry?.note ?? '')) upsertReflection(key, { note: draft })
-  }
+  const activity = dayActivity(data, today)
 
   return (
-    <section className="rounded-xl border border-line bg-surface p-5">
-      <div className="flex items-center gap-2">
-        <Sparkles size={15} strokeWidth={1.6} className="text-iris-2" />
-        <h2 className="text-lg">{t.reflection.todayTitle}</h2>
-      </div>
-      <p className="mt-1 text-sm text-ink-3">{fmtLongDate(today)}</p>
-
-      <div className="mt-3.5 flex items-center gap-2.5 text-sm text-ink-2">
-        <ListChecks size={14} strokeWidth={1.6} className="shrink-0 text-ink-3" />
-        {activity.completed.length === 0 && activity.events.length === 0 ? (
-          <span>{t.reflection.summaryNone}</span>
-        ) : (
-          <span>
-            {activity.completed.length > 0 && t.reflection.summaryTasks(activity.completed.length)}
-            {activity.completed.length > 0 && activity.events.length > 0 && ' · '}
-            {activity.events.length > 0 && t.reflection.summaryEvents(activity.events.length)}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4">
-        <SectionLabel className="mb-1.5">{t.reflection.moodLabel}</SectionLabel>
+    <Card>
+      <h2 className="display text-xl">{t.reflection.todayTitle}</h2>
+      <p className="mt-1 text-sm text-ink-3">
+        {activity.completed.length === 0 && activity.events.length === 0
+          ? t.reflection.summaryNone
+          : [
+              activity.completed.length ? t.reflection.summaryTasks(activity.completed.length) : '',
+              activity.events.length ? t.reflection.summaryEvents(activity.events.length) : '',
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+      </p>
+      <div className="mt-5">
         <MoodPicker value={entry?.mood} onChange={(v) => upsertReflection(key, { mood: v })} />
       </div>
+      <textarea
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={() => draft !== (entry?.note ?? '') && upsertReflection(key, { note: draft })}
+        placeholder={t.reflection.notePlaceholder}
+        rows={4}
+        className="mt-4 w-full resize-y rounded-xl border border-line-2 bg-bg/50 p-3.5 text-base leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/60"
+      />
+    </Card>
+  )
+}
 
-      <div className="mt-4">
-        <textarea
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          placeholder={t.reflection.notePlaceholder}
-          rows={4}
-          className="w-full resize-none rounded-lg border border-line bg-surface-2 p-3 text-sm leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
-        />
+/** fourteen days of mood as bars — height and color both say how the day was */
+function MoodStrip() {
+  const t = useT()
+  const reflections = useStore((s) => s.data.reflections)
+  const today = new Date()
+  const days = Array.from({ length: 14 }, (_, i) => addDays(today, i - 13))
+  return (
+    <Card title={t.reflection.last14}>
+      <div className="grid h-24 items-end gap-1.5" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+        {days.map((d) => {
+          const mood = reflections[dateKey(d)]?.mood as Mood | undefined
+          return (
+            <div
+              key={d.toISOString()}
+              title={`${fmtLongDate(d)} · ${mood ? t.reflection.moods[mood - 1] : t.reflection.noMood}`}
+              className="rounded-md"
+              style={{
+                height: mood ? `${20 + mood * 16}%` : 6,
+                background: mood ? MOOD_COLOR[mood] : 'var(--color-surface-3)',
+                opacity: mood ? 0.9 : 1,
+              }}
+            />
+          )
+        })}
       </div>
-    </section>
+      <div className="mt-2 grid gap-1.5 text-center text-[11px] text-ink-3" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+        {days.map((d) => (
+          <span key={d.toISOString()} className={cn(dateKey(d) === dateKey(today) && 'font-semibold text-iris-2')}>
+            {d.toLocaleDateString(dateLocale(), { weekday: 'narrow' })}
+          </span>
+        ))}
+      </div>
+    </Card>
   )
 }
 
 function HistoryRow({ entry }: { entry: Reflection }) {
   const t = useT()
   const [open, setOpen] = useState(false)
-  const mood = MOODS.find((m) => m.value === entry.mood)
   const d = new Date(entry.date + 'T00:00')
-
+  const mood = entry.mood as Mood | undefined
   return (
-    <div className="rounded-lg border border-line bg-surface">
-      <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2.5 px-3.5 py-2.5 text-left"
-      >
-        {open ? (
-          <ChevronDown size={13} className="shrink-0 text-ink-3" />
-        ) : (
-          <ChevronRight size={13} className="shrink-0 text-ink-3" />
+    <div className="border-b border-line">
+      <button onClick={() => setOpen((v) => !v)} className="flex min-h-12 w-full items-center gap-3 px-2 text-left" aria-expanded={open}>
+        <ChevronRight size={14} className={cn('shrink-0 text-ink-3 transition-transform', open && 'rotate-90')} />
+        <span className="w-[170px] shrink-0 text-sm text-ink-2 max-sm:w-[130px]">{fmtLongDate(d)}</span>
+        {mood && (
+          <span className="flex shrink-0 items-center gap-1.5 text-sm text-ink-3">
+            <i className="h-2.5 w-2.5 rounded-full" style={{ background: MOOD_COLOR[mood] }} />
+            {t.reflection.moods[mood - 1]}
+          </span>
         )}
-        <span className="w-[150px] shrink-0 text-sm text-ink-2">{fmtLongDate(d)}</span>
-        {mood && <span className="text-lg">{mood.emoji}</span>}
-        {!open && entry.note && (
-          <span className="min-w-0 flex-1 truncate text-sm text-ink-3">{entry.note}</span>
-        )}
+        {!open && entry.note && <span className="min-w-0 flex-1 truncate text-sm text-ink-3">{entry.note}</span>}
       </button>
       {open && (
-        <div className="px-3.5 pb-3.5 text-sm leading-relaxed text-ink-2">
+        <div className="pb-4 pl-9 pr-2 text-base leading-relaxed text-ink-2">
           {entry.note ? <p className="whitespace-pre-line">{entry.note}</p> : <p className="text-ink-3">{t.reflection.noNote}</p>}
         </div>
       )}
@@ -140,7 +155,6 @@ export function ReflectionView() {
   const t = useT()
   const reflections = useStore((s) => s.data.reflections)
   const todayKey = dateKey(new Date())
-
   const history = useMemo(
     () =>
       Object.values(reflections)
@@ -150,28 +164,21 @@ export function ReflectionView() {
   )
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.nav.reflection}</h1>
-        <ReflectionTabs />
-      </TopBar>
-      <div className="flex-1 overflow-y-auto px-7 py-6">
-        <div className="mx-auto flex max-w-[640px] flex-col gap-6">
-          <TodayCard />
-          <div>
-            <SectionLabel className="mb-2.5">{t.reflection.historyTitle}</SectionLabel>
-            {history.length === 0 ? (
-              <p className="text-sm text-ink-3">{t.reflection.emptyHistory}</p>
-            ) : (
-              <div className="flex flex-col gap-2">
-                {history.map((r) => (
-                  <HistoryRow key={r.id} entry={r} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+    <Page eyebrow={fmtLongDate(new Date())} title={t.nav.reflection} actions={<ReflectionTabs />} width="narrow">
+      <div className="flex flex-col gap-3.5">
+        <TodayCard />
+        <MoodStrip />
       </div>
-    </>
+      <h3 className="mb-2 mt-9 px-2 text-sm font-semibold text-ink-2">{t.reflection.historyTitle}</h3>
+      {history.length === 0 ? (
+        <p className="px-2 text-base text-ink-3">{t.reflection.emptyHistory}</p>
+      ) : (
+        <div className="border-t border-line">
+          {history.map((r) => (
+            <HistoryRow key={r.id} entry={r} />
+          ))}
+        </div>
+      )}
+    </Page>
   )
 }

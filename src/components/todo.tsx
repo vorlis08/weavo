@@ -109,6 +109,7 @@ export function TodoRow({
   const navigate = useNavigate()
   const data = useStore((s) => s.data)
   const toggleDone = useStore((s) => s.toggleDone)
+  const openPeek = useStore((s) => s.openPeek)
   const done = item.status === 'done'
   const project = item.projectId ? data.projects[item.projectId] : undefined
   const waitDays = item.waitingFor ? Math.max(0, -daysUntil(item.waitingFor.since)) : 0
@@ -116,7 +117,7 @@ export function TodoRow({
 
   return (
     <div
-      onClick={() => navigate(`/item/${item.id}`)}
+      onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
       className={cn(
         'group/row relative flex min-h-12 cursor-pointer items-center gap-3 rounded-[11px] py-2 pl-3 pr-2 transition-colors hover:bg-surface',
         'before:absolute before:left-11 before:right-2.5 before:top-0 before:h-px before:bg-line first:before:hidden hover:before:opacity-0',

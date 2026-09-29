@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ExternalLink, FileText, ListChecks, Mail, RefreshCw } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { Button, EmptyState } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -62,10 +62,7 @@ export function MailView() {
 
   if (!google.connected) {
     return (
-      <>
-        <TopBar>
-          <h1 className="text-lg">{t.mail.title}</h1>
-        </TopBar>
+      <Page title={t.mail.title} width="narrow">
         <EmptyState
           icon={<Mail size={22} strokeWidth={1.5} />}
           title={t.mail.notConnectedTitle}
@@ -76,23 +73,22 @@ export function MailView() {
             </Link>
           }
         />
-      </>
+      </Page>
     )
   }
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.mail.title}</h1>
-        <span className="mono text-ink-3">{google.gmailQuery}</span>
-        <Button variant="ghost" className="ml-auto text-sm" onClick={load} disabled={loading}>
-          <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+    <Page
+      title={t.mail.title}
+      eyebrow={google.gmailQuery}
+      width="narrow"
+      actions={
+        <Button variant="ghost" onClick={load} disabled={loading}>
+          <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           {t.mail.refresh}
         </Button>
-      </TopBar>
-
-      <div className="flex-1 overflow-y-auto px-6 py-6">
-        <div className="mx-auto max-w-[760px]">
+      }
+    >
           {error && (
             <p className="mb-4 rounded-lg bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
           )}
@@ -145,8 +141,6 @@ export function MailView() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    </>
+    </Page>
   )
 }

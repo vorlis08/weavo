@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArchiveRestore, Plus, Target } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { ReflectionTabs } from '@/components/ReflectionTabs'
 import { Button, EmptyState, SectionLabel, cn } from '@/components/ui'
 import { Modal } from '@/components/overlays'
@@ -38,15 +38,18 @@ export function GoalsView() {
   }
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.nav.reflection}</h1>
-        <ReflectionTabs />
-        <Button variant="accent" className="ml-auto h-[30px] text-sm" onClick={() => setDialog(true)}>
-          <Plus size={13} />
-          {t.goals.newGoal}
-        </Button>
-      </TopBar>
+    <Page
+      title={t.nav.reflection}
+      actions={
+        <>
+          <ReflectionTabs />
+          <Button variant="accent" onClick={() => setDialog(true)}>
+            <Plus size={15} />
+            {t.goals.newGoal}
+          </Button>
+        </>
+      }
+    >
 
       {active.length === 0 && archived.length === 0 ? (
         <EmptyState
@@ -60,8 +63,8 @@ export function GoalsView() {
           }
         />
       ) : (
-        <div className="flex-1 overflow-y-auto px-7 py-6">
-          <div className="mx-auto max-w-[1100px]">
+        <div>
+          <div>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3.5">
               {active.map((g) => (
                 <GoalCard key={g.id} goal={g} onOpen={() => navigate(`/goal/${g.id}`)} />
@@ -132,7 +135,7 @@ export function GoalsView() {
           </div>
         </div>
       </Modal>
-    </>
+    </Page>
   )
 }
 

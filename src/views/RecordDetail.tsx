@@ -24,6 +24,7 @@ import {
   Dot,
   SectionLabel,
   Segmented,
+  SpaceThread,
   Select,
   cn,
 } from '@/components/ui'
@@ -31,7 +32,7 @@ import { Menu } from '@/components/overlays'
 import { ItemPicker } from '@/components/ItemPicker'
 import { Subtasks } from '@/components/Subtasks'
 import { useConfirmDelete } from '@/components/useConfirmDelete'
-import { InlineBody, InlineTitle, PropRow, TagEditor } from '@/components/editors'
+import { InlineBody, InlineTitle, PropRow, TagEditor, WaitingInput } from '@/components/editors'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { eventConflicts, noteLinks, subtasks as childSubtasks, suggestSlot } from '@/lib/selectors'
@@ -39,28 +40,6 @@ import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
 import { SPACE_COLOR, SPACES } from '@/lib/types'
 import type { RepeatFreq, TaskPriority, TaskStatus } from '@/lib/types'
 
-/** who the task is parked on — committed on blur / Enter, cleared by emptying it */
-function WaitingInput({ itemId, who, since }: { itemId: string; who?: string; since?: string }) {
-  const t = useT()
-  const setWaitingFor = useStore((s) => s.setWaitingFor)
-  const [draft, setDraft] = useState(who ?? '')
-  const commit = () => {
-    if (draft.trim() !== (who ?? '')) setWaitingFor(itemId, draft.trim() || null)
-  }
-  return (
-    <span className="flex w-full flex-col gap-0.5">
-      <input
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={commit}
-        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
-        placeholder={t.todo.waitingPh}
-        className="h-7 w-full rounded-lg border border-line bg-surface-2 px-2 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/50"
-      />
-      {who && since && <span className="text-xs text-amber">{t.todo.since(fmtDue(since)?.label ?? '')}</span>}
-    </span>
-  )
-}
 
 const STATUS_COLOR: Record<TaskStatus, string> = {
   todo: 'var(--color-ink-2)',
@@ -539,7 +518,7 @@ export function RecordDetail() {
                 <Segmented
                   options={SPACES.map((sp) => ({
                     value: sp,
-                    label: <><Dot color={SPACE_COLOR[sp]} className="h-1.5 w-1.5" />{t.spaces[sp]}</>,
+                    label: <><SpaceThread color={SPACE_COLOR[sp]} />{t.spaces[sp]}</>,
                   }))}
                   value={item.space}
                   onChange={(sp) => {

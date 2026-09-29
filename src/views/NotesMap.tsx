@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Network } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { EmptyState } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -105,16 +105,13 @@ export function NotesMap() {
 
   if (graph.nodes.length === 0) {
     return (
-      <>
-        <TopBar>
-          <h1 className="text-lg">{t.notesMap.title}</h1>
-        </TopBar>
+      <Page title={t.notesMap.title} fill>
         <EmptyState
           icon={<Network size={22} strokeWidth={1.5} />}
           title={t.notesMap.emptyTitle}
           hint={t.notesMap.emptyHint}
         />
-      </>
+      </Page>
     )
   }
 
@@ -124,14 +121,8 @@ export function NotesMap() {
     graph.edges.some(([a, b]) => (a === hover && b === id) || (b === hover && a === id))
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.notesMap.title}</h1>
-        <span className="mono text-ink-3">
-          {t.notesMap.stats(graph.nodes.length, graph.edges.length)}
-        </span>
-      </TopBar>
-      <div ref={wrap} className="flex flex-1 items-center justify-center overflow-auto p-6">
+    <Page title={t.notesMap.title} eyebrow={t.notesMap.stats(graph.nodes.length, graph.edges.length)} fill>
+      <div ref={wrap} className="flex flex-1 items-center justify-center overflow-auto rounded-2xl border border-line bg-surface p-6">
         <svg
           viewBox={`0 0 ${graph.W} ${graph.H}`}
           className="h-full max-h-[640px] w-full max-w-[1000px]"
@@ -180,6 +171,6 @@ export function NotesMap() {
           })}
         </svg>
       </div>
-    </>
+    </Page>
   )
 }

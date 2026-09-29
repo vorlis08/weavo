@@ -1,53 +1,54 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
-import { WeekGrid } from '@/components/WeekGrid'
-import { SpaceFilterSwitch } from '@/components/todo'
-import { SPACE_COLOR } from '@/lib/types'
-import { Button, Dot, Segmented, cn } from '@/components/ui'
+import { Page } from '@/components/Page'
+import { DayChip, WeekGrid, dayItems } from '@/components/WeekGrid'
+import { SpaceFilterSwitch, TodoList } from '@/components/todo'
+import { Button, Segmented, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
-import { useT, useLang } from '@/lib/i18n'
+import { useT } from '@/lib/i18n'
 import {
   addDays,
+  dateLocale,
   endOfMonth,
+  fmtLongDate,
   fmtMonth,
+  fmtShort,
   fmtTime,
   isSameDay,
   startOfMonth,
   startOfWeek,
 } from '@/lib/date'
+import { SPACE_COLOR } from '@/lib/types'
+import type { Item } from '@/lib/types'
+
+/** ISO week number, for the eyebrow */
+function weekNumber(d: Date) {
+  const x = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()))
+  const day = x.getUTCDay() || 7
+  x.setUTCDate(x.getUTCDate() + 4 - day)
+  const yearStart = new Date(Date.UTC(x.getUTCFullYear(), 0, 1))
+  return Math.ceil(((x.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7)
+}
 
 export function CalendarView() {
   const t = useT()
-  const lang = useLang()
   const navigate = useNavigate()
   const items = useStore((s) => s.data.items)
   const projects = useStore((s) => s.data.projects)
   const weekStartsMonday = useStore((s) => s.data.settings.weekStartsMonday)
-  const createItem = useStore((s) => s.createItem)
   const filter = useStore((s) => s.data.settings.spaceFilter)
   const space = filter === 'all' ? undefined : filter
 
   const [mode, setMode] = useState<'week' | 'month'>('week')
   const [anchor, setAnchor] = useState(() => new Date())
 
-  const events = useMemo(
-    () =>
-      Object.values(items).filter(
-        (it) => it.kind === 'event' && it.start && (!space || it.space === space),
-      ),
-    [items, space],
-  )
-
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(startOfWeek(anchor, weekStartsMonday), i)),
     [anchor, weekStartsMonday],
   )
-
   const monthCells = useMemo(() => {
-    const first = startOfMonth(anchor)
-    const gridStart = startOfWeek(first, weekStartsMonday)
+    const gridStart = startOfWeek(startOfMonth(anchor), weekStartsMonday)
     const last = endOfMonth(anchor)
     const cells: Date[] = []
     let d = gridStart
@@ -59,6 +60,16 @@ export function CalendarView() {
     return cells
   }, [anchor, weekStartsMonday])
 
+  const timed = useMemo(
+    () =>
+      Object.values(items).filter(
+        (it) => it.kind === 'event' && it.start && !it.allDay && (!space || it.space === space),
+      ),
+    [items, space],
+  )
+  const eventsOn = (d: Date) =>
+    timed.filter((e) => isSameDay(e.start!, d)).sort((a, b) => (a.start! < b.start! ? -1 : 1))
+
   function step(dir: number) {
     setAnchor((a) => {
       const n = new Date(a)
@@ -68,126 +79,147 @@ export function CalendarView() {
     })
   }
 
-  const heading =
+  const eyebrow =
     mode === 'week'
-      ? `${weekDays[0].getDate()} ${fmtMonth(weekDays[0], 'short')} – ${weekDays[6].getDate()} ${fmtMonth(weekDays[6], 'short')}`
+      ? `${fmtShort(weekDays[0])} – ${fmtShort(weekDays[6])} · ${t.calendar.weekNo(weekNumber(weekDays[0]))}`
       : `${fmtMonth(anchor)} ${anchor.getFullYear()}`
 
-  return (
+  const actions = (
     <>
-      <TopBar>
-        <div className="flex items-center gap-1.5">
-          <Button variant="ghost" square onClick={() => step(-1)}>
-            <ChevronLeft size={16} />
-          </Button>
-          <Button variant="ghost" square onClick={() => step(1)}>
-            <ChevronRight size={16} />
-          </Button>
-          <Button className="h-[30px] text-sm" onClick={() => setAnchor(new Date())}>
-            {t.common.today}
-          </Button>
-        </div>
-        <h1 className="text-lg">{heading}</h1>
-        <div className="ml-auto flex items-center gap-2">
-          <SpaceFilterSwitch />
-          <Segmented
-            options={[
-              { value: 'week', label: t.common.week },
-              { value: 'month', label: t.common.month },
-            ]}
-            value={mode}
-            onChange={setMode}
-          />
-        </div>
-      </TopBar>
+      <SpaceFilterSwitch />
+      <Segmented
+        options={[
+          { value: 'week', label: t.common.week },
+          { value: 'month', label: t.common.month },
+        ]}
+        value={mode}
+        onChange={setMode}
+      />
+      <span className="flex items-center gap-1">
+        <Button variant="ghost" square onClick={() => step(-1)} aria-label={t.calendar.prev}>
+          <ChevronLeft size={17} />
+        </Button>
+        <Button onClick={() => setAnchor(new Date())}>{t.calendar.today}</Button>
+        <Button variant="ghost" square onClick={() => step(1)} aria-label={t.calendar.next}>
+          <ChevronRight size={17} />
+        </Button>
+      </span>
+    </>
+  )
 
-      {mode === 'week' ? (
-        <div className="flex flex-1 overflow-hidden p-[18px]">
+  const agendaDays = mode === 'week' ? weekDays : monthCells.filter((c) => c.getMonth() === anchor.getMonth())
+
+  return (
+    <Page eyebrow={eyebrow} title={t.calendar.title} actions={actions} fill>
+      {/* phones: the range as a list of days */}
+      <div className="flex-1 overflow-y-auto md:hidden">
+        <Agenda days={agendaDays} eventsOn={eventsOn} />
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col max-md:hidden">
+        {mode === 'week' ? (
           <WeekGrid days={weekDays} space={space} />
-        </div>
-      ) : (
-        <div className="flex flex-1 flex-col overflow-hidden p-[18px]">
-          <div className="grid grid-cols-7 border-b border-line pb-2 text-xs font-semibold uppercase tracking-[0.08em] text-ink-3">
-            {weekDays.map((d) => (
-              <div key={d.toISOString()} className="text-center">
-                {d.toLocaleDateString(lang === 'cs' ? 'cs-CZ' : 'en-US', { weekday: 'short' })}
-              </div>
-            ))}
-          </div>
-          <div className="grid flex-1 auto-rows-fr grid-cols-7 overflow-y-auto">
-            {monthCells.map((cell) => {
-              const inMonth = cell.getMonth() === anchor.getMonth()
-              const today = isSameDay(cell, new Date())
-              const dayEvents = events
-                .filter((e) => isSameDay(e.start!, cell))
-                .sort((a, b) => new Date(a.start!).getTime() - new Date(b.start!).getTime())
-              return (
-                <button
-                  key={cell.toISOString()}
-                  onClick={() => {
-                    const start = new Date(cell)
-                    start.setHours(9, 0, 0, 0)
-                    const it = createItem({
-                      kind: 'event',
-                      title: t.calendar.addEventTitle,
-                      start: start.toISOString(),
-                      end: new Date(start.getTime() + 3_600_000).toISOString(),
-                      space: space ?? 'personal',
-                    })
-                    navigate(`/item/${it.id}`)
-                  }}
-                  className={cn(
-                    'group flex min-h-[92px] flex-col gap-1 border-b border-r border-line p-1.5 text-left transition-colors hover:bg-surface-2',
-                    !inMonth && 'opacity-40',
-                  )}
-                >
-                  <span
+        ) : (
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+            <div className="grid grid-cols-7 border-b border-line">
+              {weekDays.map((d) => (
+                <div key={d.toISOString()} className="border-l border-line px-2.5 py-2 text-sm text-ink-3 first:border-l-0">
+                  {d.toLocaleDateString(dateLocale(), { weekday: 'short' })}
+                </div>
+              ))}
+            </div>
+            <div className="grid flex-1 auto-rows-fr grid-cols-7 overflow-y-auto">
+              {monthCells.map((cell) => {
+                const inMonth = cell.getMonth() === anchor.getMonth()
+                const today = isSameDay(cell, new Date())
+                const evs = eventsOn(cell)
+                const { tasks, allDay } = dayItems(items, cell, space)
+                const all: Item[] = [...allDay, ...evs, ...tasks]
+                return (
+                  <div
+                    key={cell.toISOString()}
                     className={cn(
-                      'flex h-5 w-5 items-center justify-center rounded-full text-xs font-semibold',
-                      today ? 'bg-iris text-[#0b0c0e]' : 'text-ink-2',
+                      'flex min-h-[104px] min-w-0 flex-col gap-1 border-b border-l border-line p-1.5 [&:nth-child(7n+1)]:border-l-0',
+                      !inMonth && 'opacity-40',
+                      today && 'bg-iris/[0.04]',
                     )}
                   >
-                    {cell.getDate()}
-                  </span>
-                  {dayEvents.slice(0, 3).map((e) => (
                     <span
-                      key={e.id}
-                      onClick={(ev) => {
-                        ev.stopPropagation()
-                        navigate(`/item/${e.id}`)
-                      }}
-                      className="flex items-center gap-1 truncate rounded px-1 py-px text-xs text-ink-2 hover:text-ink"
-                      style={{
-                        background:
-                          (e.projectId && projects[e.projectId]?.color
-                            ? projects[e.projectId].color
-                            : SPACE_COLOR[e.space]) + '20',
-                      }}
+                      className={cn(
+                        'display mb-0.5 flex h-6 w-6 items-center justify-center rounded-full text-sm',
+                        today ? 'bg-iris text-iris-ink' : 'text-ink-2',
+                      )}
                     >
-                      <Dot
-                        color={
-                          e.projectId && projects[e.projectId]?.color
-                            ? projects[e.projectId].color
-                            : SPACE_COLOR[e.space]
-                        }
-                      />
-                      <span className="truncate">
-                        {!e.allDay && <span className="mono">{fmtTime(e.start!)} </span>}
-                        {e.title}
-                      </span>
+                      {cell.getDate()}
                     </span>
-                  ))}
-                  {dayEvents.length > 3 && (
-                    <span className="px-1 text-xs text-ink-3">
-                      +{dayEvents.length - 3} {lang === 'cs' ? 'dalších' : 'more'}
-                    </span>
-                  )}
-                </button>
-              )
-            })}
+                    {all.slice(0, 3).map((it) =>
+                      it.kind === 'task' || it.allDay ? (
+                        <DayChip key={it.id} item={it} />
+                      ) : (
+                        <button
+                          key={it.id}
+                          onClick={() => navigate(`/item/${it.id}`)}
+                          className="flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-[3px] text-left text-xs text-ink-2 hover:bg-surface-2 hover:text-ink"
+                        >
+                          <span
+                            className="h-3 w-[3px] shrink-0 rounded-full"
+                            style={{ background: it.projectId && projects[it.projectId] ? projects[it.projectId].color : SPACE_COLOR[it.space] }}
+                          />
+                          <span className="mono shrink-0 text-ink-3">{fmtTime(it.start!)}</span>
+                          <span className="truncate">{it.title}</span>
+                        </button>
+                      ),
+                    )}
+                    {all.length > 3 && <span className="px-1.5 text-xs text-ink-3">{t.calendar.more(all.length - 3)}</span>}
+                  </div>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      )}
-    </>
+        )}
+      </div>
+    </Page>
+  )
+}
+
+/** a day-by-day list of events and tasks — the calendar on phones */
+function Agenda({ days, eventsOn }: { days: Date[]; eventsOn: (d: Date) => Item[] }) {
+  const t = useT()
+  const navigate = useNavigate()
+  const items = useStore((s) => s.data.items)
+  const filter = useStore((s) => s.data.settings.spaceFilter)
+  const space = filter === 'all' ? undefined : filter
+  const now = new Date()
+  const sections = days
+    .map((d) => ({ d, events: eventsOn(d), ...dayItems(items, d, space) }))
+    .filter((s) => s.events.length || s.tasks.length || s.allDay.length)
+
+  if (!sections.length) return <p className="py-6 text-base text-ink-3">{t.calendar.empty}</p>
+  return (
+    <div>
+      {sections.map(({ d, events, tasks, allDay }) => (
+        <section key={d.toISOString()} className="mb-7">
+          <h2 className={cn('display mb-2 px-1 text-lg', isSameDay(d, now) ? 'text-iris-2' : 'text-ink')}>
+            {isSameDay(d, now) ? t.calendar.today : isSameDay(d, addDays(now, 1)) ? t.calendar.tomorrow : fmtLongDate(d)}
+          </h2>
+          {[...allDay, ...events].length > 0 && (
+            <div className="mb-1.5 flex flex-col">
+              {[...allDay, ...events].map((ev) => (
+                <button
+                  key={ev.id}
+                  onClick={() => navigate(`/item/${ev.id}`)}
+                  className="grid min-h-10 grid-cols-[48px_2px_1fr] items-center gap-3 rounded-lg px-1 text-left text-base"
+                >
+                  <span className="mono text-right text-sm text-ink-3">{ev.allDay ? '—' : fmtTime(ev.start!)}</span>
+                  <span className="h-5 rounded-full" style={{ background: SPACE_COLOR[ev.space] }} />
+                  <span className="truncate">{ev.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <TodoList items={tasks} showSpace={!space} />
+        </section>
+      ))}
+    </div>
   )
 }

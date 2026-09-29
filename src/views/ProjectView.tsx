@@ -621,6 +621,7 @@ function Rail({ project }: { project: Project }) {
   const data = useStore((s) => s.data)
   const toggleDone = useStore((s) => s.toggleDone)
   const createItem = useStore((s) => s.createItem)
+  const openPeek = useStore((s) => s.openPeek)
   const next = projectNextStep(data, project.id)
   const mine = useMemo(() => Object.values(data.items).filter((it) => it.projectId === project.id), [data.items, project.id])
   const today = startOfDay(new Date())
@@ -645,7 +646,7 @@ function Rail({ project }: { project: Project }) {
             {next.flame && <Flame size={13} className="text-flame" />}
             {t.project.nextStep}
           </div>
-          <button onClick={() => navigate(`/item/${next.id}`)} className="display text-left text-lg leading-snug hover:text-iris-2">
+          <button onClick={() => openPeek(next.id)} className="display text-left text-lg leading-snug hover:text-iris-2">
             {next.title}
           </button>
           <div className="mt-1.5 text-sm text-ink-3">
@@ -678,7 +679,7 @@ function Rail({ project }: { project: Project }) {
         <Card title={<><Hourglass size={14} className="text-amber" />{t.project.waitingTitle}</>}>
           <RailList>
             {waiting.map((it) => (
-              <RailRow key={it.id} onClick={() => navigate(`/item/${it.id}`)}>
+              <RailRow key={it.id} onClick={() => openPeek(it.id)}>
                 <span className="min-w-0 flex-1 truncate">{it.title}</span>
                 <span className="shrink-0 text-sm text-ink-3">{it.waitingFor!.who}</span>
               </RailRow>

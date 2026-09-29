@@ -150,6 +150,8 @@ interface Store {
   captureKind: ItemKind
   captureText: string
   paletteOpen: boolean
+  /** task shown in the side drawer */
+  peekId: string | null
   tourOpen: boolean
   toasts: Toast[]
 
@@ -158,6 +160,8 @@ interface Store {
   setCaptureKind: (k: ItemKind) => void
   setCaptureText: (t: string) => void
   setPalette: (open: boolean) => void
+  openPeek: (id: string) => void
+  closePeek: () => void
   startTour: () => void
   endTour: () => void
   toast: (message: string, action?: Toast['action']) => void
@@ -235,6 +239,7 @@ export const useStore = create<Store>()(
       captureKind: 'task',
       captureText: '',
       paletteOpen: false,
+      peekId: null,
       tourOpen: false,
       toasts: [],
 
@@ -248,6 +253,8 @@ export const useStore = create<Store>()(
       setCaptureKind: (k) => set({ captureKind: k }),
       setCaptureText: (t) => set({ captureText: t }),
       setPalette: (open) => set({ paletteOpen: open }),
+      openPeek: (id) => set({ peekId: id }),
+      closePeek: () => set({ peekId: null }),
       startTour: () => set({ tourOpen: true, captureOpen: false, paletteOpen: false }),
       endTour: () =>
         set((s) => ({

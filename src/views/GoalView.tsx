@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { Archive, ArchiveRestore, ChevronLeft, MoreHorizontal, Pencil, Trash2, X } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
-import { Button, EmptyState, SectionLabel, Select, TextField, cn } from '@/components/ui'
+import { Archive, ArchiveRestore, MoreHorizontal, Pencil, Trash2, X } from 'lucide-react'
+import { Page } from '@/components/Page'
+import { EmptyState, SectionLabel, Select, TextField, cn } from '@/components/ui'
 import { ConfirmDialog, Menu } from '@/components/overlays'
 import { InlineBody } from '@/components/editors'
 import { useStore } from '@/lib/store'
@@ -36,79 +36,79 @@ export function GoalView() {
 
   if (!goal) {
     return (
-      <>
-        <TopBar>
-          <h1 className="text-lg">{t.goals.notFoundTitle}</h1>
-        </TopBar>
+      <Page title={t.goals.notFoundTitle}>
         <EmptyState title={t.goals.notFoundTitle} hint={t.goals.notFoundBody} />
-      </>
+      </Page>
     )
   }
 
   return (
-    <>
-      <TopBar>
-        <Button variant="ghost" square onClick={() => navigate('/goals')}>
-          <ChevronLeft size={16} />
-        </Button>
-        <span className="h-2.5 w-2.5 rounded-full" style={{ background: goal.color }} />
-        {renaming ? (
-          <TextField
-            autoFocus
-            defaultValue={goal.title}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => {
-              if (name.trim()) updateGoal(goal.id, { title: name.trim() })
-              setRenaming(false)
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
-              if (e.key === 'Escape') setRenaming(false)
-            }}
-            className="h-7 w-[220px]"
-          />
-        ) : (
-          <h1 className="text-lg">{goal.title}</h1>
-        )}
-        {goal.archived && (
-          <span className="mono text-xs uppercase tracking-wider text-ink-3">{t.goals.archivedTag}</span>
-        )}
-        <div className="ml-auto flex items-center gap-2">
-          <Menu
-            align="right"
-            trigger={({ toggle }) => (
-              <button onClick={toggle} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-surface-2 hover:text-ink">
-                <MoreHorizontal size={15} />
-              </button>
-            )}
-            items={[
-              {
-                label: t.goals.rename,
-                icon: <Pencil size={13} />,
-                onSelect: () => {
-                  setName(goal.title)
-                  setRenaming(true)
+    <Page
+      before={
+        <div className="mb-3.5 flex items-center gap-2 text-sm text-ink-3">
+          <Link to="/goals" className="hover:text-ink">
+            {t.reflectionTabs.goals}
+          </Link>
+          {goal.archived && <span>· {t.goals.archivedTag}</span>}
+          <span className="-my-2 ml-auto">
+            <Menu
+              align="right"
+              trigger={({ toggle }) => (
+                <button onClick={toggle} className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-2 hover:bg-surface-2 hover:text-ink">
+                  <MoreHorizontal size={15} />
+                </button>
+              )}
+              items={[
+                {
+                  label: t.goals.rename,
+                  icon: <Pencil size={13} />,
+                  onSelect: () => {
+                    setName(goal.title)
+                    setRenaming(true)
+                  },
                 },
-              },
-              {
-                label: goal.archived ? t.goals.unarchive : t.goals.archive,
-                icon: goal.archived ? <ArchiveRestore size={13} /> : <Archive size={13} />,
-                onSelect: () => updateGoal(goal.id, { archived: goal.archived ? undefined : true }),
-              },
-              'separator',
-              {
-                label: t.goals.deleteGoal,
-                icon: <Trash2 size={13} />,
-                danger: true,
-                onSelect: () => setConfirmDel(true),
-              },
-            ]}
-          />
+                {
+                  label: goal.archived ? t.goals.unarchive : t.goals.archive,
+                  icon: goal.archived ? <ArchiveRestore size={13} /> : <Archive size={13} />,
+                  onSelect: () => updateGoal(goal.id, { archived: goal.archived ? undefined : true }),
+                },
+                'separator',
+                {
+                  label: t.goals.deleteGoal,
+                  icon: <Trash2 size={13} />,
+                  danger: true,
+                  onSelect: () => setConfirmDel(true),
+                },
+              ]}
+            />
+          </span>
         </div>
-      </TopBar>
-
-      <div className="flex-1 overflow-y-auto px-8 py-8">
-        <div className="mx-auto max-w-[720px]">
+      }
+      title={
+        <span className="flex items-center gap-3.5">
+          <span className="h-4 w-4 shrink-0 rounded-full" style={{ background: goal.color }} />
+          {renaming ? (
+            <TextField
+              autoFocus
+              defaultValue={goal.title}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => {
+                if (name.trim()) updateGoal(goal.id, { title: name.trim() })
+                setRenaming(false)
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur()
+                if (e.key === 'Escape') setRenaming(false)
+              }}
+              className="display h-11 max-w-[420px] text-2xl"
+            />
+          ) : (
+            goal.title
+          )}
+        </span>
+      }
+      width="narrow"
+    >
           <div className="flex flex-wrap items-center gap-x-7 gap-y-2.5 text-sm text-ink-3">
             <label className="flex items-center gap-2">
               <span>{t.goals.targetDate}</span>
@@ -120,7 +120,7 @@ export function GoalView() {
                     targetDate: e.target.value ? new Date(e.target.value + 'T00:00').toISOString() : undefined,
                   })
                 }
-                className="h-7 rounded-lg border border-line bg-surface-2 px-2 text-xs text-ink outline-none [color-scheme:dark] focus:border-iris/50"
+                className="h-8 rounded-lg border border-line-2 bg-surface px-2.5 text-sm text-ink outline-none [color-scheme:dark] focus:border-iris/60"
               />
             </label>
 
@@ -191,8 +191,6 @@ export function GoalView() {
               </div>
             )}
           </div>
-        </div>
-      </div>
 
       <ConfirmDialog
         open={confirmDel}
@@ -204,7 +202,7 @@ export function GoalView() {
         }}
         onCancel={() => setConfirmDel(false)}
       />
-    </>
+    </Page>
   )
 }
 

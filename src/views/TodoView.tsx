@@ -36,8 +36,16 @@ export function TodoView() {
 
   const weekEnd = addDays(startOfDay(now), 8)
   const planned = (it: Item) => isOpen(it) && !it.someday && !it.waitingFor
+  // burning work is already listed under "On fire"
   const upcoming = mine
-    .filter((it) => planned(it) && it.due && new Date(it.due) < weekEnd && !isOnToday(data, it))
+    .filter(
+      (it) =>
+        planned(it) &&
+        it.due &&
+        new Date(it.due) < weekEnd &&
+        !isOnToday(data, it) &&
+        !(space === 'work' && isHot(it)),
+    )
     .sort((a, b) => (a.due! < b.due! ? -1 : 1))
   const noDate = mine.filter((it) => planned(it) && !it.due && !it.unsorted).sort(byUrgency)
   const waiting = waitingTasks(data, space)
@@ -126,7 +134,12 @@ export function TodoView() {
 function SpaceTabs({ space }: { space: Space }) {
   const t = useT()
   const data = useStore((s) => s.data)
-  const count = (sp: Space) => todayTasks(data, sp).filter(isOpen).length
+  // what needs attention: open tasks for today plus anything burning
+  const count = (sp: Space) =>
+    new Set([
+      ...todayTasks(data, sp).filter(isOpen).map((it) => it.id),
+      ...Object.values(data.items).filter((it) => it.space === sp && isHot(it)).map((it) => it.id),
+    ]).size
   return (
     <div className="mb-6 flex gap-7 border-b border-line" data-tour="todo-space">
       {(['personal', 'work'] as Space[]).map((sp) => (

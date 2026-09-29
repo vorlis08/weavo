@@ -7,11 +7,11 @@ export function ReflectionTabs() {
   const t = useT()
   const cls = ({ isActive }: { isActive: boolean }) =>
     cn(
-      'flex h-7 items-center rounded-md px-3 text-sm font-medium transition-colors',
-      isActive ? 'bg-surface-3 text-ink' : 'text-ink-2 hover:text-ink',
+      'flex h-7 items-center rounded-[7px] px-3 text-sm font-medium transition-colors',
+      isActive ? 'bg-surface-3 text-ink' : 'text-ink-3 hover:text-ink',
     )
   return (
-    <div className="flex gap-0.5 rounded-lg border border-line bg-surface-2 p-0.5">
+    <div className="inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-[3px]">
       <NavLink to="/reflection" className={cls}>
         {t.reflectionTabs.journal}
       </NavLink>

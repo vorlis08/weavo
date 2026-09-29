@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { TopBar } from '@/components/TopBar'
+import { Page } from '@/components/Page'
 import { EmptyState } from '@/components/ui'
 import { GanttChartSquare } from 'lucide-react'
 import { useStore } from '@/lib/store'
@@ -53,16 +53,13 @@ export function Timeline() {
 
   if (dated.length === 0) {
     return (
-      <>
-        <TopBar>
-          <h1 className="text-lg">{t.timeline.title}</h1>
-        </TopBar>
+      <Page title={t.timeline.title} fill>
         <EmptyState
           icon={<GanttChartSquare size={22} strokeWidth={1.5} />}
           title={t.timeline.emptyTitle}
           hint={t.timeline.emptyHint}
         />
-      </>
+      </Page>
     )
   }
 
@@ -70,13 +67,8 @@ export function Timeline() {
   const todayX = xFor(new Date().toISOString())
 
   return (
-    <>
-      <TopBar>
-        <h1 className="text-lg">{t.timeline.title}</h1>
-        <span className="mono text-ink-3">{t.timeline.lanes(lanes.length)}</span>
-      </TopBar>
-
-      <div className="flex-1 overflow-auto p-[18px]">
+    <Page title={t.timeline.title} eyebrow={t.timeline.lanes(lanes.length)} fill>
+      <div className="flex-1 overflow-auto rounded-2xl border border-line bg-surface p-[18px]">
         <div className="relative" style={{ width: width + 160 }}>
           {/* date header */}
           <div className="sticky top-0 z-10 flex bg-bg pl-40">
@@ -150,6 +142,6 @@ export function Timeline() {
           })}
         </div>
       </div>
-    </>
+    </Page>
   )
 }

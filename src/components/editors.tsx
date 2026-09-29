@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { useT } from '@/lib/i18n'
 import { useStore } from '@/lib/store'
+import { fmtDue } from '@/lib/date'
 import type { Space } from '@/lib/types'
 import { cn } from './ui'
 
@@ -39,7 +40,7 @@ export function InlineTitle({
           ;(e.target as HTMLTextAreaElement).blur()
         }
       }}
-      className="w-full resize-none overflow-hidden bg-transparent text-2xl font-semibold leading-tight tracking-[-0.025em] text-ink outline-none placeholder:text-ink-3"
+      className="display w-full resize-none overflow-hidden bg-transparent text-2xl leading-tight text-ink outline-none placeholder:text-ink-3"
     />
   )
 }
@@ -200,5 +201,28 @@ export function LinkifiedText({
         ),
       )}
     </>
+  )
+}
+
+/** who the task is parked on — committed on blur / Enter, cleared by emptying it */
+export function WaitingInput({ itemId, who, since }: { itemId: string; who?: string; since?: string }) {
+  const t = useT()
+  const setWaitingFor = useStore((s) => s.setWaitingFor)
+  const [draft, setDraft] = useState(who ?? '')
+  const commit = () => {
+    if (draft.trim() !== (who ?? '')) setWaitingFor(itemId, draft.trim() || null)
+  }
+  return (
+    <span className="flex w-full flex-col gap-0.5">
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === 'Enter' && (e.target as HTMLInputElement).blur()}
+        placeholder={t.todo.waitingPh}
+        className="h-8 w-full rounded-lg border border-line-2 bg-surface px-2.5 text-sm text-ink outline-none placeholder:text-ink-3 focus:border-iris/60"
+      />
+      {who && since && <span className="text-xs text-amber">{t.todo.since(fmtDue(since)?.label ?? '')}</span>}
+    </span>
   )
 }
