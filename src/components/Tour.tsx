@@ -23,13 +23,13 @@ const STEPS: Step[] = [
 
 const CONTENT: Record<'cs' | 'en', { title: string; body: string }[]> = {
   cs: [
-    { title: 'Zachyť cokoli', body: 'Zmáčkni C nebo klikni sem a zapiš událost, úkol nebo nápad. Weavo si z věty samo vytáhne datum, #projekt i @osobu.' },
-    { title: 'Hledej a skákej', body: '⌘K / Ctrl-K otevře hledání napříč vším — a umožní skočit do libovolného pohledu.' },
-    { title: 'Domů, To-do, Kalendář', body: 'Domů ukáže, co dnes hoří a co tě čeká. To-do je denní checklist, Kalendář tvůj týden. Méně používané pohledy jsou schované pod „Další“.' },
-    { title: 'Seskupuj podle projektu', body: 'Projekt patří do osobního, nebo pracovního prostoru. Pracovní projekty zároveň třídí pracovní to-do.' },
-    { title: 'Osobní a pracovní', body: 'To-do má dva oddělené seznamy — přepínáš je tady. Plamínkem označíš, co hoří, a v režimu Kanban přetahuješ karty mezi stavy.' },
-    { title: 'Nastavení', body: 'Připoj Google, nastav pracovní hodiny, zapni notifikace, exportuj data.' },
-    { title: 'To je celá průvodka', body: 'Celý psaný průvodce je tady, kdykoli ho budeš chtít.' },
+    { title: 'Nový záznam', body: 'Stiskni C nebo klikni sem a zapiš událost, úkol nebo poznámku. Weavo z věty vyčte datum, čas, opakování, #štítek i #projekt.' },
+    { title: 'Hledání', body: '⌘K / Ctrl-K otevře hledání ve všech záznamech a umožní přejít na libovolnou stránku.' },
+    { title: 'Přehled, Úkoly, Kalendář', body: 'Přehled ukáže, co dnes hoří a co je na řadě. Úkoly jsou denní seznam, Kalendář tvůj týden. Méně používané stránky jsou pod položkou „Další“.' },
+    { title: 'Projekty', body: 'Projekt patří do osobního nebo pracovního prostoru. Pracovní projekty zároveň třídí pracovní úkoly.' },
+    { title: 'Osobní a pracovní', body: 'Úkoly mají dva oddělené seznamy, přepínáš je tady. Plamenem označíš, co hoří, a v zobrazení Kanban přetahuješ karty mezi stavy.' },
+    { title: 'Nastavení', body: 'Tady připojíš Google, nastavíš pracovní hodiny a výchozí připomenutí, zapneš oznámení a exportuješ data.' },
+    { title: 'To je vše', body: 'Celého průvodce najdeš tady, kdykoli ho budeš potřebovat.' },
   ],
   en: [
     { title: 'Capture anything', body: 'Press C or click here to jot down an event, a task, or a stray thought. Weavo reads the date, #project and @person straight out of the sentence.' },
