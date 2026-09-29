@@ -31,7 +31,7 @@ export function Page({
   const max = width === 'narrow' ? 'max-w-[760px]' : width === 'wide' ? 'max-w-[1400px]' : 'max-w-[1140px]'
   const header = (
     <header className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 max-md:basis-full">
         {before}
         {eyebrow && <div className="mb-1.5 text-sm text-ink-3">{eyebrow}</div>}
         <h1 className="display text-3xl lg:text-[34px] lg:leading-[1.08]">{title}</h1>
@@ -42,14 +42,14 @@ export function Page({
   )
   if (fill)
     return (
-      <div className={cn('flex min-h-0 flex-1 flex-col px-4 pb-24 pt-6 md:px-10 md:pb-6 md:pt-9', className)}>
+      <div className={cn('flex min-h-0 flex-1 flex-col px-4 pb-4 pt-6 md:px-10 md:pb-6 md:pt-9', className)}>
         {header}
         <div className="flex min-h-0 flex-1 flex-col">{children}</div>
       </div>
     )
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className={cn('mx-auto w-full px-4 pb-28 pt-6 md:px-10 md:pb-24 md:pt-9', max, className)}>
+      <div className={cn('mx-auto w-full px-4 pb-12 pt-6 md:px-10 md:pb-24 md:pt-9', max, className)}>
         {header}
         {children}
       </div>

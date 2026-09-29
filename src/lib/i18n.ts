@@ -59,6 +59,7 @@ const cs = {
     done: 'Hotovo',
   },
   nav: {
+    menu: 'Menu',
     capture: 'Zachytit…',
     noProjectsInSpace: 'Zatím žádný projekt',
     home: 'Domů',
@@ -681,6 +682,7 @@ const en: Dict = {
     done: 'Done',
   },
   nav: {
+    menu: 'Menu',
     capture: 'Capture…',
     noProjectsInSpace: 'No projects yet',
     home: 'Home',

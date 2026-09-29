@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { Sparkles, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
@@ -7,6 +7,7 @@ import { useReminderEngine } from '@/hooks/useReminderEngine'
 import { useGoogleSync } from '@/hooks/useGoogleSync'
 import { setDateLang } from '@/lib/date'
 import { Sidebar } from './Sidebar'
+import { MobileTabBar, MobileTopBar, SidebarDrawer } from './MobileNav'
 import { QuickCapture } from './QuickCapture'
 import { CommandPalette } from './CommandPalette'
 import { Toaster } from './Toaster'
@@ -34,7 +35,7 @@ function TourNudge() {
 
   if (tourSeen || tourOpen || !ready) return null
   return (
-    <div className="fixed bottom-5 right-5 z-40 w-[300px] rounded-2xl border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]">
+    <div className="fixed bottom-5 right-5 z-40 w-[300px] rounded-2xl max-md:hidden border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]">
       <div className="flex items-start gap-2.5">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-iris/14 text-iris-2">
           <Sparkles size={14} />
@@ -54,7 +55,7 @@ function TourNudge() {
       <div className="mt-3 flex gap-2">
         <button
           onClick={startTour}
-          className="h-8 flex-1 rounded-lg bg-iris text-sm font-semibold text-[#0b0c0e] hover:bg-iris-2"
+          className="h-8 flex-1 rounded-lg bg-iris text-sm font-semibold text-iris-ink hover:bg-iris-2"
         >
           {t.tour.take}
         </button>
@@ -74,6 +75,8 @@ export function AppShell() {
   const navigate = useNavigate()
   const { openCapture, setPalette, captureOpen, paletteOpen, tourOpen } = useStore()
   const [helpOpen, setHelpOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
   const lang = useStore((s) => s.data.settings.lang)
   useReminderEngine(navigate)
   useGoogleSync()
@@ -126,10 +129,13 @@ export function AppShell() {
 
   return (
     <div className="flex h-full overflow-hidden bg-bg text-ink">
-      <Sidebar />
-      <main className="flex min-w-0 flex-1 flex-col">
+      <Sidebar className="max-md:hidden" />
+      <main className="flex min-w-0 flex-1 flex-col max-md:pb-[calc(68px+env(safe-area-inset-bottom,0px))]">
+        <MobileTopBar onMenu={() => setMenuOpen(true)} />
         <Outlet />
       </main>
+      <MobileTabBar />
+      <SidebarDrawer open={menuOpen} onClose={closeMenu} />
       <QuickCapture />
       <CommandPalette />
       <Toaster />

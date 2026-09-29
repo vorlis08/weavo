@@ -90,7 +90,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
           <Plus size={13} strokeWidth={2.4} />
         </span>
         {t.nav.capture}
-        <span className="ml-auto">
+        <span className="ml-auto max-md:hidden">
           <Kbd>C</Kbd>
         </span>
       </button>
@@ -208,7 +208,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
         >
           <Search size={18} strokeWidth={1.6} />
           {t.common.search}
-          <span className="ml-auto">
+          <span className="ml-auto max-md:hidden">
             <Kbd>⌘K</Kbd>
           </span>
         </button>

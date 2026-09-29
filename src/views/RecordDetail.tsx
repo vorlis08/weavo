@@ -226,8 +226,8 @@ export function RecordDetail() {
         </div>
       </TopBar>
 
-      <div className="flex flex-1 justify-center overflow-y-auto px-8 pb-12 pt-[26px]">
-        <div className="flex w-full max-w-[1000px] gap-[34px]">
+      <div className="flex flex-1 justify-center overflow-y-auto px-4 pb-12 pt-[26px] md:px-8">
+        <div className="flex w-full max-w-[1000px] flex-col gap-8 lg:flex-row lg:gap-[34px]">
           {/* main */}
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-2.5">
@@ -533,7 +533,7 @@ export function RecordDetail() {
           </div>
 
           {/* side */}
-          <div className="flex w-[300px] shrink-0 flex-col gap-3.5">
+          <div className="flex w-full shrink-0 flex-col gap-3.5 lg:w-[300px]">
             <div className="rounded-xl border border-line bg-surface px-[15px] py-2.5">
               <PropRow label={t.spaces.label}>
                 <Segmented
