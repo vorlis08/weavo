@@ -1,0 +1,12 @@
+<!doctype html><meta charset="utf-8"><body style="background:#0f0f13">
+<script type="module">
+// dev-only helper for screenshots: load the sample data, then go to ?to=
+// "@phased" in the target is replaced with the id of the sample project that has phases
+import { makeSampleData } from '/src/lib/sampleData.ts'
+const q = new URLSearchParams(location.search)
+const data = makeSampleData(new Date(), q.get('lang') || 'cs')
+localStorage.setItem('weavo-v1', JSON.stringify({ version: 6, state: { data } }))
+const phased = Object.values(data.projects).find((p) => p.phases?.length)
+const task = Object.values(data.items).find((i) => i.checklist?.length)
+location.replace((q.get('to') || '/').replace('@phased', phased.id).replace('@task', task.id))
+</script>
