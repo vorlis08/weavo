@@ -32,7 +32,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
   const inMore = ['/timeline', '/notes', '/mail'].some((p) => location.pathname.startsWith(p))
   const [moreOpen, setMoreOpen] = useState(inMore)
   const projects = useMemo(
-    () => Object.values(projectsRec).filter((p) => !p.archived),
+    () => Object.values(projectsRec).filter((p) => p.status === 'active'),
     [projectsRec],
   )
 

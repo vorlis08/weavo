@@ -37,7 +37,7 @@ export function Home() {
     .filter((it) => it.kind === 'event' && inFilter(it) && it.start && isSameDay(it.start, now))
     .sort((a, b) => (a.start! < b.start! ? -1 : 1))
   const projects = Object.values(data.projects)
-    .filter((p) => !p.archived && p.due && inFilter(p))
+    .filter((p) => p.status === 'active' && p.due && inFilter(p))
     .sort((a, b) => (a.due! < b.due! ? -1 : 1))
     .slice(0, 5)
   const unsorted = Object.values(data.items).filter((it) => it.unsorted).length

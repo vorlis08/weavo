@@ -1,5 +1,5 @@
 import { addDays, isSameDay, overlaps, startOfDay } from './date'
-import type { Item, Reminder, Space, WeavoData } from './types'
+import type { Item, Project, ProjectPhase, Reminder, Space, WeavoData } from './types'
 
 export const list = <T,>(rec: Record<string, T>): T[] => Object.values(rec)
 
@@ -308,4 +308,69 @@ export function noteLinks(data: WeavoData, item: Item) {
     }
   }
   return { linkedFrom, linksTo }
+}
+
+const PRIO: Record<string, number> = { high: 0, medium: 1, low: 2 }
+
+/** open, planned tasks of a project (no subtasks, nothing parked) */
+export function projectOpenTasks(data: WeavoData, projectId: string): Item[] {
+  return itemsArray(data).filter(
+    (it) =>
+      it.projectId === projectId &&
+      it.kind === 'task' &&
+      it.status !== 'done' &&
+      !it.parentId &&
+      !it.someday,
+  )
+}
+
+/** the next thing to do in a project: burning first, then overdue, then by due date and priority */
+export function projectNextStep(data: WeavoData, projectId: string, ref = new Date()): Item | undefined {
+  return projectOpenTasks(data, projectId)
+    .filter((it) => !it.waitingFor)
+    .sort(
+      (a, b) =>
+        Number(!!b.flame) - Number(!!a.flame) ||
+        Number(isOverdue(b, ref)) - Number(isOverdue(a, ref)) ||
+        (a.due ?? '9999').localeCompare(b.due ?? '9999') ||
+        (PRIO[a.priority ?? ''] ?? 3) - (PRIO[b.priority ?? ''] ?? 3),
+    )[0]
+}
+
+/** burning and waiting counts — the signals column of the projects list */
+export function projectSignals(data: WeavoData, projectId: string, ref = new Date()) {
+  const open = projectOpenTasks(data, projectId)
+  return {
+    hot: open.filter((it) => isHot(it, ref)).length,
+    waiting: open.filter((it) => it.waitingFor).length,
+  }
+}
+
+export function phaseStats(data: WeavoData, projectId: string, phaseId: string | null) {
+  const tasks = itemsArray(data).filter(
+    (it) =>
+      it.projectId === projectId &&
+      it.kind === 'task' &&
+      !it.parentId &&
+      !it.someday &&
+      (phaseId ? it.phaseId === phaseId : !it.phaseId),
+  )
+  return { done: tasks.filter((it) => it.status === 'done').length, total: tasks.length }
+}
+
+/**
+ * The phase a project is in: the one whose dates cover today, otherwise the
+ * first phase that still has open work.
+ */
+export function currentPhase(data: WeavoData, project: Project, ref = new Date()): ProjectPhase | undefined {
+  const phases = project.phases ?? []
+  const today = startOfDay(ref).getTime()
+  const dated = phases.find(
+    (ph) => ph.start && ph.end && startOfDay(ph.start).getTime() <= today && today <= startOfDay(ph.end).getTime(),
+  )
+  if (dated) return dated
+  return phases.find((ph) => {
+    const s = phaseStats(data, project.id, ph.id)
+    return s.total > s.done
+  })
 }

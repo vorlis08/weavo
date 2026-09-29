@@ -30,7 +30,7 @@ export function GoalView() {
     [data.projects, id],
   )
   const linkable = useMemo(
-    () => Object.values(data.projects).filter((p) => p.goalId !== id && !p.archived),
+    () => Object.values(data.projects).filter((p) => p.goalId !== id && p.status !== 'done'),
     [data.projects, id],
   )
 

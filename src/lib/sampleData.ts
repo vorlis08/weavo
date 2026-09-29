@@ -1,12 +1,18 @@
 import { DEFAULT_GOOGLE, DEFAULT_SETTINGS, starterTags } from './store'
-import { addDays, startOfDay, startOfWeek } from './date'
+import { addDays, startOfDay } from './date'
 import type { Item, Lang, WeavoData } from './types'
 
 const TEXT = {
   cs: {
     pLaunch: 'Uvedení produktu',
     pSite: 'Web',
-    pHome: 'Osobní',
+    pHome: 'Domácnost',
+    launchBrief: 'Spustit nový ceník a stránku s tarify. Hotovo, až bude stránka venku a tým o ní bude vědět.',
+    phPrep: 'Příprava',
+    phCopy: 'Texty a ceník',
+    phLaunch: 'Spuštění',
+    positioning: 'Sepsat pozicování',
+    competitors: 'Srovnat konkurenci',
     cAlex: 'Alex Rivera',
     cSam: 'Sam Cole',
     roleDesign: 'Design',
@@ -49,7 +55,13 @@ const TEXT = {
   en: {
     pLaunch: 'Product launch',
     pSite: 'Website',
-    pHome: 'Personal',
+    pHome: 'Household',
+    launchBrief: 'Ship the new pricing and the tiers page. Done when the page is live and the team knows about it.',
+    phPrep: 'Prepare',
+    phCopy: 'Copy and pricing',
+    phLaunch: 'Launch',
+    positioning: 'Write the positioning',
+    competitors: 'Compare competitors',
     cAlex: 'Alex Rivera',
     cSam: 'Sam Cole',
     roleDesign: 'Design',
@@ -92,25 +104,43 @@ const TEXT = {
 }
 
 /**
- * A self-consistent example dataset anchored to the current week, so the app
+ * A self-consistent example dataset anchored to today, so the app
  * looks alive without shipping stale content. Loaded only on demand from
  * Settings and fully removable.
  */
 export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   const x = TEXT[lang] ?? TEXT.cs
   const uid = () => crypto.randomUUID()
-  const monday = startOfWeek(now, true)
+  const base = startOfDay(now)
   const at = (dayOffset: number, h: number, m = 0) => {
-    const d = new Date(monday)
+    const d = new Date(base)
     d.setDate(d.getDate() + dayOffset)
     d.setHours(h, m, 0, 0)
     return d.toISOString()
   }
   const dueDay = (dayOffset: number, h = 17) => at(dayOffset, h)
 
-  const pLaunch = { id: uid(), name: x.pLaunch, color: '#dfa871', space: 'work' as const }
-  const pSite = { id: uid(), name: x.pSite, color: '#8d93ef', space: 'work' as const }
-  const pHome = { id: uid(), name: x.pHome, color: '#83c79d', space: 'personal' as const }
+  const phase = (name: string, from: number, to: number) => ({
+    id: uid(),
+    name,
+    start: addDays(startOfDay(now), from).toISOString(),
+    end: addDays(startOfDay(now), to).toISOString(),
+  })
+  const phPrep = phase(x.phPrep, -10, -3)
+  const phCopy = phase(x.phCopy, -2, 3)
+  const phLaunch = phase(x.phLaunch, 4, 6)
+  const pLaunch = {
+    id: uid(), name: x.pLaunch, color: '#e07a5f', space: 'work' as const, status: 'active' as const,
+    description: x.launchBrief,
+    start: addDays(startOfDay(now), -10).toISOString(),
+    due: addDays(startOfDay(now), 6).toISOString(),
+    phases: [phPrep, phCopy, phLaunch],
+  }
+  const pSite = {
+    id: uid(), name: x.pSite, color: '#b794f4', space: 'work' as const, status: 'active' as const,
+    due: addDays(startOfDay(now), 18).toISOString(),
+  }
+  const pHome = { id: uid(), name: x.pHome, color: '#8bc47a', space: 'personal' as const, status: 'active' as const }
 
   const tags = starterTags(lang)
   const tagNamed = (i: number) => Object.values(tags)[i].id
@@ -145,12 +175,12 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   push({ kind: 'event', title: x.launchDay, start: at(4, 12), end: at(4, 13), projectId: pLaunch.id })
 
   const approval = push({
-    kind: 'task', title: x.approval, projectId: pLaunch.id, status: 'todo',
+    kind: 'task', title: x.approval, projectId: pLaunch.id, phaseId: phCopy.id, status: 'todo',
     assigneeId: cSam.id, due: dueDay(2, 12),
     waitingFor: { who: x.samWho, since: addDays(now, -2).toISOString() },
   })
   const copy = push({
-    kind: 'task', title: x.copy, projectId: pLaunch.id, status: 'in_progress', due: dueDay(4, 15),
+    kind: 'task', title: x.copy, projectId: pLaunch.id, phaseId: phCopy.id, status: 'in_progress', due: dueDay(2, 15),
     body: x.copyBody, blockedBy: [approval.id], flame: true,
     checklist: [
       { id: uid(), text: x.ck1, done: true },
@@ -158,12 +188,14 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
       { id: uid(), text: x.ck3, done: false },
     ],
   })
-  push({ kind: 'task', title: x.publish, projectId: pLaunch.id, status: 'todo', blockedBy: [copy.id] })
-  push({ kind: 'task', title: x.announce, projectId: pLaunch.id, status: 'todo', blockedBy: [copy.id] })
+  push({ kind: 'task', title: x.publish, projectId: pLaunch.id, phaseId: phLaunch.id, status: 'todo', due: dueDay(5), blockedBy: [copy.id] })
+  push({ kind: 'task', title: x.announce, projectId: pLaunch.id, phaseId: phLaunch.id, status: 'todo', due: dueDay(6), blockedBy: [copy.id] })
+  push({ kind: 'task', title: x.positioning, projectId: pLaunch.id, phaseId: phPrep.id, status: 'done', due: dueDay(-8), completedAt: addDays(now, -8).toISOString() })
+  push({ kind: 'task', title: x.competitors, projectId: pLaunch.id, phaseId: phPrep.id, status: 'done', due: dueDay(-5), completedAt: addDays(now, -5).toISOString() })
   push({ kind: 'task', title: x.social, projectId: pSite.id, status: 'todo', due: dueDay(3) })
   push({ kind: 'task', title: x.qa, projectId: pSite.id, status: 'in_progress' })
   push({ kind: 'task', title: x.flights, projectId: pHome.id, status: 'done', completedAt: addDays(now, -1).toISOString() })
-  push({ kind: 'task', title: x.replyAlex, projectId: pHome.id, status: 'todo', due: dueDay(0, 16) })
+  push({ kind: 'task', title: x.replyAlex, projectId: pHome.id, status: 'todo', due: dueDay(-1, 16) })
   push({ kind: 'task', title: x.invoice, status: 'todo', unsorted: true })
   push({ kind: 'task', title: x.groceries, status: 'todo', due: fromToday(2), tags: [tagNamed(2)] })
   push({ kind: 'task', title: x.homework, status: 'todo', due: fromToday(0), priority: 'high', tags: [tagNamed(0)] })

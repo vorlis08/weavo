@@ -8,6 +8,7 @@ import type {
   ItemKind,
   Lang,
   Project,
+  ProjectPhase,
   Reflection,
   Reminder,
   RepeatFreq,
@@ -47,7 +48,7 @@ export const DEFAULT_GOOGLE: GoogleIntegration = {
   space: 'personal',
 }
 
-const DATA_VERSION = 5
+const DATA_VERSION = 6
 
 const STARTER_TAGS: Record<Lang, [string, number?][]> = {
   cs: [['Škola'], ['Vaření'], ['Nákup', 2], ['Projekty'], ['Zdraví'], ['Domov']],
@@ -73,7 +74,11 @@ export function starterTags(lang: Lang = 'cs'): Record<string, Tag> {
  */
 export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<WeavoData> {
   const projects: Record<string, Project> = {}
-  for (const p of Object.values(d.projects ?? {})) projects[p.id] = { ...p, space: p.space ?? 'personal' }
+  for (const old of Object.values(d.projects ?? {})) {
+    // v5 archived projects become "done"
+    const { archived, ...p } = old as Project & { archived?: boolean }
+    projects[p.id] = { ...p, space: p.space ?? 'personal', status: p.status ?? (archived ? 'done' : 'active') }
+  }
 
   const tags: Record<string, Tag> = { ...(d.tags ?? {}) }
   if (seedTags && !Object.keys(tags).length) Object.assign(tags, starterTags(d.settings?.lang))
@@ -166,7 +171,7 @@ interface Store {
   toggleDone: (id: string) => void
   setStatus: (id: string, status: TaskStatus, order?: number) => void
 
-  addProject: (name: string, color: string, space?: Space) => Project
+  addProject: (name: string, color: string, space?: Space, extra?: Partial<Project>) => Project
   updateProject: (id: string, patch: Partial<Project>) => void
   deleteProject: (id: string) => void
   addSubtask: (parentId: string, title: string) => Item | undefined
@@ -179,6 +184,12 @@ interface Store {
   toggleFlame: (id: string) => void
   /** park the task on someone (`who`), or clear it with null */
   setWaitingFor: (id: string, who: string | null) => void
+
+  addPhase: (projectId: string, name: string) => ProjectPhase | undefined
+  updatePhase: (projectId: string, phaseId: string, patch: Partial<ProjectPhase>) => void
+  /** removes the phase; its tasks move to "No phase" */
+  deletePhase: (projectId: string, phaseId: string) => void
+  movePhase: (projectId: string, phaseId: string, dir: -1 | 1) => void
 
   addGoal: (title: string, color: string) => Goal
   updateGoal: (id: string, patch: Partial<Goal>) => void
@@ -391,8 +402,8 @@ export const useStore = create<Store>()(
           }
         }),
 
-      addProject: (name, color, space = 'personal') => {
-        const p: Project = { id: uid(), name: name.trim(), color, space, createdAt: now() }
+      addProject: (name, color, space = 'personal', extra = {}) => {
+        const p: Project = { id: uid(), name: name.trim(), color, space, status: 'active', createdAt: now(), ...extra }
         set((s) => ({ data: { ...s.data, projects: { ...s.data.projects, [p.id]: p } } }))
         return p
       },
@@ -435,6 +446,49 @@ export const useStore = create<Store>()(
           projectId: parent.projectId,
           space: parent.space,
         })
+      },
+
+      addPhase: (projectId, name) => {
+        const p = get().data.projects[projectId]
+        if (!p) return undefined
+        const phase: ProjectPhase = { id: uid(), name: name.trim() }
+        get().updateProject(projectId, { phases: [...(p.phases ?? []), phase] })
+        return phase
+      },
+      updatePhase: (projectId, phaseId, patch) => {
+        const p = get().data.projects[projectId]
+        if (!p?.phases) return
+        get().updateProject(projectId, {
+          phases: p.phases.map((ph) => (ph.id === phaseId ? { ...ph, ...patch } : ph)),
+        })
+      },
+      deletePhase: (projectId, phaseId) =>
+        set((s) => {
+          const p = s.data.projects[projectId]
+          if (!p) return s
+          const items = { ...s.data.items }
+          for (const it of Object.values(items)) {
+            if (it.phaseId === phaseId) items[it.id] = { ...it, phaseId: undefined, updatedAt: now() }
+          }
+          return {
+            data: {
+              ...s.data,
+              items,
+              projects: {
+                ...s.data.projects,
+                [projectId]: { ...p, phases: (p.phases ?? []).filter((ph) => ph.id !== phaseId) },
+              },
+            },
+          }
+        }),
+      movePhase: (projectId, phaseId, dir) => {
+        const p = get().data.projects[projectId]
+        const list = [...(p?.phases ?? [])]
+        const i = list.findIndex((ph) => ph.id === phaseId)
+        const j = i + dir
+        if (i < 0 || j < 0 || j >= list.length) return
+        ;[list[i], list[j]] = [list[j], list[i]]
+        get().updateProject(projectId, { phases: list })
       },
 
       addTag: (name, space, color) => {
@@ -686,6 +740,8 @@ export const useStore = create<Store>()(
         }
         if (p?.data && version < 5) {
           p.data = normalizeData(p.data, true)
+        } else if (p?.data && version < 6) {
+          p.data = normalizeData(p.data)
         }
         return p as { data: WeavoData }
       },

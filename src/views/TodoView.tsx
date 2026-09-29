@@ -307,7 +307,7 @@ function WorkByProject({ mine, today }: { mine: Item[]; today: Item[] }) {
     ...mine.filter((it) => isOpen(it) && !it.someday && !it.unsorted),
     ...today.filter((it) => !isOpen(it)),
   ].sort(byUrgency)
-  const workProjects = Object.values(projects).filter((p) => p.space === 'work' && !p.archived)
+  const workProjects = Object.values(projects).filter((p) => p.space === 'work' && p.status === 'active')
   const loose = active.filter((it) => !it.projectId || !projects[it.projectId])
   return (
     <>

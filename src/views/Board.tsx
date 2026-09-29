@@ -13,20 +13,13 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useDraggable } from '@dnd-kit/core'
-import { Plus } from 'lucide-react'
-import { TopBar } from '@/components/TopBar'
-import { Badge, cn } from '@/components/ui'
+import { Flame, Plus } from 'lucide-react'
+import { Badge, ProjectGlyph, cn } from '@/components/ui'
 import { DueChip, SourceBadge } from '@/components/items'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { PRIORITY_RANK } from '@/lib/types'
 import type { Item, Space, TaskPriority, TaskStatus } from '@/lib/types'
-
-const PRIORITY_COLOR: Record<TaskPriority, string> = {
-  high: 'var(--color-rose)',
-  medium: 'var(--color-amber)',
-  low: 'var(--color-ink-3)',
-}
 
 type ColKey = TaskStatus | 'unsorted'
 const COLUMNS: { key: ColKey; accent?: string }[] = [
@@ -54,14 +47,14 @@ function CardBody({ item }: { item: Item }) {
   return (
     <div
       className={cn(
-        'rounded-lg border border-line bg-surface-2 px-[11px] py-2.5',
+        'rounded-[11px] border border-line bg-surface-2 px-3 py-2.5 transition-colors hover:border-line-3',
         done && 'opacity-60',
       )}
     >
       <div className="mb-1.5 flex items-center gap-[7px] text-xs text-ink-3">
         {project ? (
           <>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: project.color }} />
+            <ProjectGlyph color={project.color} className="h-2 w-2 rounded-[2.5px]" />
             <span className="truncate">{project.name}</span>
           </>
         ) : (
@@ -72,14 +65,9 @@ function CardBody({ item }: { item: Item }) {
         </span>
       </div>
       <div className="flex items-start gap-1.5">
-        {item.priority && (
-          <span
-            title={t.priority[item.priority]}
-            className="mt-[5px] h-[6px] w-[6px] shrink-0 rounded-full"
-            style={{ background: PRIORITY_COLOR[item.priority] }}
-          />
-        )}
-        <div className={cn('text-sm leading-snug text-ink', done && 'text-ink-2 line-through')}>
+        {item.flame && !done && <Flame size={13} className="mt-0.5 shrink-0 text-flame" fill="currentColor" fillOpacity={0.28} />}
+        <div className={cn('text-[13.5px] leading-snug text-ink', done && 'text-ink-3 line-through')}>
+          {item.priority === 'high' && !done && <span className="mr-1 font-bold text-rose">!</span>}
           {item.title}
         </div>
       </div>
@@ -136,14 +124,13 @@ function Column({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex w-[214px] shrink-0 flex-col overflow-hidden rounded-xl border bg-surface transition-colors',
+        'flex w-[248px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-surface transition-colors',
         isOver ? 'border-iris/50' : 'border-line',
       )}
-      style={{ borderTop: `2px solid ${col.accent ?? 'var(--color-line-2)'}` }}
     >
       <div
         data-tour={tourAnchor ? 'board-col' : undefined}
-        className="flex items-center gap-2 px-[13px] pb-2.5 pt-3"
+        className="flex items-center gap-2 px-3.5 pb-2.5 pt-3.5"
       >
         <span
           className={cn('text-sm font-semibold', col.key === 'done' && 'text-ink-2')}
@@ -208,30 +195,11 @@ function Column({
 }
 
 /** a project's own board (reached from the project page) */
+/** old /board links: a project's board now lives on the project page */
 export function Board() {
-  const t = useT()
-  const [params, setParams] = useSearchParams()
-  const projectFilter = params.get('project') ?? undefined
-  const project = useStore((s) => (projectFilter ? s.data.projects[projectFilter] : undefined))
-  if (!projectFilter) return <Navigate to="/todo" replace />
-
-  return (
-    <>
-      <TopBar>
-        <h1 className="flex items-center gap-2 text-lg">
-          {project && (
-            <span className="h-[7px] w-[7px] rounded-full" style={{ background: project.color }} />
-          )}
-          {project ? t.board.boardSuffix(project.name) : t.board.title}
-        </h1>
-        <button onClick={() => setParams({})} className="text-xs text-ink-3 hover:text-ink-2">
-          {t.common.clearFilter}
-        </button>
-        <span className="mono ml-auto text-xs text-ink-3">{t.board.dragHint}</span>
-      </TopBar>
-      <BoardColumns projectId={projectFilter} />
-    </>
-  )
+  const [params] = useSearchParams()
+  const project = params.get('project')
+  return <Navigate to={project ? `/project/${project}` : '/todo'} replace />
 }
 
 /** status columns with drag & drop — the To-do's kanban mode and the project board */
@@ -299,7 +267,7 @@ export function BoardColumns({ projectId: projectFilter, space }: { projectId?: 
         onDragEnd={onDragEnd}
         onDragCancel={() => setDragId(null)}
       >
-        <div className="flex flex-1 gap-3.5 overflow-x-auto p-4 px-5">
+        <div className="flex flex-1 gap-3.5 overflow-x-auto px-4 pb-4 md:px-5">
           {COLUMNS.map((col, i) => (
             <Column
               key={col.key}

@@ -623,14 +623,14 @@ export function RecordDetail() {
               <PropRow label={t.detail.propProject}>
                 <Select
                   value={item.projectId ?? ''}
-                  onChange={(e) => updateItem(item.id, { projectId: e.target.value || undefined })}
-                  className="h-7"
+                  onChange={(e) => updateItem(item.id, { projectId: e.target.value || undefined, phaseId: undefined })}
+                  className="h-8"
                 >
                   <option value="">{t.common.noProject}</option>
                   {SPACES.map((sp) => (
                     <optgroup key={sp} label={t.spaces[sp]}>
                       {Object.values(data.projects)
-                        .filter((p) => p.space === sp && (!p.archived || p.id === item.projectId))
+                        .filter((p) => p.space === sp && (p.status !== 'done' || p.id === item.projectId))
                         .map((p) => (
                           <option key={p.id} value={p.id}>
                             {p.name}
@@ -640,6 +640,25 @@ export function RecordDetail() {
                   ))}
                 </Select>
               </PropRow>
+              {item.kind === 'task' && item.projectId && data.projects[item.projectId]?.phases?.length ? (
+                <>
+                  <Divider />
+                  <PropRow label={t.detail.propPhase}>
+                    <Select
+                      value={item.phaseId ?? ''}
+                      onChange={(e) => updateItem(item.id, { phaseId: e.target.value || undefined })}
+                      className="h-8"
+                    >
+                      <option value="">{t.project.phaseNone}</option>
+                      {data.projects[item.projectId].phases!.map((ph) => (
+                        <option key={ph.id} value={ph.id}>
+                          {ph.name}
+                        </option>
+                      ))}
+                    </Select>
+                  </PropRow>
+                </>
+              ) : null}
               <Divider />
               {item.kind === 'task' ? (
                 <>

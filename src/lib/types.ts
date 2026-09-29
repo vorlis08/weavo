@@ -64,18 +64,34 @@ export const DEFAULT_PROJECT_SECTIONS: ProjectSection[] = [
   { id: 'done' },
 ]
 
+export type ProjectStatus = 'active' | 'paused' | 'done'
+export const PROJECT_STATUSES: ProjectStatus[] = ['active', 'paused', 'done']
+
+/** a stage of a project (Příprava → Realizace → Předání); tasks point at it by phaseId */
+export interface ProjectPhase {
+  id: string
+  name: string
+  /** ISO dates — optional, drawn on the project's timeline */
+  start?: string
+  end?: string
+}
+
 export interface Project {
   id: string
   name: string
   color: string
   space: Space
-  archived?: boolean
-  /** the project page body — free-form rich text (Notion-style) */
+  status: ProjectStatus
+  /** the brief — a short free-form description on top of the project page */
   description?: string
+  /** ISO datetime — optional start; the timeline falls back to createdAt */
+  start?: string
   /** ISO datetime — optional project deadline */
   due?: string
   createdAt?: string
-  /** ordered, collapsible content sections on the project page */
+  /** ordered stages; tasks without a phase sit in "No phase" */
+  phases?: ProjectPhase[]
+  /** @deprecated section layout of the old project page, no longer shown */
   sections?: ProjectSection[]
   /** the long-term goal this project rolls up into, if any */
   goalId?: string
@@ -147,6 +163,8 @@ export interface Item {
   checklist?: { id: string; text: string; done: boolean }[]
   /** subtask: id of the parent task this rolls up into */
   parentId?: string
+  /** the project phase this task belongs to */
+  phaseId?: string
   priority?: TaskPriority
   /** recurring task: when completed, the next occurrence is created automatically */
   repeat?: RepeatFreq
