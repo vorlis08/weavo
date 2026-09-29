@@ -35,7 +35,7 @@ export function MoodPicker({ value, onChange }: { value?: Mood; onChange: (v: Mo
           onClick={() => onChange(m)}
           aria-pressed={value === m}
           className={cn(
-            'flex flex-col items-center gap-2 rounded-xl border px-1 py-2.5 text-sm transition-colors',
+            'flex flex-col items-center gap-2 rounded-md border px-1 py-2.5 text-sm transition-colors',
             value === m ? 'border-line-3 bg-surface-3 text-ink' : 'border-line text-ink-3 hover:border-line-2 hover:text-ink-2',
           )}
         >
@@ -82,7 +82,7 @@ function TodayCard() {
         onBlur={() => draft !== (entry?.note ?? '') && upsertReflection(key, { note: draft })}
         placeholder={t.reflection.notePlaceholder}
         rows={4}
-        className="mt-4 w-full resize-y rounded-xl border border-line-2 bg-bg/50 p-3.5 text-base leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/60"
+        className="mt-4 w-full resize-y rounded-md border border-line-2 bg-bg/50 p-3.5 text-base leading-relaxed text-ink outline-none placeholder:text-ink-3 focus:border-iris/60"
       />
     </Card>
   )
@@ -113,7 +113,7 @@ function MoodStrip() {
           )
         })}
       </div>
-      <div className="mt-2 grid gap-1.5 text-center text-[11px] text-ink-3" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
+      <div className="mt-2 grid gap-1.5 text-center text-xs text-ink-3" style={{ gridTemplateColumns: 'repeat(14, minmax(0, 1fr))' }}>
         {days.map((d) => (
           <span key={d.toISOString()} className={cn(dateKey(d) === dateKey(today) && 'font-semibold text-iris-2')}>
             {d.toLocaleDateString(dateLocale(), { weekday: 'narrow' })}

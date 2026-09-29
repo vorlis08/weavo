@@ -80,17 +80,17 @@ export function FlameButton({ item, always }: { item: Item; always?: boolean }) 
       aria-label={item.flame ? t.todo.flameOff : t.todo.flameOn}
       aria-pressed={!!item.flame}
       className={cn(
-        'flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg transition-[opacity,color,background-color] hover:bg-surface-3',
+        'flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-[opacity,color,background-color] hover:bg-surface-3',
         item.flame ? 'text-flame' : 'text-ink-4 hover:text-ink-2 focus-visible:opacity-100',
         !item.flame && !always && 'opacity-0 group-hover/row:opacity-100 max-md:hidden',
       )}
     >
-      <Flame size={16} strokeWidth={1.7} fill={item.flame ? 'currentColor' : 'none'} fillOpacity={0.28} />
+      <Flame size={14} strokeWidth={1.7} fill={item.flame ? 'currentColor' : 'none'} fillOpacity={0.28} />
     </button>
   )
 }
 
-/** one task — checkbox, title, context, due, flame toggle */
+/** one task — one line: checkbox, title, then project and due in fixed columns on the right */
 export function TodoRow({
   item,
   showSpace,
@@ -114,71 +114,88 @@ export function TodoRow({
   const project = item.projectId ? data.projects[item.projectId] : undefined
   const waitDays = item.waitingFor ? Math.max(0, -daysUntil(item.waitingFor.since)) : 0
   const steps = item.checklist ?? []
+  const tags = hideTags ? [] : item.tags.filter((id) => data.tags[id])
+  const extras = (
+    <>
+      {tags.map((id) => (
+        <span key={id} className={metaCls}>
+          #{data.tags[id].name}
+        </span>
+      ))}
+      {item.repeat && item.repeat !== 'none' && (
+        <span className={metaCls} title={t.repeat[item.repeat]}>
+          <Repeat size={12} />
+        </span>
+      )}
+      {item.waitingFor && (
+        <span className={cn(metaCls, 'text-ink-2')}>
+          <Hourglass size={12} className="text-amber" />
+          {item.waitingFor.who} · {t.todo.waitingDays(waitDays)}
+        </span>
+      )}
+      {steps.length > 0 && !done && (
+        <span className={metaCls}>{t.todo.stepsCount(steps.filter((s) => s.done).length, steps.length)}</span>
+      )}
+    </>
+  )
 
   return (
-    <div
-      onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
-      className={cn(
-        'group/row relative flex min-h-12 cursor-pointer items-center gap-3 rounded-[11px] py-2 pl-3 pr-2 transition-colors hover:bg-surface',
-        'before:absolute before:left-11 before:right-2.5 before:top-0 before:h-px before:bg-line first:before:hidden hover:before:opacity-0',
-      )}
-    >
-      {showSpace && (
-        <span
-          className="absolute bottom-3 left-0 top-3 w-[2px] rounded-full"
-          style={{ background: SPACE_COLOR[item.space] }}
-        />
-      )}
-      <Checkbox checked={done} onChange={() => toggleDone(item.id)} />
-      <div className="min-w-0 flex-1">
-        <div
-          className={cn(
-            'truncate text-base leading-snug transition-colors max-md:whitespace-normal',
-            done && 'text-ink-3 line-through decoration-ink-4',
-          )}
-        >
-          {item.priority === 'high' && !done && (
-            <span className="mr-1.5 font-bold text-rose" title={t.priority.high}>
-              !
-            </span>
-          )}
-          {item.title}
-        </div>
-        <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-ink-3 empty:hidden">
-          {!hideProject && project && (
-            <span className={metaCls}>
-              <ProjectGlyph color={project.color} />
-              {project.name}
-            </span>
-          )}
-          {!hideTags &&
-            item.tags.map((id) =>
-              data.tags[id] ? (
-                <span key={id} className={metaCls}>
-                  #{data.tags[id].name}
+    <div className="@container">
+      <div
+        onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
+        className="group/row relative flex min-h-[34px] cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-1 transition-colors hover:bg-surface-2"
+      >
+        {showSpace && (
+          <span
+            className="absolute bottom-2 left-0 top-2 w-[2px] rounded-full"
+            style={{ background: SPACE_COLOR[item.space] }}
+          />
+        )}
+        <Checkbox checked={done} onChange={() => toggleDone(item.id)} />
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-baseline gap-2.5">
+            <span
+              className={cn(
+                'truncate text-base transition-colors max-md:whitespace-normal',
+                done && 'text-ink-3 line-through decoration-ink-4',
+              )}
+            >
+              {item.priority === 'high' && !done && (
+                <span className="mr-1.5 font-semibold text-rose" title={t.priority.high}>
+                  !
                 </span>
-              ) : null,
+              )}
+              {item.title}
+            </span>
+            <span className="flex shrink-0 items-center gap-2.5 text-sm text-ink-3 @max-[520px]:hidden">{extras}</span>
+          </div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-sm text-ink-3 empty:hidden @[520px]:hidden">
+            {!hideProject && project && (
+              <span className={metaCls}>
+                <ProjectGlyph color={project.color} />
+                {project.name}
+              </span>
             )}
-          <DueLabel item={item} data={data} ctx={ctx} />
-          {item.repeat && item.repeat !== 'none' && (
-            <span className={metaCls}>
-              <Repeat size={12} />
-              {t.repeat[item.repeat].toLowerCase()}
-            </span>
-          )}
-          {item.waitingFor && (
-            <span className={cn(metaCls, 'text-ink-2')}>
-              <Hourglass size={12} className="text-amber" />
-              {item.waitingFor.who} · {t.todo.waitingDays(waitDays)}
-            </span>
-          )}
-          {steps.length > 0 && !done && (
-            <span className={metaCls}>{t.todo.stepsCount(steps.filter((s) => s.done).length, steps.length)}</span>
-          )}
+            <DueLabel item={item} data={data} ctx={ctx} />
+            {extras}
+          </div>
         </div>
+        {!hideProject && (
+          <span className="flex w-[140px] shrink-0 items-center gap-1.5 truncate text-sm text-ink-3 @max-[520px]:hidden">
+            {project && (
+              <>
+                <ProjectGlyph color={project.color} />
+                <span className="truncate">{project.name}</span>
+              </>
+            )}
+          </span>
+        )}
+        <span className="w-[104px] shrink-0 text-right text-sm text-ink-3 @max-[520px]:hidden">
+          <DueLabel item={item} data={data} ctx={ctx} />
+        </span>
+        {item.source && <SourceBadge source={item.source} size={13} />}
+        <FlameButton item={item} />
       </div>
-      {item.source && <SourceBadge source={item.source} size={13} />}
-      <FlameButton item={item} />
     </div>
   )
 }
@@ -198,7 +215,7 @@ export function TodoList({
   hideTags?: boolean
   ctx?: 'today'
 }) {
-  if (!items.length) return empty ? <p className="pb-1 pl-11 pt-1 text-base text-ink-3">{empty}</p> : null
+  if (!items.length) return empty ? <p className="px-2.5 pb-1 pt-0.5 text-base text-ink-4">{empty}</p> : null
   return (
     <div className="flex flex-col">
       {items.map((it) => (
@@ -250,20 +267,27 @@ export function TodoSection({
       {icon}
       {glyph}
       {title}
-      <span className="font-medium text-ink-3">{openCount}</span>
+      <span className="font-normal text-ink-4">{openCount}</span>
     </>
   )
   return (
-    <section className="mb-8">
-      <div className={cn('flex items-center gap-2.5 px-3 pb-2 text-sm font-semibold', hot ? 'text-flame' : 'text-ink-2')}>
+    <section className="mb-6">
+      <div
+        className={cn('flex items-center gap-2 px-2.5 pb-1.5 text-sm font-medium', hot ? 'text-flame' : 'text-ink-2')}
+      >
         {collapsible ? (
-          <button onClick={() => setOpen((v) => !v)} className="flex items-center gap-2.5 hover:text-ink" aria-expanded={open}>
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex items-center gap-2 hover:text-ink"
+            aria-expanded={open}
+          >
             {head}
           </button>
         ) : (
           head
         )}
-        {hint && <span className="ml-auto text-sm font-normal text-ink-3 max-sm:hidden">{hint}</span>}
+        <i className="h-px flex-1 bg-line" />
+        {hint && <span className="text-sm font-normal text-ink-4 max-sm:hidden">{hint}</span>}
       </div>
       {(!collapsible || open) &&
         (children ?? (
@@ -290,15 +314,21 @@ export function ProgressBar({ items, split }: { items: Item[]; split?: boolean }
         <>
           <i
             className="h-full transition-[width] duration-500"
-            style={{ width: `${(doneOf('personal') / n) * 100}%`, background: SPACE_COLOR.personal }}
+            style={{
+              width: `${(doneOf('personal') / n) * 100}%`,
+              background: SPACE_COLOR.personal,
+            }}
           />
           <i
             className="h-full transition-[width] duration-500"
-            style={{ width: `${(doneOf('work') / n) * 100}%`, background: SPACE_COLOR.work }}
+            style={{
+              width: `${(doneOf('work') / n) * 100}%`,
+              background: SPACE_COLOR.work,
+            }}
           />
         </>
       ) : (
-        <i className="h-full bg-iris transition-[width] duration-500" style={{ width: `${(doneOf() / n) * 100}%` }} />
+        <i className="h-full bg-ink-3 transition-[width] duration-500" style={{ width: `${(doneOf() / n) * 100}%` }} />
       )}
     </div>
   )

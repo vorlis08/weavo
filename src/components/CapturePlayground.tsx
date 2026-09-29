@@ -67,7 +67,7 @@ export function CapturePlayground() {
     : null
 
   return (
-    <div className="my-5 overflow-hidden rounded-2xl border border-line-2 bg-surface">
+    <div className="my-5 overflow-hidden rounded-lg border border-line-2 bg-surface">
       <div className="mono flex items-center gap-2 border-b border-line px-4 py-2.5 text-xs uppercase tracking-[0.13em] text-ink-3">
         <span className="text-iris">✦</span> {t.playground.header}
         <span className="ml-auto normal-case tracking-normal text-ink-3">{t.playground.sandbox}</span>

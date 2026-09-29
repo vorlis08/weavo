@@ -101,7 +101,7 @@ export function GoogleConnect() {
             href={SETUP_URL}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-1 text-xs text-iris hover:text-iris-2"
+            className="flex items-center gap-1 text-xs text-iris hover:text-ink"
           >
             {t.google.getClientId} <ExternalLink size={11} />
           </a>
@@ -178,7 +178,7 @@ export function GoogleConnect() {
           placeholder="is:starred"
           spellCheck={false}
         />
-        <Link to="/mail" className="mt-2 inline-flex items-center gap-1 text-xs text-iris hover:text-iris-2">
+        <Link to="/mail" className="mt-2 inline-flex items-center gap-1 text-xs text-iris hover:text-ink">
           {t.google.openMail}
         </Link>
       </div>

@@ -190,7 +190,7 @@ function ProjectRow({ project: p, onOpen }: { project: Project; onOpen: () => vo
       <div className="text-right md:text-left">
         {p.due ? (
           <>
-            <div className="text-[13.5px] font-medium">{fmtShort(p.due)}</div>
+            <div className="text-base font-medium">{fmtShort(p.due)}</div>
             <div
               className={cn(
                 'text-sm',
@@ -202,7 +202,7 @@ function ProjectRow({ project: p, onOpen }: { project: Project; onOpen: () => vo
           </>
         ) : (
           <>
-            <div className="text-[13.5px] text-ink-3">—</div>
+            <div className="text-base text-ink-3">—</div>
             <div className="text-sm text-ink-4">{t.project.dueNone}</div>
           </>
         )}
@@ -378,7 +378,7 @@ function NewProjectDialog({ open, onClose }: { open: boolean; onClose: () => voi
             type="date"
             value={due}
             onChange={(e) => setDue(e.target.value)}
-            className="h-9 rounded-[10px] border border-line-2 bg-surface px-3 text-sm text-ink outline-none [color-scheme:dark] focus:border-iris/60"
+            className="h-9 rounded-md border border-line-2 bg-surface px-3 text-sm text-ink outline-none [color-scheme:dark] focus:border-iris/60"
           />
         </label>
         <div className="flex justify-end gap-2">

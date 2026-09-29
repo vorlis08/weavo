@@ -36,7 +36,7 @@ function TourNudge() {
 
   if (tourSeen || tourOpen || !ready) return null
   return (
-    <div className="fixed bottom-5 right-5 z-40 w-[300px] rounded-2xl max-md:hidden border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]">
+    <div className="fixed bottom-5 right-5 z-40 w-[300px] rounded-lg max-md:hidden border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]">
       <div className="flex items-start gap-2.5">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-iris/14 text-iris-2">
           <Sparkles size={14} />

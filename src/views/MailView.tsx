@@ -103,7 +103,7 @@ export function MailView() {
             {mail.map((m) => (
               <div
                 key={m.id}
-                className="group flex items-start gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+                className="group flex items-start gap-3 rounded-md border border-line bg-surface px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline gap-2">

@@ -11,7 +11,7 @@ export function Toaster() {
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="pointer-events-auto flex items-center gap-3 rounded-xl border border-line-2 bg-surface-3 py-2 pl-3.5 pr-2 text-sm shadow-[0_16px_44px_-10px_rgba(0,0,0,0.6)]"
+          className="pointer-events-auto flex items-center gap-3 rounded-md border border-line-2 bg-surface-3 py-2 pl-3.5 pr-2 text-sm shadow-[0_16px_44px_-10px_rgba(0,0,0,0.6)]"
         >
           <span className="text-ink">{t.message}</span>
           {t.action && (

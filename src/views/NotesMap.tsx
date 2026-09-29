@@ -122,7 +122,7 @@ export function NotesMap() {
 
   return (
     <Page title={t.notesMap.title} eyebrow={t.notesMap.stats(graph.nodes.length, graph.edges.length)} fill>
-      <div ref={wrap} className="flex flex-1 items-center justify-center overflow-auto rounded-2xl border border-line bg-surface p-6">
+      <div ref={wrap} className="flex flex-1 items-center justify-center overflow-auto rounded-lg border border-line bg-surface p-6">
         <svg
           viewBox={`0 0 ${graph.W} ${graph.H}`}
           className="h-full max-h-[640px] w-full max-w-[1000px]"

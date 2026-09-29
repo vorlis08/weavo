@@ -147,7 +147,7 @@ function GoalCard({ goal, onOpen }: { goal: Goal; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className="flex flex-col rounded-xl border border-line bg-surface p-3.5 text-left transition-colors hover:border-line-2"
+      className="flex flex-col rounded-md border border-line bg-surface p-3.5 text-left transition-colors hover:border-line-2"
     >
       <div className="flex items-center gap-2">
         <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: goal.color }} />

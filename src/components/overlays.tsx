@@ -49,7 +49,7 @@ export function Modal({
       onMouseDown={onClose}
     >
       <div
-        className="max-h-[85vh] w-full overflow-hidden rounded-2xl border border-line-2 bg-surface shadow-[0_30px_80px_-16px_rgba(0,0,0,0.65)] [animation:sheet-up_.25s_var(--ease-out-soft)]"
+        className="max-h-[85vh] w-full overflow-hidden rounded-lg border border-line-2 bg-surface shadow-[0_30px_80px_-16px_rgba(0,0,0,0.65)] [animation:sheet-up_.25s_var(--ease-out-soft)]"
         style={{ maxWidth: width }}
         onMouseDown={(e) => e.stopPropagation()}
       >
@@ -106,7 +106,7 @@ export function Menu({
       {open && (
         <div
           className={cn(
-            'absolute z-40 mt-1 min-w-[176px] overflow-hidden rounded-xl border border-line-2 bg-surface-3 p-1 shadow-[0_16px_44px_-10px_rgba(0,0,0,0.6)]',
+            'absolute z-40 mt-1 min-w-[176px] overflow-hidden rounded-md border border-line-2 bg-surface-3 p-1 shadow-[0_16px_44px_-10px_rgba(0,0,0,0.6)]',
             align === 'right' ? 'right-0' : 'left-0',
           )}
         >

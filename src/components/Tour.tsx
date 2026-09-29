@@ -152,7 +152,7 @@ export function Tour() {
       {/* spotlight */}
       {rect && (
         <div
-          className="pointer-events-none absolute rounded-[10px] transition-all duration-200"
+          className="pointer-events-none absolute rounded-md transition-all duration-200"
           style={{
             left: rect.left - 6,
             top: rect.top - 6,
@@ -165,7 +165,7 @@ export function Tour() {
       )}
       {/* card */}
       <div
-        className="absolute w-[320px] rounded-2xl border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]"
+        className="absolute w-[320px] rounded-lg border border-line-2 bg-surface p-4 shadow-[0_24px_70px_-12px_rgba(0,0,0,0.6)]"
         style={cardStyle}
       >
         <div className="flex items-center gap-2">

@@ -422,7 +422,7 @@ export function Guide() {
                       const Icon = KIND_ICONS[i]
                       const tone = KIND_TONES[i]
                       return (
-                        <div key={r.name} className="rounded-xl border border-line bg-surface p-4">
+                        <div key={r.name} className="rounded-md border border-line bg-surface p-4">
                           <span
                             className={cn(
                               'flex h-8 w-8 items-center justify-center rounded-lg',
@@ -447,16 +447,16 @@ export function Guide() {
                       <Link
                         key={v.key}
                         to={v.to}
-                        className="group rounded-xl border border-line bg-surface p-3.5 transition-colors hover:border-line-2"
+                        className="group rounded-md border border-line bg-surface p-3.5 transition-colors hover:border-line-2"
                       >
                         <div className="flex items-center gap-2 text-base font-medium text-ink">
-                          <v.icon size={15} strokeWidth={1.6} className="text-ink-3 group-hover:text-iris-2" />
+                          <v.icon size={15} strokeWidth={1.6} className="text-ink-3 group-hover:text-ink" />
                           {t.nav[v.key]}
                         </div>
                         <p className="mt-1 text-sm leading-snug text-ink-2">{g.viewBlurbs[v.key]}</p>
                       </Link>
                     ))}
-                    <div className="rounded-xl border border-line bg-surface p-3.5">
+                    <div className="rounded-md border border-line bg-surface p-3.5">
                       <div className="flex items-center gap-2 text-base font-medium text-ink">
                         <Mail size={15} strokeWidth={1.6} className="text-ink-3" />
                         {t.nav.mail}
@@ -467,7 +467,7 @@ export function Guide() {
                 )}
 
                 {sec.node === 'keys' && (
-                  <div className="overflow-hidden rounded-xl border border-line">
+                  <div className="overflow-hidden rounded-md border border-line">
                     {(
                       [
                         [<Kbd key="c">C</Kbd>, g.keyLabels[0]],

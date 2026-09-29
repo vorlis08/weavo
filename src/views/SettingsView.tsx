@@ -16,7 +16,7 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   return (
     <section className="mb-9">
       <h2 className="mb-3 px-1 text-sm font-semibold text-ink-2">{title}</h2>
-      <div className="rounded-2xl border border-line bg-surface px-5 py-4">{children}</div>
+      <div className="rounded-lg border border-line bg-surface px-5 py-4">{children}</div>
     </section>
   )
 }

@@ -278,7 +278,7 @@ function DrawerBody({ item, onClose }: { item: Item; onClose: () => void }) {
         </div>
 
         <h4 className="mb-2 text-sm font-semibold text-ink-2">{t.drawer.note}</h4>
-        <div className="rounded-xl bg-surface-2 px-3.5 py-3">
+        <div className="rounded-md bg-surface-2 px-3.5 py-3">
           <InlineBody
             value={item.body ?? ''}
             onCommit={(v) => updateItem(item.id, { body: v })}

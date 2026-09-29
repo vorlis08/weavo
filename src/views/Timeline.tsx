@@ -68,7 +68,7 @@ export function Timeline() {
 
   return (
     <Page title={t.timeline.title} eyebrow={t.timeline.lanes(lanes.length)} fill>
-      <div className="flex-1 overflow-auto rounded-2xl border border-line bg-surface p-[18px]">
+      <div className="flex-1 overflow-auto rounded-lg border border-line bg-surface p-[18px]">
         <div className="relative" style={{ width: width + 160 }}>
           {/* date header */}
           <div className="sticky top-0 z-10 flex bg-bg pl-40">

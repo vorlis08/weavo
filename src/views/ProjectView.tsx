@@ -211,7 +211,7 @@ function Chip({ children, className, ...rest }: React.ButtonHTMLAttributes<HTMLB
     <button
       {...rest}
       className={cn(
-        'relative inline-flex h-8 items-center gap-2 rounded-[10px] border border-line bg-surface px-3 text-sm text-ink-2 transition-colors hover:border-line-3 hover:text-ink',
+        'relative inline-flex h-8 items-center gap-2 rounded-md border border-line bg-surface px-3 text-sm text-ink-2 transition-colors hover:border-line-3 hover:text-ink',
         className,
       )}
     >
@@ -401,12 +401,12 @@ function TasksTab({ project }: { project: Project }) {
               }
             }}
             placeholder={t.project.phaseNamePh}
-            className="display h-11 w-full rounded-xl border border-line-2 bg-surface px-3.5 text-lg text-ink outline-none placeholder:text-ink-4 focus:border-iris/60"
+            className="display h-11 w-full rounded-md border border-line-2 bg-surface px-3.5 text-lg text-ink outline-none placeholder:text-ink-4 focus:border-iris/60"
           />
         ) : (
           <button
             onClick={() => setAdding(true)}
-            className="flex h-11 w-full items-center gap-2.5 rounded-xl border border-dashed border-line-2 px-3.5 text-base text-ink-3 transition-colors hover:border-line-3 hover:text-ink-2"
+            className="flex h-11 w-full items-center gap-2.5 rounded-md border border-dashed border-line-2 px-3.5 text-base text-ink-3 transition-colors hover:border-line-3 hover:text-ink-2"
           >
             <Plus size={16} />
             {t.project.addPhase}
@@ -598,7 +598,7 @@ function InlineTaskAdd({ project, phaseId }: { project: Project; phaseId?: strin
     setDraft('')
   }
   return (
-    <label className="flex min-h-11 items-center gap-3 rounded-[11px] px-3 text-ink-3 transition-colors hover:bg-surface focus-within:bg-surface">
+    <label className="flex min-h-11 items-center gap-3 rounded-md px-3 text-ink-3 transition-colors hover:bg-surface focus-within:bg-surface">
       <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-[1.6px] border-dashed border-ink-4">
         <Plus size={11} strokeWidth={2.4} />
       </span>
@@ -636,17 +636,13 @@ function Rail({ project }: { project: Project }) {
     <div className="flex flex-col gap-3.5">
       {next && (
         <section
-          className="rounded-2xl border p-[18px]"
-          style={{
-            borderColor: `color-mix(in oklab, ${project.color} 30%, var(--color-line))`,
-            background: `linear-gradient(180deg, color-mix(in oklab, ${project.color} 9%, var(--color-surface)), var(--color-surface))`,
-          }}
+          className="rounded-lg border border-line bg-surface p-3.5"
         >
           <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-ink-3">
             {next.flame && <Flame size={13} className="text-flame" />}
             {t.project.nextStep}
           </div>
-          <button onClick={() => openPeek(next.id)} className="display text-left text-lg leading-snug hover:text-iris-2">
+          <button onClick={() => openPeek(next.id)} className="display text-left text-lg leading-snug hover:text-ink">
             {next.title}
           </button>
           <div className="mt-1.5 text-sm text-ink-3">
@@ -724,7 +720,7 @@ const RailList = ({ children }: { children: ReactNode }) => <div className="flex
 const RailRow = ({ children, onClick }: { children: ReactNode; onClick: () => void }) => (
   <button
     onClick={onClick}
-    className="flex min-h-[38px] items-center gap-2.5 border-t border-line text-left text-[13.5px] first:border-t-0 hover:text-iris-2"
+    className="flex min-h-[38px] items-center gap-2.5 border-t border-line text-left text-base first:border-t-0 hover:text-ink"
   >
     {children}
   </button>

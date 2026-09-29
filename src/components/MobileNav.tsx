@@ -15,7 +15,7 @@ export function MobileTopBar({ onMenu }: { onMenu: () => void }) {
     <header className="flex shrink-0 items-center gap-2 border-b border-line bg-bg/90 px-2 pb-2 pt-[calc(8px+env(safe-area-inset-top,0px))] backdrop-blur-md md:hidden">
       <button
         onClick={onMenu}
-        className="flex h-10 w-10 items-center justify-center rounded-xl text-ink-2 active:bg-surface-2"
+        className="flex h-10 w-10 items-center justify-center rounded-md text-ink-2 active:bg-surface-2"
         aria-label={t.nav.menu}
       >
         <Menu size={20} strokeWidth={1.7} />
@@ -23,7 +23,7 @@ export function MobileTopBar({ onMenu }: { onMenu: () => void }) {
       <WeavoLogo />
       <button
         onClick={() => setPalette(true)}
-        className="ml-auto flex h-10 w-10 items-center justify-center rounded-xl text-ink-2 active:bg-surface-2"
+        className="ml-auto flex h-10 w-10 items-center justify-center rounded-md text-ink-2 active:bg-surface-2"
         aria-label={t.common.search}
       >
         <Search size={19} strokeWidth={1.7} />
@@ -43,11 +43,11 @@ export function MobileTabBar() {
       <NavLink
         to={to}
         className={cn(
-          'flex min-w-[58px] flex-col items-center gap-1 py-1 text-[11px] font-medium',
+          'flex min-w-[58px] flex-col items-center gap-1 py-1 text-xs font-medium',
           on ? 'text-ink' : 'text-ink-3',
         )}
       >
-        <Icon size={21} strokeWidth={1.6} className={on ? 'text-iris' : undefined} />
+        <Icon size={21} strokeWidth={1.6} className={on ? 'text-ink' : undefined} />
         {label}
       </NavLink>
     )
@@ -58,7 +58,7 @@ export function MobileTabBar() {
       {tab('/todo', ListChecks, t.nav.todo, (p) => p.startsWith('/todo'))}
       <button
         onClick={() => openCapture()}
-        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-iris text-iris-ink shadow-[0_8px_24px_-6px_rgb(158_160_247/0.5)] active:scale-95"
+        className="flex h-12 w-12 items-center justify-center rounded-lg bg-iris text-iris-ink active:scale-95"
         aria-label={t.nav.capture}
       >
         <Plus size={22} strokeWidth={2.2} />

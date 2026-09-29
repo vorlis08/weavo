@@ -37,7 +37,7 @@ export function Subtasks({ parentId }: { parentId: string }) {
             <Link
               to={`/item/${k.id}`}
               className={cn(
-                'min-w-0 flex-1 truncate text-sm hover:text-iris-2',
+                'min-w-0 flex-1 truncate text-sm hover:text-ink',
                 done && 'text-ink-3 line-through',
               )}
             >

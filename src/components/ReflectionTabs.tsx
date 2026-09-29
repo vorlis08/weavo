@@ -11,7 +11,7 @@ export function ReflectionTabs() {
       isActive ? 'bg-surface-3 text-ink' : 'text-ink-3 hover:text-ink',
     )
   return (
-    <div className="inline-flex gap-0.5 rounded-[10px] border border-line bg-surface p-[3px]">
+    <div className="inline-flex gap-0.5 rounded-md border border-line bg-surface p-[3px]">
       <NavLink to="/reflection" className={cls}>
         {t.reflectionTabs.journal}
       </NavLink>

@@ -120,7 +120,7 @@ export function CalendarView() {
         {mode === 'week' ? (
           <WeekGrid days={weekDays} space={space} />
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
             <div className="grid grid-cols-7 border-b border-line">
               {weekDays.map((d) => (
                 <div key={d.toISOString()} className="border-l border-line px-2.5 py-2 text-sm text-ink-3 first:border-l-0">

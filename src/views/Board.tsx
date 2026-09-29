@@ -47,7 +47,7 @@ function CardBody({ item }: { item: Item }) {
   return (
     <div
       className={cn(
-        'rounded-[11px] border border-line bg-surface-2 px-3 py-2.5 transition-colors hover:border-line-3',
+        'rounded-md border border-line bg-surface-2 px-3 py-2.5 transition-colors hover:border-line-3',
         done && 'opacity-60',
       )}
     >
@@ -66,7 +66,7 @@ function CardBody({ item }: { item: Item }) {
       </div>
       <div className="flex items-start gap-1.5">
         {item.flame && !done && <Flame size={13} className="mt-0.5 shrink-0 text-flame" fill="currentColor" fillOpacity={0.28} />}
-        <div className={cn('text-[13.5px] leading-snug text-ink', done && 'text-ink-3 line-through')}>
+        <div className={cn('text-base leading-snug text-ink', done && 'text-ink-3 line-through')}>
           {item.priority === 'high' && !done && <span className="mr-1 font-bold text-rose">!</span>}
           {item.title}
         </div>
@@ -125,7 +125,7 @@ function Column({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex w-[248px] shrink-0 flex-col overflow-hidden rounded-2xl border bg-surface transition-colors',
+        'flex w-[248px] shrink-0 flex-col overflow-hidden rounded-lg border bg-surface transition-colors',
         isOver ? 'border-iris/50' : 'border-line',
       )}
     >

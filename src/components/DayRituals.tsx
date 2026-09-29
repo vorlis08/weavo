@@ -141,7 +141,7 @@ function PlanDay({ onClose }: { onClose: () => void }) {
       {step === 2 && (
         <>
           <Heading title={t.rituals.dayTitle} hint={new Date().toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })} />
-          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-sm text-ink-2">
+          <div className="mb-4 flex flex-wrap gap-6 rounded-md bg-surface-2 px-4 py-3 text-sm text-ink-2">
             {[
               [todayTasks(data).filter((it) => it.status !== 'done').length, t.rituals.tasks],
               [hot.length, t.rituals.burning],
@@ -220,7 +220,7 @@ function CloseDay({ onClose }: { onClose: () => void }) {
       {step === 1 && (
         <>
           <Heading title={t.rituals.moodTitle} hint={t.rituals.moodHint} />
-          <div className="mb-4 flex flex-wrap gap-6 rounded-xl bg-surface-2 px-4 py-3 text-sm text-ink-2">
+          <div className="mb-4 flex flex-wrap gap-6 rounded-md bg-surface-2 px-4 py-3 text-sm text-ink-2">
             <span>
               <b className="block text-xl font-semibold text-ink">
                 {today.filter((it) => it.status === 'done').length}/{today.length}
@@ -271,23 +271,21 @@ export function DayRituals() {
     title: string,
     hint: string,
     done: boolean,
-    tone: string,
   ) => (
     <button
       onClick={() => setOpen(kind)}
       className={cn(
-        'flex items-center gap-3.5 rounded-[14px] border bg-surface px-4 py-3.5 text-left transition-colors hover:border-line-3 hover:bg-surface-2',
-        (kind === 'close') === evening && !done ? 'border-amber/35' : 'border-line',
+        'flex items-center gap-3 rounded-lg border bg-surface px-3 py-2.5 text-left transition-colors hover:border-line-3 hover:bg-surface-2',
+        (kind === 'close') === evening && !done ? 'border-line-3' : 'border-line',
       )}
     >
       <span
-        className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-[11px]"
-        style={{ background: `color-mix(in oklab, ${tone} 16%, transparent)`, color: tone }}
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-3 text-ink-2"
       >
         {icon}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-base font-semibold">{title}</span>
+        <span className="block text-base font-medium">{title}</span>
         <span className="block truncate text-sm text-ink-3">{hint}</span>
       </span>
       {done && (
@@ -301,9 +299,9 @@ export function DayRituals() {
 
   return (
     <>
-      <div className="mb-9 grid gap-3 sm:grid-cols-2">
-        {tile('plan', <Sun size={17} />, t.rituals.plan, t.rituals.planHint, lastPlanned === key, 'var(--color-amber)')}
-        {tile('close', <Moon size={17} />, t.rituals.close, t.rituals.closeHint, lastClosed === key, 'var(--color-iris-2)')}
+      <div className="mb-6 grid gap-2.5 sm:grid-cols-2">
+        {tile('plan', <Sun size={15} />, t.rituals.plan, t.rituals.planHint, lastPlanned === key)}
+        {tile('close', <Moon size={15} />, t.rituals.close, t.rituals.closeHint, lastClosed === key)}
       </div>
       <Modal open={open === 'plan'} onClose={() => setOpen(null)} width={560}>
         <PlanDay onClose={() => setOpen(null)} />

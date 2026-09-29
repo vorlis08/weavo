@@ -184,7 +184,7 @@ function QuickAdd({ space }: { space: Space }) {
     toast(t.todo.added)
   }
   return (
-    <label className="mb-6 flex h-12 items-center gap-3 rounded-xl border border-line bg-surface px-3.5 text-ink-3 transition-colors focus-within:border-line-3">
+    <label className="mb-6 flex h-12 items-center gap-3 rounded-md border border-line bg-surface px-3.5 text-ink-3 transition-colors focus-within:border-line-3">
       <Plus size={16} />
       <input
         id="todo-quick-add"
@@ -209,7 +209,7 @@ function EventPill({ item }: { item: Item }) {
     <button
       onClick={() => navigate(`/item/${item.id}`)}
       className={cn(
-        'flex h-9 shrink-0 items-center gap-2.5 rounded-[10px] border border-line bg-surface pl-3 pr-3.5 text-[13.5px] transition-colors hover:border-line-3',
+        'flex h-9 shrink-0 items-center gap-2.5 rounded-md border border-line bg-surface pl-3 pr-3.5 text-base transition-colors hover:border-line-3',
         past && 'opacity-50',
       )}
     >
@@ -365,12 +365,12 @@ function SomedaySection({ items, space }: { items: Item[]; space: Space }) {
         {items.map((it) => (
           <div
             key={it.id}
-            className="group flex min-h-11 items-center gap-3 rounded-[11px] px-3 hover:bg-surface"
+            className="group flex min-h-11 items-center gap-3 rounded-md px-3 hover:bg-surface"
           >
             <span className="h-5 w-5 shrink-0 rounded-full border-[1.6px] border-dashed border-ink-4" />
             <button
               onClick={() => navigate(`/item/${it.id}`)}
-              className="min-w-0 flex-1 truncate text-left text-base hover:text-iris-2"
+              className="min-w-0 flex-1 truncate text-left text-base hover:text-ink"
             >
               {it.title}
             </button>
@@ -390,7 +390,7 @@ function SomedaySection({ items, space }: { items: Item[]; space: Space }) {
             </button>
           </div>
         ))}
-        <label className="flex min-h-11 items-center gap-3 rounded-[11px] px-3 text-ink-3 hover:bg-surface">
+        <label className="flex min-h-11 items-center gap-3 rounded-md px-3 text-ink-3 hover:bg-surface">
           <Plus size={16} className="mx-0.5" />
           <input
             value={draft}

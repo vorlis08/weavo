@@ -239,7 +239,7 @@ export function RecordDetail() {
                   href={item.externalUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1 text-xs text-iris hover:text-iris-2"
+                  className="inline-flex items-center gap-1 text-xs text-iris hover:text-ink"
                 >
                   {t.detail.openExternal} <ExternalLink size={11} />
                 </a>
@@ -287,7 +287,7 @@ export function RecordDetail() {
                   {conflictIds.map((c, i) => (
                     <span key={c.id}>
                       {i > 0 && ', '}
-                      <Link to={`/item/${c.id}`} className="text-ink hover:text-iris-2">
+                      <Link to={`/item/${c.id}`} className="text-ink hover:text-ink">
                         {c.title}
                       </Link>
                     </span>
@@ -298,7 +298,7 @@ export function RecordDetail() {
             )}
 
             {suggestion && (
-              <div className="mt-4 flex gap-2.5 rounded-xl border border-iris/25 bg-iris/12 px-[15px] py-3">
+              <div className="mt-4 flex gap-2.5 rounded-md border border-iris/25 bg-iris/12 px-[15px] py-3">
                 <Sparkles size={17} strokeWidth={1.6} className="mt-px shrink-0 text-iris" />
                 <div className="flex-1">
                   <div className="text-sm leading-normal text-ink">
@@ -419,7 +419,7 @@ export function RecordDetail() {
                   <SectionLabel>{t.detail.dependencies}</SectionLabel>
                   <button
                     onClick={() => setPickDep(true)}
-                    className="flex items-center gap-1 text-xs text-iris hover:text-iris-2"
+                    className="flex items-center gap-1 text-xs text-iris hover:text-ink"
                   >
                     <Plus size={11} />
                     {t.detail.addBlockedBy}
@@ -436,7 +436,7 @@ export function RecordDetail() {
                           return (
                             <div key={bid} className="group flex items-center gap-2.5 rounded-lg border border-line bg-surface-2 px-3 py-2.5">
                               <GitBranch size={14} strokeWidth={1.7} className="shrink-0 text-rose" />
-                              <Link to={`/item/${bid}`} className="min-w-0 flex-1 truncate text-sm hover:text-iris-2">
+                              <Link to={`/item/${bid}`} className="min-w-0 flex-1 truncate text-sm hover:text-ink">
                                 {b.title}
                               </Link>
                               <span className="mono text-xs text-ink-3">
@@ -513,7 +513,7 @@ export function RecordDetail() {
 
           {/* side */}
           <div className="flex w-full shrink-0 flex-col gap-3.5 lg:w-[300px]">
-            <div className="rounded-xl border border-line bg-surface px-[15px] py-2.5">
+            <div className="rounded-md border border-line bg-surface px-[15px] py-2.5">
               <PropRow label={t.spaces.label}>
                 <Segmented
                   options={SPACES.map((sp) => ({
@@ -689,7 +689,7 @@ export function RecordDetail() {
             </div>
 
             {item.kind !== 'note' && (
-              <div className="rounded-xl border border-line bg-surface px-[15px] py-3.5">
+              <div className="rounded-md border border-line bg-surface px-[15px] py-3.5">
                 <div className="mb-1 flex items-center gap-2">
                   <Bell size={13} strokeWidth={1.6} className="text-ink-2" />
                   <h3 className="text-base">{t.detail.reminders}</h3>
@@ -714,7 +714,7 @@ export function RecordDetail() {
                 ))}
                 <Menu
                   trigger={({ toggle }) => (
-                    <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-xs text-iris hover:text-iris-2">
+                    <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-xs text-iris hover:text-ink">
                       <Plus size={11} />
                       {t.detail.addReminder}
                     </button>

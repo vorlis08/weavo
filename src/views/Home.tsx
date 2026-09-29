@@ -13,7 +13,7 @@ import { SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 
 const MoreLink = ({ to, children }: { to: string; children: string }) => (
-  <Link to={to} className="flex items-center gap-1 text-iris-2 hover:text-iris">
+  <Link to={to} className="flex items-center gap-1 text-ink-3 hover:text-ink">
     {children}
     <ArrowRight size={13} />
   </Link>
@@ -42,9 +42,6 @@ export function Home() {
     .slice(0, 5)
   const unsorted = Object.values(data.items).filter((it) => it.unsorted).length
 
-  const hour = now.getHours()
-  const greeting = hour < 11 ? t.home.morning : hour < 18 ? t.home.afternoon : t.home.evening
-  const name = data.settings.displayName
   const split = (sp: Space) => {
     const all = today.filter((it) => it.space === sp)
     return { done: all.filter((it) => it.status === 'done').length, total: all.length }
@@ -55,12 +52,7 @@ export function Home() {
   return (
     <Page
       eyebrow={fmtLongDate(now)}
-      title={
-        <>
-          {greeting}
-          {name ? `, ${name}` : ''}
-        </>
-      }
+      title={t.nav.home}
       lede={t.home.lede(agenda.length, open.length, hot.length)}
       actions={<SpaceFilterSwitch />}
     >
@@ -69,7 +61,7 @@ export function Home() {
       {unsorted > 0 && (
         <Link
           to="/triage"
-          className="mb-8 flex items-center gap-3 rounded-xl border border-iris/25 bg-iris/[0.07] px-4 py-3 text-base text-iris-2 transition-colors hover:border-iris/45"
+          className="mb-6 flex items-center gap-2.5 rounded-md border border-line-2 px-3 py-2 text-base text-ink-2 transition-colors hover:bg-surface-2 hover:text-ink"
         >
           <Inbox size={16} />
           {t.home.unsorted(unsorted)}
@@ -77,7 +69,7 @@ export function Home() {
         </Link>
       )}
 
-      <div className="grid items-start gap-9 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
         <div>
           <TodoSection
             title={t.todo.hot}
@@ -96,7 +88,7 @@ export function Home() {
           />
         </div>
 
-        <div className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3">
           <Card title={t.home.today}>
             <div className="display flex items-baseline gap-2">
               <b className="text-4xl font-semibold">{today.length - open.length}</b>
@@ -143,7 +135,7 @@ export function Home() {
 
           <Card title={t.home.projects} action={<MoreLink to="/projects">{t.home.allLink}</MoreLink>}>
             {projects.length ? (
-              <div className="flex flex-col gap-3.5">
+              <div className="flex flex-col gap-3">
                 {projects.map((p) => {
                   const st = projectStats(data, p.id)
                   return (
@@ -152,7 +144,7 @@ export function Home() {
                       onClick={() => navigate(`/project/${p.id}`)}
                       className="group grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5 text-left"
                     >
-                      <span className="flex min-w-0 items-center gap-2.5 text-[13.5px] group-hover:text-iris-2">
+                      <span className="flex min-w-0 items-center gap-2.5 text-base group-hover:text-ink">
                         <ProjectGlyph color={p.color} />
                         <span className="truncate">{p.name}</span>
                       </span>
@@ -192,7 +184,7 @@ function AgendaRow({ item, onOpen }: { item: Item; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className={`grid min-h-10 grid-cols-[48px_2px_1fr] items-center gap-3 rounded-lg text-left text-[13.5px] hover:text-iris-2 ${past ? 'opacity-45' : ''}`}
+      className={`grid min-h-10 grid-cols-[48px_2px_1fr] items-center gap-3 rounded-lg text-left text-base hover:text-ink ${past ? 'opacity-45' : ''}`}
     >
       <span className="mono text-right text-sm text-ink-3">{item.allDay ? t.home.allDay : fmtTime(item.start!)}</span>
       <span className="h-[22px] rounded-full" style={{ background: SPACE_COLOR[item.space] }} />

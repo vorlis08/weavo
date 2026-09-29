@@ -124,7 +124,7 @@ export function WeekGrid({
   const cols = { gridTemplateColumns: `52px repeat(${days.length}, minmax(0, 1fr))` }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-line bg-surface">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-line bg-surface">
       <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
         <div className="flex min-h-0 min-w-[760px] flex-1 flex-col">
           {/* day header */}
@@ -148,7 +148,7 @@ export function WeekGrid({
           {/* tasks and all-day events */}
           {hasBand && (
             <div className="grid border-b border-line-2 bg-bg/60" style={cols}>
-              <div className="pr-2 pt-2 text-right text-[11px] text-ink-3">{t.calendar.tasksBand}</div>
+              <div className="pr-2 pt-2 text-right text-xs text-ink-3">{t.calendar.tasksBand}</div>
               {bands.map((b, i) => (
                 <div key={days[i].toISOString()} className="flex min-w-0 flex-col gap-1 border-l border-line p-1.5">
                   {[...b.allDay, ...b.tasks].slice(0, 4).map((it) => (

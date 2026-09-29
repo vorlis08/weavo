@@ -50,7 +50,7 @@ export function Triage() {
               </span>
               <button
                 onClick={() => (it.kind === 'task' ? openPeek(it.id) : navigate(`/item/${it.id}`))}
-                className="min-w-0 flex-1 truncate text-left text-base hover:text-iris-2"
+                className="min-w-0 flex-1 truncate text-left text-base hover:text-ink"
               >
                 {it.title}
               </button>

@@ -25,7 +25,7 @@ const days = (a: Date, b: Date) => Math.round((startOfDay(b).getTime() - startOf
 
 /**
  * "Osnova" — work drawn as threads on a day axis. Each lane is one thread from
- * start to end; the solid part is what's done, the hatched part what's left.
+ * start to end; the solid part is what's done, the faint part what's left.
  * A vertical needle marks today.
  */
 export function Loom({
@@ -66,7 +66,7 @@ export function Loom({
   )
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line bg-surface">
+    <div className="overflow-x-auto rounded-lg border border-line bg-surface">
       <div className="relative min-w-[720px] px-4 pb-3 pt-3.5">
         {/* axis */}
         <div className="grid h-7 border-b border-line text-xs text-ink-3" style={{ gridTemplateColumns: `${labelWidth}px 1fr` }}>
@@ -98,7 +98,7 @@ export function Loom({
                 <button
                   onClick={l.onClick}
                   disabled={!l.onClick}
-                  className="flex min-w-0 items-center gap-2.5 pr-3 text-left text-[13.5px] enabled:hover:text-iris-2"
+                  className="flex min-w-0 items-center gap-2.5 pr-3 text-left text-base enabled:hover:text-ink"
                 >
                   <span className="flex min-w-0 flex-1 items-center gap-2.5 truncate">{l.label}</span>
                   {l.meta && <span className="shrink-0 text-xs text-ink-3">{l.meta}</span>}
@@ -110,18 +110,17 @@ export function Loom({
                       disabled={!l.onClick}
                       title={l.title}
                       className={cn(
-                        'absolute top-1/2 h-3 -translate-y-1/2 overflow-hidden rounded-full',
+                        'absolute top-1/2 h-2 -translate-y-1/2 overflow-hidden rounded-[3px]',
                         l.muted && 'saturate-[.2] brightness-75',
                       )}
                       style={{
                         left: `${pct(s)}%`,
                         width: `${width}%`,
-                        background: `repeating-linear-gradient(135deg, color-mix(in oklab, ${l.color} 42%, transparent) 0 2px, transparent 2px 6px)`,
-                        boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${l.color} 50%, transparent)`,
+                        background: `color-mix(in oklab, ${l.color} 28%, transparent)`,
                       }}
                     >
                       <i
-                        className="block h-full rounded-l-full"
+                        className="block h-full"
                         style={{ width: `${Math.min(1, Math.max(0, l.progress)) * 100}%`, background: l.color }}
                       />
                     </button>
@@ -144,7 +143,7 @@ export function Loom({
                 className="absolute inset-y-0 w-px bg-iris"
                 style={{ left: `${pct(today) + 50 / span}%` }}
               >
-                <span className="absolute -top-0.5 left-1.5 text-[11px] font-semibold text-iris-2">{t.project.today}</span>
+                <span className="absolute -top-0.5 left-1.5 text-xs font-semibold text-iris-2">{t.project.today}</span>
               </span>
             </div>
           )}
