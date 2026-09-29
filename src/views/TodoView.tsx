@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { NavLink, useNavigate, useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import { ArrowRight, Clock9, Columns3, Flame, Hourglass, List, Plus, Repeat, Trash2 } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { ProgressBar, TodoSection, byUrgency } from '@/components/todo'
@@ -202,11 +202,11 @@ function QuickAdd({ space }: { space: Space }) {
 }
 
 function EventPill({ item }: { item: Item }) {
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const past = item.end ? new Date(item.end) < new Date() : false
   return (
     <button
-      onClick={() => navigate(`/item/${item.id}`)}
+      onClick={() => openPeek(item.id)}
       className={cn(
         'flex h-9 shrink-0 items-center gap-2.5 rounded-md border border-line bg-surface pl-3 pr-3.5 text-base transition-colors hover:border-line-3',
         past && 'opacity-50',
@@ -339,7 +339,7 @@ function WorkByProject({ mine, today }: { mine: Item[]; today: Item[] }) {
 
 function SomedaySection({ items, space }: { items: Item[]; space: Space }) {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const createItem = useStore((s) => s.createItem)
   const updateItem = useStore((s) => s.updateItem)
   const { askDelete, dialog } = useConfirmDelete()
@@ -368,7 +368,7 @@ function SomedaySection({ items, space }: { items: Item[]; space: Space }) {
           >
             <span className="h-5 w-5 shrink-0 rounded-full border-[1.6px] border-dashed border-ink-4" />
             <button
-              onClick={() => navigate(`/item/${it.id}`)}
+              onClick={() => openPeek(it.id)}
               className="min-w-0 flex-1 truncate text-left text-base hover:text-ink"
             >
               {it.title}

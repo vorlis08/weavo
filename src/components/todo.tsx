@@ -1,5 +1,4 @@
 import { useState, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Flame, Hourglass, Repeat } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -106,7 +105,6 @@ export function TodoRow({
   ctx?: 'today'
 }) {
   const t = useT()
-  const navigate = useNavigate()
   const data = useStore((s) => s.data)
   const toggleDone = useStore((s) => s.toggleDone)
   const openPeek = useStore((s) => s.openPeek)
@@ -142,7 +140,7 @@ export function TodoRow({
   return (
     <div className="@container">
       <div
-        onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
+        onClick={() => openPeek(item.id)}
         className="group/row relative flex min-h-[34px] cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-1 transition-colors hover:bg-surface-2"
       >
         {showSpace && (

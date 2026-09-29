@@ -8,13 +8,19 @@ import { Checkbox, cn } from './ui'
 const uid = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
 
-/** a task's steps (its checklist): tick, rename in place, remove, add */
+export type Step = NonNullable<Item['checklist']>[number]
+
+/** a stored task's steps */
 export function Steps({ item }: { item: Item }) {
-  const t = useT()
   const updateItem = useStore((s) => s.updateItem)
-  const steps = item.checklist ?? []
+  return <StepsList steps={item.checklist ?? []} onChange={(checklist) => updateItem(item.id, { checklist })} />
+}
+
+/** a checklist: tick, rename in place, remove, add */
+export function StepsList({ steps, onChange }: { steps: Step[]; onChange: (steps: Step[]) => void }) {
+  const t = useT()
   const [draft, setDraft] = useState('')
-  const set = (next: NonNullable<Item['checklist']>) => updateItem(item.id, { checklist: next })
+  const set = onChange
 
   function add() {
     const v = draft.trim()

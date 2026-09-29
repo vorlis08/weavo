@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Check, Inbox, Trash2 } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { Button, EmptyState, Select } from '@/components/ui'
@@ -12,7 +11,6 @@ import { SPACES } from '@/lib/types'
 /** the inbox: give each captured thing a project and file it, open it, or delete it */
 export function Triage() {
   const t = useT()
-  const navigate = useNavigate()
   const itemsRec = useStore((s) => s.data.items)
   const projectsRec = useStore((s) => s.data.projects)
   const unsorted = useMemo(
@@ -49,7 +47,7 @@ export function Triage() {
                 <KindIcon kind={it.kind} size={17} />
               </span>
               <button
-                onClick={() => (it.kind === 'task' ? openPeek(it.id) : navigate(`/item/${it.id}`))}
+                onClick={() => openPeek(it.id)}
                 className="min-w-0 flex-1 truncate text-left text-base hover:text-ink"
               >
                 {it.title}
@@ -74,7 +72,7 @@ export function Triage() {
                     </optgroup>
                   ))}
                 </Select>
-                <Button variant="ghost" size="sm" square onClick={() => navigate(`/item/${it.id}`)} title={t.triage.openDetails}>
+                <Button variant="ghost" size="sm" square onClick={() => openPeek(it.id)} title={t.triage.openDetails}>
                   <ArrowRight size={15} />
                 </Button>
                 <Button size="sm" square onClick={() => file(it.id)} title={t.triage.file} className="hover:border-sage/40 hover:text-sage">

@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Page } from '@/components/Page'
 import { EmptyState } from '@/components/ui'
 import { GanttChartSquare } from 'lucide-react'
@@ -13,7 +12,7 @@ const ROW_H = 30
 
 export function Timeline() {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const data = useStore((s) => s.data)
 
   const dated = useMemo(
@@ -114,14 +113,14 @@ export function Timeline() {
                   return (
                     <div key={it.id} className="flex items-center" style={{ height: ROW_H }}>
                       <button
-                        onClick={() => navigate(`/item/${it.id}`)}
+                        onClick={() => openPeek(it.id)}
                         className="w-40 shrink-0 truncate pr-2 text-left text-xs text-ink-2 hover:text-ink"
                       >
                         {it.title}
                       </button>
                       <div className="relative h-full flex-1">
                         <button
-                          onClick={() => navigate(`/item/${it.id}`)}
+                          onClick={() => openPeek(it.id)}
                           className="absolute top-1/2 -translate-y-1/2 rounded-md text-left"
                           style={{
                             left: x1,

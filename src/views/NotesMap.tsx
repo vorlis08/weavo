@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Network } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { EmptyState } from '@/components/ui'
@@ -18,7 +17,7 @@ interface Node {
 
 export function NotesMap() {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const data = useStore((s) => s.data)
   const [hover, setHover] = useState<string | null>(null)
   const wrap = useRef<HTMLDivElement>(null)
@@ -155,7 +154,7 @@ export function NotesMap() {
                 opacity={active ? 1 : 0.28}
                 onMouseEnter={() => setHover(n.id)}
                 onMouseLeave={() => setHover(null)}
-                onClick={() => navigate(`/item/${n.id}`)}
+                onClick={() => openPeek(n.id)}
               >
                 <circle r={r} fill={n.color} />
                 <text

@@ -63,7 +63,9 @@ export function RepeatField({ value, onChange }: { value?: RepeatRule; onChange:
                 aria-pressed={!!on}
                 className={cn(
                   'h-7 min-w-7 rounded-md border px-1 text-xs transition-colors',
-                  on ? 'border-ink-3 bg-surface-3 text-ink' : 'border-line text-ink-3 hover:border-line-3 hover:text-ink',
+                  on
+                    ? 'border-ink-3 bg-surface-3 text-ink'
+                    : 'border-line text-ink-3 hover:border-line-3 hover:text-ink',
                 )}
               >
                 {t.repeat.weekdaysShort[d]}
@@ -103,7 +105,12 @@ function human(t: ReturnType<typeof useT>, m: number) {
 
 export function triggerLabel(t: ReturnType<typeof useT>, tr: ReminderTrigger, kind: ItemKind) {
   if (tr.type === 'at')
-    return new Date(tr.at).toLocaleString(dateLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return new Date(tr.at).toLocaleString(dateLocale(), {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   if (tr.type === 'on_day') return kind === 'event' ? t.remind.onDayEvent(tr.time) : t.remind.onDay(tr.time)
   if (tr.minutes === 0) return kind === 'event' ? t.remind.atStart : t.remind.atTime
   return t.remind.before(human(t, tr.minutes))
@@ -116,11 +123,14 @@ const DAY_TIMES = ['08:00', '09:00', '12:00', '18:00']
 export function RemindersField({
   kind,
   entries,
+  hasDate = true,
   onAdd,
   onRemove,
 }: {
   kind: ItemKind
   entries: ReminderEntry[]
+  /** without a date only a fixed time makes sense */
+  hasDate?: boolean
   onAdd: (t: ReminderTrigger) => void
   onRemove: (id: string) => void
 }) {
@@ -129,10 +139,11 @@ export function RemindersField({
   const have = new Set(entries.map((e) => triggerKey(e.trigger)))
   const rel = (minutes: number): ReminderTrigger =>
     kind === 'event' ? { type: 'before_start', minutes } : { type: 'before_due', minutes }
-  const items = [
-    ...MINUTE_PRESETS.map((m) => rel(m)),
-    ...DAY_TIMES.map((time): ReminderTrigger => ({ type: 'on_day', time })),
-  ]
+  const items = (
+    hasDate
+      ? [...MINUTE_PRESETS.map((m) => rel(m)), ...DAY_TIMES.map((time): ReminderTrigger => ({ type: 'on_day', time }))]
+      : []
+  )
     .filter((tr) => !have.has(triggerKey(tr)))
     .map((tr) => ({ label: triggerLabel(t, tr, kind), onSelect: () => onAdd(tr) }))
   return (
@@ -180,7 +191,11 @@ export function RemindersField({
             {entries.length ? t.common.add : t.remind.add}
           </button>
         )}
-        items={[...items, 'separator', { label: t.remind.custom, onSelect: () => setCustom(true) }]}
+        items={[
+          ...items,
+          ...(items.length ? ['separator' as const] : []),
+          { label: t.remind.custom, onSelect: () => setCustom(true) },
+        ]}
       />
     </div>
   )

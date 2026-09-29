@@ -20,6 +20,7 @@ import type {
 import { TAG_COLORS } from './types'
 import { legacyRule, nextOccurrence } from './recur'
 import { DEFAULT_REMINDERS, defaultTriggers } from './reminders'
+import { reminderTimes } from './selectors'
 
 const uid = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -133,6 +134,14 @@ function emptyData(): WeavoData {
   }
 }
 
+/** a reminder whose time has already passed when it is made is born fired, so it does not go off retroactively */
+function armed(r: Reminder, item: Item): Reminder {
+  const nowMs = Date.now()
+  return reminderTimes(r, item, nowMs - 12 * 3_600_000, nowMs).some((ms) => ms <= nowMs)
+    ? { ...r, firedAt: new Date().toISOString() }
+    : r
+}
+
 export interface Toast {
   id: string
   message: string
@@ -145,13 +154,15 @@ interface Store {
   captureOpen: boolean
   captureKind: ItemKind
   captureText: string
+  /** fields the capture window starts with (say, the slot clicked in the calendar) */
+  capturePreset: Partial<Item> | null
   paletteOpen: boolean
   /** task shown in the side drawer */
   peekId: string | null
   tourOpen: boolean
   toasts: Toast[]
 
-  openCapture: (kind?: ItemKind, text?: string) => void
+  openCapture: (kind?: ItemKind, text?: string, preset?: Partial<Item>) => void
   closeCapture: () => void
   setCaptureKind: (k: ItemKind) => void
   setCaptureText: (t: string) => void
@@ -235,18 +246,20 @@ export const useStore = create<Store>()(
       captureOpen: false,
       captureKind: 'task',
       captureText: '',
+      capturePreset: null,
       paletteOpen: false,
       peekId: null,
       tourOpen: false,
       toasts: [],
 
-      openCapture: (kind, text) =>
+      openCapture: (kind, text, preset) =>
         set((s) => ({
           captureOpen: true,
           captureKind: kind ?? s.captureKind,
           captureText: text ?? '',
+          capturePreset: preset ?? null,
         })),
-      closeCapture: () => set({ captureOpen: false, captureText: '' }),
+      closeCapture: () => set({ captureOpen: false, captureText: '', capturePreset: null }),
       setCaptureKind: (k) => set({ captureKind: k }),
       setCaptureText: (t) => set({ captureText: t }),
       setPalette: (open) => set({ paletteOpen: open }),
@@ -286,7 +299,7 @@ export const useStore = create<Store>()(
         if (opts?.reminders !== false && !item.parentId && !item.source) {
           for (const trigger of defaultTriggers(item, get().data.settings.reminderDefaults)) {
             const id = uid()
-            reminders[id] = { id, itemId: item.id, trigger }
+            reminders[id] = armed({ id, itemId: item.id, trigger }, item)
           }
         }
         set((s) => ({
@@ -597,7 +610,8 @@ export const useStore = create<Store>()(
         }),
 
       addReminder: (r) => {
-        const rem: Reminder = { id: uid(), ...r }
+        const item = get().data.items[r.itemId]
+        const rem: Reminder = item ? armed({ id: uid(), ...r }, item) : { id: uid(), ...r }
         set((s) => ({
           data: { ...s.data, reminders: { ...s.data.reminders, [rem.id]: rem } },
         }))

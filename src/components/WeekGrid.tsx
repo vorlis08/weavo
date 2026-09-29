@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { FileText, Flame, TriangleAlert } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -51,12 +50,11 @@ export function dayItems(items: Record<string, Item>, day: Date, space?: Space) 
 
 /** a task or all-day event as a small chip */
 export function DayChip({ item }: { item: Item }) {
-  const navigate = useNavigate()
   const openPeek = useStore((s) => s.openPeek)
   const done = item.status === 'done'
   return (
     <button
-      onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
+      onClick={() => openPeek(item.id)}
       className={cn(
         'flex min-w-0 items-center gap-1.5 rounded-md bg-surface-2 px-1.5 py-[3px] text-left text-xs transition-colors hover:bg-surface-3',
         done && 'opacity-50',
@@ -90,12 +88,12 @@ export function WeekGrid({
   space?: Space
 }) {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const data = useStore((s) => s.data)
   const items = data.items
   const projects = data.projects
   const { dayStartHour, dayEndHour } = data.settings
-  const createItem = useStore((s) => s.createItem)
+  const openCapture = useStore((s) => s.openCapture)
 
   const hours = useMemo(
     () => Array.from({ length: dayEndHour - dayStartHour }, (_, i) => dayStartHour + i),
@@ -120,14 +118,12 @@ export function WeekGrid({
     const start = new Date(day)
     start.setHours(hour, 0, 0, 0)
     const end = new Date(start.getTime() + 3_600_000)
-    const it = createItem({
-      kind: 'event',
-      title: t.calendar.addEventTitle,
+    openCapture('event', '', {
       start: start.toISOString(),
       end: end.toISOString(),
-      space: space ?? 'personal',
+      allDay: false,
+      ...(space ? { space } : {}),
     })
-    navigate(`/item/${it.id}`)
   }
 
   const cols = { gridTemplateColumns: `52px repeat(${days.length}, minmax(0, 1fr))` }
@@ -213,7 +209,7 @@ export function WeekGrid({
                       return (
                         <button
                           key={ev.id}
-                          onClick={() => navigate(`/item/${ev.id}`)}
+                          onClick={() => openPeek(ev.id)}
                           className="absolute overflow-hidden rounded-lg px-2 py-[5px] text-left transition-[filter] hover:brightness-125"
                           style={{
                             top: top + 1,

@@ -618,7 +618,6 @@ function InlineTaskAdd({ project, phaseId }: { project: Project; phaseId?: strin
 /** the right rail: next step, what's coming, who we wait on, notes */
 function Rail({ project }: { project: Project }) {
   const t = useT()
-  const navigate = useNavigate()
   const data = useStore((s) => s.data)
   const toggleDone = useStore((s) => s.toggleDone)
   const createItem = useStore((s) => s.createItem)
@@ -659,7 +658,7 @@ function Rail({ project }: { project: Project }) {
         <Card title={t.project.upcomingTitle}>
           <RailList>
             {events.map((ev) => (
-              <RailRow key={ev.id} onClick={() => navigate(`/item/${ev.id}`)}>
+              <RailRow key={ev.id} onClick={() => openPeek(ev.id)}>
                 <span className="h-4 w-[2px] shrink-0 rounded-full" style={{ background: SPACE_COLOR[ev.space] }} />
                 <span className="min-w-0 flex-1 truncate">{ev.title}</span>
                 <span className="shrink-0 text-sm text-ink-3">
@@ -690,7 +689,7 @@ function Rail({ project }: { project: Project }) {
           <button
             onClick={() => {
               const n = createItem({ kind: 'note', title: t.project.newNote, projectId: project.id })
-              navigate(`/item/${n.id}`)
+              openPeek(n.id)
             }}
             className="flex items-center gap-1 text-iris-2 hover:text-iris"
           >
@@ -702,7 +701,7 @@ function Rail({ project }: { project: Project }) {
         {notes.length ? (
           <RailList>
             {notes.map((n: Item) => (
-              <RailRow key={n.id} onClick={() => navigate(`/item/${n.id}`)}>
+              <RailRow key={n.id} onClick={() => openPeek(n.id)}>
                 <FileText size={14} className="shrink-0 text-ink-3" />
                 <span className="min-w-0 flex-1 truncate">{n.title}</span>
               </RailRow>

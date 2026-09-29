@@ -24,7 +24,8 @@ export function defaultTriggers(
     return defaults.event == null ? [] : [{ type: 'before_start', minutes: defaults.event }]
   }
   if (!item.due) return []
-  if (hasTimeOfDay(item.due)) return defaults.taskTimed == null ? [] : [{ type: 'before_due', minutes: defaults.taskTimed }]
+  if (hasTimeOfDay(item.due))
+    return defaults.taskTimed == null ? [] : [{ type: 'before_due', minutes: defaults.taskTimed }]
   return defaults.taskDay ? [{ type: 'on_day', time: defaults.taskDay }] : []
 }
 

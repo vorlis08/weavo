@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router-dom'
 import { CalendarDays, CircleCheck, FileText, Hash, ListChecks, Mail } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
@@ -70,7 +69,7 @@ export function DueChip({ due, className }: { due?: string; className?: string }
 
 export function TaskRow({ item }: { item: Item }) {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const toggleDone = useStore((s) => s.toggleDone)
   const project = useStore((s) => (item.projectId ? s.data.projects[item.projectId] : undefined))
   const done = item.kind === 'task' ? item.status === 'done' : !!item.completedAt
@@ -81,7 +80,7 @@ export function TaskRow({ item }: { item: Item }) {
 
   return (
     <button
-      onClick={() => navigate(`/item/${item.id}`)}
+      onClick={() => openPeek(item.id)}
       className="group flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left transition-colors hover:bg-surface-2"
     >
       {item.kind === 'note' ? (
@@ -107,10 +106,10 @@ export function TaskRow({ item }: { item: Item }) {
 }
 
 export function CompletedRow({ item }: { item: Item }) {
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   return (
     <button
-      onClick={() => navigate(`/item/${item.id}`)}
+      onClick={() => openPeek(item.id)}
       className="flex w-full items-center gap-2.5 rounded-md px-1.5 py-1.5 text-left opacity-45 transition-opacity hover:opacity-70"
     >
       <CircleCheck size={15} strokeWidth={1.6} className="shrink-0 text-sage" />

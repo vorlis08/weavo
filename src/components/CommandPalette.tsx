@@ -24,6 +24,7 @@ export function CommandPalette() {
   const openCapture = useStore((s) => s.openCapture)
   const items = useStore((s) => s.data.items)
   const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)
   const listRef = useRef<HTMLDivElement>(null)
@@ -50,7 +51,7 @@ export function CommandPalette() {
         icon: <KindIcon kind={it.kind} />,
         run: () => {
           close()
-          navigate(`/item/${it.id}`)
+          openPeek(it.id)
         },
       }))
 

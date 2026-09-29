@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ExternalLink, FileText, ListChecks, Mail, RefreshCw } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { Button, EmptyState } from '@/components/ui'
@@ -11,7 +11,7 @@ import { fmtAgo } from '@/lib/date'
 
 export function MailView() {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const google = useStore((s) => s.data.google)
   const createItem = useStore((s) => s.createItem)
   const updateGoogle = useStore((s) => s.updateGoogle)
@@ -56,7 +56,7 @@ export function MailView() {
     })
     toast(t.mail.added(kind === 'task' ? t.kind.taskLower : t.kind.noteLower), {
       label: t.common.open,
-      run: () => navigate(`/item/${it.id}`),
+      run: () => openPeek(it.id),
     })
   }
 

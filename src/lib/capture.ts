@@ -1,4 +1,5 @@
 import { parseCapture, type ParseResult } from './parse'
+import { startOfDay } from './date'
 import type { Item, Project, Space, WeavoData } from './types'
 
 /**
@@ -46,7 +47,8 @@ export function taskFromLine(
     tags: tagIds,
     projectId: project?.id,
     flame: parsed.flame || undefined,
-    due: parsed.when?.start.toISOString(),
+    due: parsed.when?.start.toISOString() ?? (parsed.repeat ? startOfDay(new Date()).toISOString() : undefined),
+    repeat: parsed.repeat,
     ...extra,
   }
 }

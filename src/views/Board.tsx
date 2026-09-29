@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import {
   DndContext,
   DragOverlay,
@@ -89,7 +89,6 @@ function CardBody({ item }: { item: Item }) {
 }
 
 function DraggableCard({ item }: { item: Item }) {
-  const navigate = useNavigate()
   const openPeek = useStore((s) => s.openPeek)
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id })
   return (
@@ -97,7 +96,7 @@ function DraggableCard({ item }: { item: Item }) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      onClick={() => (item.kind === 'task' ? openPeek(item.id) : navigate(`/item/${item.id}`))}
+      onClick={() => openPeek(item.id)}
       className={cn('cursor-grab touch-none active:cursor-grabbing', isDragging && 'opacity-30')}
     >
       <CardBody item={item} />

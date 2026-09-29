@@ -23,6 +23,7 @@ const MoreLink = ({ to, children }: { to: string; children: string }) => (
 export function Home() {
   const t = useT()
   const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const data = useStore((s) => s.data)
   const filter = data.settings.spaceFilter
   const space = filter === 'all' ? undefined : filter
@@ -122,7 +123,7 @@ export function Home() {
                 {agenda.map((ev, i) => (
                   <Fragment key={ev.id}>
                     {i === nowIndex && <NowNeedle />}
-                    <AgendaRow item={ev} onOpen={() => navigate(`/item/${ev.id}`)} />
+                    <AgendaRow item={ev} onOpen={() => openPeek(ev.id)} />
                   </Fragment>
                 ))}
                 {nowIndex === -1 && <NowNeedle />}

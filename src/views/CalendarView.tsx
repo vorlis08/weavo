@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { DayChip, WeekGrid, dayItems } from '@/components/WeekGrid'
@@ -34,7 +33,7 @@ function weekNumber(d: Date) {
 
 export function CalendarView() {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const data = useStore((s) => s.data)
   const items = data.items
   const projects = data.projects
@@ -152,7 +151,7 @@ export function CalendarView() {
                       ) : (
                         <button
                           key={it.id}
-                          onClick={() => navigate(`/item/${it.id}`)}
+                          onClick={() => openPeek(it.id)}
                           className="flex min-w-0 items-center gap-1.5 rounded-md px-1.5 py-[3px] text-left text-xs text-ink-2 hover:bg-surface-2 hover:text-ink"
                         >
                           <span
@@ -179,7 +178,7 @@ export function CalendarView() {
 /** a day-by-day list of events and tasks — the calendar on phones */
 function Agenda({ days, eventsOn }: { days: Date[]; eventsOn: (d: Date) => Item[] }) {
   const t = useT()
-  const navigate = useNavigate()
+  const openPeek = useStore((s) => s.openPeek)
   const items = useStore((s) => s.data.items)
   const filter = useStore((s) => s.data.settings.spaceFilter)
   const space = filter === 'all' ? undefined : filter
@@ -201,7 +200,7 @@ function Agenda({ days, eventsOn }: { days: Date[]; eventsOn: (d: Date) => Item[
               {[...allDay, ...events, ...notes].map((ev) => (
                 <button
                   key={ev.id}
-                  onClick={() => navigate(`/item/${ev.id}`)}
+                  onClick={() => openPeek(ev.id)}
                   className="grid min-h-10 grid-cols-[48px_2px_1fr] items-center gap-3 rounded-lg px-1 text-left text-base"
                 >
                   <span className="mono text-right text-sm text-ink-3">{ev.allDay || !ev.start ? '—' : fmtTime(ev.start)}</span>

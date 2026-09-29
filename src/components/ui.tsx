@@ -214,7 +214,7 @@ export function Segmented<T extends string>({
   className?: string
 }) {
   return (
-    <div className={cn('inline-flex gap-0.5 rounded-md border border-line bg-surface p-0.5', className)}>
+    <div className={cn('inline-flex max-w-full gap-0.5 overflow-x-auto rounded-md border border-line bg-surface p-0.5', className)}>
       {options.map((o) => (
         <button
           key={o.value}

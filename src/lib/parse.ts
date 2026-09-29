@@ -1,4 +1,4 @@
-import type { Space } from './types'
+import type { RepeatFreq, RepeatRule, Space } from './types'
 import { addDays, startOfDay } from './date'
 
 const EN_WEEKDAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -38,6 +38,8 @@ export interface ParseResult {
   flame: boolean
   contactNames: string[]
   when: ParsedWhen | null
+  /** "každý týden", "daily", "každý pátek", "každé 2 týdny"… */
+  repeat?: RepeatRule
 }
 
 const SPACE_WORDS: Record<string, Space> = {
@@ -168,6 +170,61 @@ function parseDay(text: string, now: Date): { date: Date; raw: string } | null {
   return null
 }
 
+const REPEAT_UNITS: [RegExp, RepeatFreq][] = [
+  [/^(den|dny|dní|dnů|dni|dnu|days?)$/, 'daily'],
+  [/^(týden|týdny|týdnů|tyden|tydny|tydnu|weeks?)$/, 'weekly'],
+  [/^(měsíc|měsíce|měsíců|mesic|mesice|mesicu|months?)$/, 'monthly'],
+  [/^(rok|roky|let|years?)$/, 'yearly'],
+]
+
+const REPEAT_WORDS: Record<string, RepeatFreq> = {
+  denně: 'daily', denne: 'daily', týdně: 'weekly', tydne: 'weekly',
+  měsíčně: 'monthly', mesicne: 'monthly', ročně: 'yearly', rocne: 'yearly',
+  daily: 'daily', weekly: 'weekly', monthly: 'monthly', yearly: 'yearly',
+}
+
+/**
+ * A repeat phrase in the text. Returns the rule, the matched text, and what to
+ * leave behind in its place: a weekday stays ("každý pátek" → "pátek") so it
+ * still sets the first date.
+ */
+function parseRepeat(text: string): { rule: RepeatRule; raw: string; keep: string } | null {
+  const l = text.toLowerCase()
+  let m: RegExpMatchArray | null
+
+  m = l.match(
+    /(?:ve\s+všední\s+dny|ve\s+vsedni\s+dny|každý\s+(?:pracovní|všední|pracovni|vsedni)\s+den|kazdy\s+(?:pracovni|vsedni)\s+den|every\s+weekday|on\s+weekdays)/,
+  )
+  if (m) return { rule: { freq: 'weekdays', interval: 1 }, raw: m[0], keep: '' }
+
+  m = l.match(
+    /(?:každ[éýou]|kazd[eyou]|every)\s+(pondělí|pondeli|úterý|utery|středu|stredu|středa|streda|čtvrtek|ctvrtek|pátek|patek|sobotu|sobota|neděli|nedele|monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?![\p{L}])/u,
+  )
+  if (m) {
+    const word = m[1]
+    const stems = [...CS_WEEKDAY_STEMS.map((s) => new RegExp(`^(?:${s})`)), ...EN_WEEKDAYS.map((w) => new RegExp(`^${w}`))]
+    const idx = stems.findIndex((re) => re.test(word))
+    if (idx >= 0) return { rule: { freq: 'weekly', interval: 1, days: [idx % 7] }, raw: m[0], keep: word }
+  }
+
+  m = l.match(/(?:každých|každé|každý|každou|kazdych|kazde|kazdy|every)\s+(\d+)\s+([\p{L}]+)/u)
+  if (m) {
+    const unit = REPEAT_UNITS.find(([re]) => re.test(m![2]))
+    const n = parseInt(m[1], 10)
+    if (unit && n >= 1) return { rule: { freq: unit[1], interval: n }, raw: m[0], keep: '' }
+  }
+
+  m = l.match(/(?:každý|každé|každou|kazdy|kazde|every)\s+(den|týden|tyden|měsíc|mesic|rok|day|week|month|year)(?![\p{L}])/u)
+  if (m) {
+    const unit = REPEAT_UNITS.find(([re]) => re.test(m![1]))
+    if (unit) return { rule: { freq: unit[1], interval: 1 }, raw: m[0], keep: '' }
+  }
+
+  m = l.match(/(?:^|\s)(denně|denne|týdně|tydne|měsíčně|mesicne|ročně|rocne|daily|weekly|monthly|yearly)(?=\s|$)/u)
+  if (m) return { rule: { freq: REPEAT_WORDS[m[1]], interval: 1 }, raw: m[1], keep: '' }
+  return null
+}
+
 function escapeRe(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
@@ -196,6 +253,13 @@ export function parseCapture(input: string, now = new Date()): ParseResult {
       return sp
     },
   )
+
+  let repeat: RepeatRule | undefined
+  const rep = parseRepeat(text)
+  if (rep) {
+    repeat = rep.rule
+    text = text.replace(new RegExp(escapeRe(rep.raw), 'i'), ` ${rep.keep} `)
+  }
 
   let when: ParsedWhen | null = null
 
@@ -259,5 +323,5 @@ export function parseCapture(input: string, now = new Date()): ParseResult {
     .replace(/\b(at|on|by|for|v|ve|na|do|od|k|ke)\s*$/i, '')
     .trim()
 
-  return { title: title || input.trim(), projectName: hashes[0], hashes, space, flame, contactNames, when }
+  return { title: title || input.trim(), projectName: hashes[0], hashes, space, flame, contactNames, when, repeat }
 }

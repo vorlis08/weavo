@@ -8,8 +8,7 @@ import { useGoogleSync } from '@/hooks/useGoogleSync'
 import { setDateLang } from '@/lib/date'
 import { Sidebar } from './Sidebar'
 import { MobileTabBar, MobileTopBar, SidebarDrawer } from './MobileNav'
-import { TaskDrawer } from './TaskDrawer'
-import { QuickCapture } from './QuickCapture'
+import { CaptureDialog, PeekPanel } from './ItemEditor'
 import { CommandPalette } from './CommandPalette'
 import { Toaster } from './Toaster'
 import { Tour } from './Tour'
@@ -136,9 +135,9 @@ export function AppShell() {
         <Outlet />
       </main>
       <MobileTabBar />
-      <TaskDrawer />
+      <PeekPanel />
       <SidebarDrawer open={menuOpen} onClose={closeMenu} />
-      <QuickCapture />
+      <CaptureDialog />
       <CommandPalette />
       <Toaster />
       <TourNudge />
