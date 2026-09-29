@@ -1,5 +1,5 @@
 import { useStore } from './store'
-import type { Lang } from './types'
+import type { Lang, RepeatFreq, RepeatRule } from './types'
 
 export type { Lang }
 
@@ -532,10 +532,58 @@ const cs = {
   },
   repeat: {
     label: 'Opakování',
-    none: 'Neopakovat',
-    daily: 'Denně',
-    weekly: 'Týdně',
-    monthly: 'Měsíčně',
+    none: 'Neopakuje se',
+    daily: 'Každý den',
+    weekdays: 'Každý pracovní den',
+    weekly: 'Každý týden',
+    monthly: 'Každý měsíc',
+    yearly: 'Každý rok',
+    every: 'Každých',
+    unit: (f: RepeatFreq, n: number) =>
+      ({
+        daily: cz(n, ['den', 'dny', 'dní']),
+        weekdays: '',
+        weekly: cz(n, ['týden', 'týdny', 'týdnů']),
+        monthly: cz(n, ['měsíc', 'měsíce', 'měsíců']),
+        yearly: cz(n, ['rok', 'roky', 'let']),
+      })[f],
+    weekdaysShort: ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so'],
+    onDays: 'Ve dnech',
+    until: 'Do data',
+    noEnd: 'Bez konce',
+    summary: (r: RepeatRule) => {
+      const n = Math.max(1, r.interval || 1)
+      const wd = ['ne', 'po', 'út', 'st', 'čt', 'pá', 'so']
+      const base = {
+        daily: n === 1 ? 'Každý den' : n < 5 ? `Každé ${n} dny` : `Každých ${n} dní`,
+        weekdays: 'Každý pracovní den',
+        weekly: n === 1 ? 'Každý týden' : n < 5 ? `Každé ${n} týdny` : `Každých ${n} týdnů`,
+        monthly: n === 1 ? 'Každý měsíc' : n < 5 ? `Každé ${n} měsíce` : `Každých ${n} měsíců`,
+        yearly: n === 1 ? 'Každý rok' : n < 5 ? `Každé ${n} roky` : `Každých ${n} let`,
+      }[r.freq]
+      const days =
+        r.freq === 'weekly' && r.days?.length
+          ? ` (${[...r.days].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map((d) => wd[d]).join(', ')})`
+          : ''
+      const until = r.until ? `, do ${new Date(r.until).toLocaleDateString('cs-CZ')}` : ''
+      return base + days + until
+    },
+  },
+  remind: {
+    label: 'Připomenutí',
+    add: 'Přidat připomenutí',
+    none: 'Žádné připomenutí',
+    atTime: 'V čas termínu',
+    atStart: 'V čas začátku',
+    before: (t: string) => `${t} předem`,
+    onDay: (time: string) => `V den termínu v ${time}`,
+    onDayEvent: (time: string) => `V den události v ${time}`,
+    fired: 'odesláno',
+    custom: 'V konkrétní čas…',
+    dayAt: 'V den termínu v…',
+    minutes: (n: number) => `${n} min`,
+    hours: (n: number) => `${n} ${cz(n, ['hodinu', 'hodiny', 'hodin'])}`,
+    days: (n: number) => `${n} ${cz(n, ['den', 'dny', 'dní'])}`,
   },
   someday: {
     title: 'Někdy/později',
@@ -1248,9 +1296,57 @@ const en: Dict = {
   repeat: {
     label: 'Repeat',
     none: 'Does not repeat',
-    daily: 'Daily',
-    weekly: 'Weekly',
-    monthly: 'Monthly',
+    daily: 'Every day',
+    weekdays: 'Every weekday',
+    weekly: 'Every week',
+    monthly: 'Every month',
+    yearly: 'Every year',
+    every: 'Every',
+    unit: (f, n) =>
+      ({
+        daily: n === 1 ? 'day' : 'days',
+        weekdays: '',
+        weekly: n === 1 ? 'week' : 'weeks',
+        monthly: n === 1 ? 'month' : 'months',
+        yearly: n === 1 ? 'year' : 'years',
+      })[f],
+    weekdaysShort: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+    onDays: 'On',
+    until: 'Until',
+    noEnd: 'No end date',
+    summary: (r) => {
+      const n = Math.max(1, r.interval || 1)
+      const wd = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+      const base = {
+        daily: n === 1 ? 'Every day' : `Every ${n} days`,
+        weekdays: 'Every weekday',
+        weekly: n === 1 ? 'Every week' : `Every ${n} weeks`,
+        monthly: n === 1 ? 'Every month' : `Every ${n} months`,
+        yearly: n === 1 ? 'Every year' : `Every ${n} years`,
+      }[r.freq]
+      const days =
+        r.freq === 'weekly' && r.days?.length
+          ? ` (${[...r.days].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map((d) => wd[d]).join(', ')})`
+          : ''
+      const until = r.until ? `, until ${new Date(r.until).toLocaleDateString('en-US')}` : ''
+      return base + days + until
+    },
+  },
+  remind: {
+    label: 'Reminders',
+    add: 'Add a reminder',
+    none: 'No reminders',
+    atTime: 'At the due time',
+    atStart: 'When it starts',
+    before: (t) => `${t} before`,
+    onDay: (time) => `On the due day at ${time}`,
+    onDayEvent: (time) => `On the day at ${time}`,
+    fired: 'sent',
+    custom: 'At a specific time…',
+    dayAt: 'On the day at…',
+    minutes: (n) => `${n} min`,
+    hours: (n) => `${n} hour${n === 1 ? '' : 's'}`,
+    days: (n) => `${n} day${n === 1 ? '' : 's'}`,
   },
   someday: {
     title: 'Someday/later',

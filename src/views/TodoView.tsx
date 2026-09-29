@@ -8,9 +8,10 @@ import { useConfirmDelete } from '@/components/useConfirmDelete'
 import { BoardColumns } from './Board'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { addDays, fmtLongDate, fmtTime, isSameDay, startOfDay } from '@/lib/date'
+import { addDays, fmtLongDate, fmtTime, startOfDay } from '@/lib/date'
 import { isHot, isOnToday, isOverdue, todayTasks, waitingTasks } from '@/lib/selectors'
 import { taskFromLine } from '@/lib/capture'
+import { eventsOn } from '@/lib/recur'
 import { SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 
@@ -30,9 +31,7 @@ export function TodoView() {
     () => Object.values(data.items).filter((it) => it.kind === 'task' && it.space === space && !it.parentId),
     [data.items, space],
   )
-  const events = Object.values(data.items)
-    .filter((it) => it.kind === 'event' && it.space === space && it.start && isSameDay(it.start, now))
-    .sort((a, b) => (a.start! < b.start! ? -1 : 1))
+  const events = eventsOn(data, now, space)
 
   const weekEnd = addDays(startOfDay(now), 8)
   const planned = (it: Item) => isOpen(it) && !it.someday && !it.waitingFor
@@ -228,7 +227,7 @@ function PersonalSections({ today }: { today: Item[] }) {
     .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
 
   const overdue = today.filter((it) => isOverdue(it))
-  const routine = (it: Item) => !!it.repeat && it.repeat !== 'none'
+  const routine = (it: Item) => !!it.repeat
   const rest = today.filter((it) => !isOverdue(it) && !routine(it))
   const routines = today.filter((it) => !isOverdue(it) && routine(it))
 

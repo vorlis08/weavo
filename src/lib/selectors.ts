@@ -1,4 +1,5 @@
 import { addDays, isSameDay, overlaps, startOfDay } from './date'
+import { eventsOn, expandEvent } from './recur'
 import type { Item, Project, ProjectPhase, Reminder, Space, WeavoData } from './types'
 
 export const list = <T,>(rec: Record<string, T>): T[] => Object.values(rec)
@@ -87,15 +88,43 @@ export function suggestSlot(
   return null
 }
 
+/** the instant a reminder fires for one occurrence of an item (snooze ignored) */
+function triggerMs(r: Reminder, item: Item): number | null {
+  const t = r.trigger
+  if (t.type === 'at') return new Date(t.at).getTime()
+  if (t.type === 'before_due' && item.due) return new Date(item.due).getTime() - t.minutes * 60_000
+  if (t.type === 'before_start' && item.start) return new Date(item.start).getTime() - t.minutes * 60_000
+  if (t.type === 'on_day') {
+    const ref = item.kind === 'event' ? item.start : (item.due ?? item.start)
+    if (!ref) return null
+    const [h, m] = t.time.split(':').map(Number)
+    const d = new Date(ref)
+    d.setHours(h || 0, m || 0, 0, 0)
+    return d.getTime()
+  }
+  return null
+}
+
 export function reminderDueAt(r: Reminder, item: Item): number | null {
   if (r.done) return null
   if (r.snoozedUntil) return new Date(r.snoozedUntil).getTime()
-  if (r.trigger.type === 'at') return new Date(r.trigger.at).getTime()
-  if (r.trigger.type === 'before_due' && item.due)
-    return new Date(item.due).getTime() - r.trigger.minutes * 60_000
-  if (r.trigger.type === 'before_start' && item.start)
-    return new Date(item.start).getTime() - r.trigger.minutes * 60_000
-  return null
+  return triggerMs(r, item)
+}
+
+/**
+ * Every instant this reminder is due within [fromMs, toMs]: one for a plain
+ * item, one per occurrence for a repeating event.
+ */
+export function reminderTimes(r: Reminder, item: Item, fromMs: number, toMs: number): number[] {
+  if (r.done) return []
+  if (r.snoozedUntil) return [new Date(r.snoozedUntil).getTime()]
+  if (item.kind === 'event' && item.repeat && item.start) {
+    // look a day either side: a trigger can sit before or after the occurrence day
+    const occ = expandEvent(item, new Date(fromMs - 2 * 86_400_000), new Date(toMs + 2 * 86_400_000))
+    return occ.map((o) => triggerMs(r, o)).filter((x): x is number => x != null && x >= fromMs && x <= toMs)
+  }
+  const t = triggerMs(r, item)
+  return t == null ? [] : [t]
 }
 
 /** how many days ahead a task surfaces in "today" — the longest lead of its tags */
@@ -157,9 +186,7 @@ export function buildDigest(data: WeavoData, ref = new Date()): Digest {
   const isOpenTask = (it: Item) => it.kind === 'task' && it.status !== 'done'
 
   return {
-    todayEvents: items
-      .filter((it) => it.kind === 'event' && it.start && isSameDay(it.start, ref))
-      .sort((a, b) => eventStartMs(a) - eventStartMs(b)),
+    todayEvents: eventsOn(data, ref),
     dueToday: items
       .filter((it) => isOpenTask(it) && it.due && isSameDay(it.due, ref))
       .sort(sortByDue),
@@ -263,9 +290,7 @@ export function dayActivity(data: WeavoData, ref = new Date()) {
   const items = itemsArray(data)
   return {
     completed: items.filter((it) => it.completedAt && isSameDay(it.completedAt, ref)),
-    events: items
-      .filter((it) => it.kind === 'event' && it.start && isSameDay(it.start, ref))
-      .sort((a, b) => eventStartMs(a) - eventStartMs(b)),
+    events: eventsOn(data, ref),
   }
 }
 

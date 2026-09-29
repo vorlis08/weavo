@@ -7,7 +7,8 @@ import { SpaceFilterSwitch, TodoSection, byUrgency } from '@/components/todo'
 import { ProjectGlyph } from '@/components/ui'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { fmtCountdown, fmtLongDate, fmtShort, fmtTime, isSameDay } from '@/lib/date'
+import { eventsOn } from '@/lib/recur'
+import { fmtCountdown, fmtLongDate, fmtShort, fmtTime } from '@/lib/date'
 import { isHot, projectStats, todayTasks, waitingTasks } from '@/lib/selectors'
 import { SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
@@ -33,9 +34,7 @@ export function Home() {
   const hot = Object.values(data.items).filter((it) => inFilter(it) && isHot(it)).sort(byUrgency)
   const next = open.filter((it) => !isHot(it)).slice(0, 6)
   const waiting = waitingTasks(data, space)
-  const agenda = Object.values(data.items)
-    .filter((it) => it.kind === 'event' && inFilter(it) && it.start && isSameDay(it.start, now))
-    .sort((a, b) => (a.start! < b.start! ? -1 : 1))
+  const agenda = eventsOn(data, now, space)
   const projects = Object.values(data.projects)
     .filter((p) => p.status === 'active' && p.due && inFilter(p))
     .sort((a, b) => (a.due! < b.due! ? -1 : 1))

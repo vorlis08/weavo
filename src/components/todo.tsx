@@ -122,8 +122,8 @@ export function TodoRow({
           #{data.tags[id].name}
         </span>
       ))}
-      {item.repeat && item.repeat !== 'none' && (
-        <span className={metaCls} title={t.repeat[item.repeat]}>
+      {item.repeat && (
+        <span className={metaCls} title={t.repeat.summary(item.repeat)}>
           <Repeat size={12} />
         </span>
       )}

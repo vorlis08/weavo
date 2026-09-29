@@ -7,7 +7,18 @@ export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high'
 export const PRIORITY_RANK: Record<TaskPriority, number> = { high: 0, medium: 1, low: 2 }
 
-export type RepeatFreq = 'none' | 'daily' | 'weekly' | 'monthly'
+/** how a repeat rule steps: every N days / working days / weeks (on chosen days) / months / years */
+export type RepeatFreq = 'daily' | 'weekdays' | 'weekly' | 'monthly' | 'yearly'
+
+export interface RepeatRule {
+  freq: RepeatFreq
+  /** every N units (ignored for 'weekdays') */
+  interval: number
+  /** weekly: weekdays it happens on, 0 = Sunday … 6 = Saturday; empty = the anchor's weekday */
+  days?: number[]
+  /** ISO date — the last day an occurrence may fall on */
+  until?: string
+}
 
 /** top-level partition: personal and work items live in separate to-do lists */
 export type Space = 'personal' | 'work'
@@ -133,6 +144,8 @@ export type ReminderTrigger =
   | { type: 'before_due'; minutes: number }
   | { type: 'before_start'; minutes: number }
   | { type: 'at'; at: string }
+  /** on the day of the due date / event start, at HH:MM */
+  | { type: 'on_day'; time: string }
 
 export interface Reminder {
   id: string
@@ -166,8 +179,8 @@ export interface Item {
   /** the project phase this task belongs to */
   phaseId?: string
   priority?: TaskPriority
-  /** recurring task: when completed, the next occurrence is created automatically */
-  repeat?: RepeatFreq
+  /** recurring: a task spawns its next occurrence when completed, an event is expanded on the calendar */
+  repeat?: RepeatRule
   /** parked in the Someday/later list, kept out of the board and digest */
   someday?: boolean
   /** manually marked as burning — must get done no matter what */
@@ -179,6 +192,9 @@ export interface Item {
   end?: string
   allDay?: boolean
   contactIds?: string[]
+  /** event — where it takes place, and a link to join (meeting URL) */
+  place?: string
+  link?: string
 
   /** shared — Tag ids */
   tags: string[]
@@ -215,6 +231,16 @@ export interface GoogleIntegration {
 
 export type Lang = 'cs' | 'en'
 
+/** reminders a new item gets by default; null switches that kind off */
+export interface ReminderDefaults {
+  /** minutes before an event starts */
+  event: number | null
+  /** minutes before a task (or note) with a time of day is due; 0 = at that time */
+  taskTimed: number | null
+  /** HH:MM on the due day for items that have a date but no time */
+  taskDay: string | null
+}
+
 export interface Settings {
   lang: Lang
   displayName: string
@@ -232,6 +258,7 @@ export interface Settings {
   /** date keys (YYYY-MM-DD) of the last morning plan / evening close */
   lastPlanned?: string
   lastClosed?: string
+  reminderDefaults: ReminderDefaults
 }
 
 export interface WeavoData {

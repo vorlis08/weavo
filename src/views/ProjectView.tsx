@@ -31,6 +31,7 @@ import { useT } from '@/lib/i18n'
 import { addDays, daysUntil, fmtCountdown, fmtRelDay, fmtShort, fmtTime, startOfDay, toLocalInput } from '@/lib/date'
 import { currentPhase, phaseStats, projectNextStep, projectStats } from '@/lib/selectors'
 import { taskFromLine } from '@/lib/capture'
+import { eventsBetween } from '@/lib/recur'
 import { PROJECT_COLORS, PROJECT_STATUSES, SPACE_COLOR, SPACES } from '@/lib/types'
 import type { Item, Project, ProjectPhase, ProjectStatus } from '@/lib/types'
 
@@ -625,9 +626,8 @@ function Rail({ project }: { project: Project }) {
   const next = projectNextStep(data, project.id)
   const mine = useMemo(() => Object.values(data.items).filter((it) => it.projectId === project.id), [data.items, project.id])
   const today = startOfDay(new Date())
-  const events = mine
-    .filter((it) => it.kind === 'event' && it.start && new Date(it.start) >= today)
-    .sort((a, b) => (a.start! < b.start! ? -1 : 1))
+  const events = eventsBetween(data, today, addDays(today, 120))
+    .filter((it) => it.projectId === project.id)
     .slice(0, 5)
   const waiting = mine.filter((it) => it.kind === 'task' && it.status !== 'done' && it.waitingFor)
   const notes = mine.filter((it) => it.kind === 'note').sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))

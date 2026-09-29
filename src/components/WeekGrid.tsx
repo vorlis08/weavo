@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Flame, TriangleAlert } from 'lucide-react'
+import { FileText, Flame, TriangleAlert } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { dateLocale, decimalHours, fmtTime, isSameDay } from '@/lib/date'
 import { eventConflicts } from '@/lib/selectors'
+import { eventsBetween, expandEvent } from '@/lib/recur'
 import { SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 import { cn } from './ui'
@@ -33,16 +34,19 @@ function packDay(events: Item[]) {
     .map((x, _i, arr) => ({ ...x, total: Math.max(...arr.map((a) => a.col + 1)) }))
 }
 
-/** tasks due on a day and all-day events — the band above the hour grid */
+/** tasks due on a day, all-day events and dated notes — the band above the hour grid */
 export function dayItems(items: Record<string, Item>, day: Date, space?: Space) {
   const inSpace = (it: Item) => !space || it.space === space
   const tasks = Object.values(items)
     .filter((it) => it.kind === 'task' && it.due && !it.someday && !it.parentId && inSpace(it) && isSameDay(it.due, day))
     .sort((a, b) => Number(a.status === 'done') - Number(b.status === 'done') || Number(!!b.flame) - Number(!!a.flame))
-  const allDay = Object.values(items).filter(
-    (it) => it.kind === 'event' && it.allDay && it.start && inSpace(it) && isSameDay(it.start, day),
-  )
-  return { tasks, allDay }
+  const dayEnd = new Date(day)
+  dayEnd.setHours(23, 59, 59, 999)
+  const allDay = Object.values(items)
+    .filter((it) => it.kind === 'event' && it.allDay && it.start && inSpace(it))
+    .flatMap((it) => expandEvent(it, day, dayEnd))
+  const notes = Object.values(items).filter((it) => it.kind === 'note' && it.due && inSpace(it) && isSameDay(it.due, day))
+  return { tasks, allDay, notes }
 }
 
 /** a task or all-day event as a small chip */
@@ -64,6 +68,8 @@ export function DayChip({ item }: { item: Item }) {
           className="h-3 w-3 shrink-0 rounded-full border-[1.5px]"
           style={{ borderColor: SPACE_COLOR[item.space], background: done ? SPACE_COLOR[item.space] : undefined }}
         />
+      ) : item.kind === 'note' ? (
+        <FileText size={12} className="shrink-0 text-ink-3" />
       ) : (
         <span className="h-3 w-[3px] shrink-0 rounded-full" style={{ background: SPACE_COLOR[item.space] }} />
       )}
@@ -85,9 +91,10 @@ export function WeekGrid({
 }) {
   const t = useT()
   const navigate = useNavigate()
-  const items = useStore((s) => s.data.items)
-  const projects = useStore((s) => s.data.projects)
-  const { dayStartHour, dayEndHour } = useStore((s) => s.data.settings)
+  const data = useStore((s) => s.data)
+  const items = data.items
+  const projects = data.projects
+  const { dayStartHour, dayEndHour } = data.settings
   const createItem = useStore((s) => s.createItem)
 
   const hours = useMemo(
@@ -96,16 +103,18 @@ export function WeekGrid({
   )
   const bodyHeight = hours.length * ROW_H
 
-  const events = useMemo(
-    () =>
-      Object.values(items).filter(
-        (it) => it.kind === 'event' && it.start && !it.allDay && (!space || it.space === space),
-      ),
-    [items, space],
-  )
+  const rangeStart = days[0]?.getTime()
+  const rangeLen = days.length
+  const events = useMemo(() => {
+    const last = new Date(rangeStart)
+    last.setDate(last.getDate() + rangeLen - 1)
+    last.setHours(23, 59, 59, 999)
+    return eventsBetween({ ...data, items }, new Date(rangeStart), last, space).filter((it) => !it.allDay)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [items, space, rangeStart, rangeLen])
   const conflicts = useMemo(() => eventConflicts(events), [events])
   const bands = days.map((d) => dayItems(items, d, space))
-  const hasBand = bands.some((b) => b.tasks.length || b.allDay.length)
+  const hasBand = bands.some((b) => b.tasks.length || b.allDay.length || b.notes.length)
 
   function addAt(day: Date, hour: number) {
     const start = new Date(day)
@@ -151,12 +160,12 @@ export function WeekGrid({
               <div className="pr-2 pt-2 text-right text-xs text-ink-3">{t.calendar.tasksBand}</div>
               {bands.map((b, i) => (
                 <div key={days[i].toISOString()} className="flex min-w-0 flex-col gap-1 border-l border-line p-1.5">
-                  {[...b.allDay, ...b.tasks].slice(0, 4).map((it) => (
+                  {[...b.allDay, ...b.notes, ...b.tasks].slice(0, 4).map((it) => (
                     <DayChip key={it.id} item={it} />
                   ))}
-                  {b.tasks.length + b.allDay.length > 4 && (
+                  {b.tasks.length + b.allDay.length + b.notes.length > 4 && (
                     <span className="px-1.5 text-xs text-ink-3">
-                      {t.calendar.more(b.tasks.length + b.allDay.length - 4)}
+                      {t.calendar.more(b.tasks.length + b.allDay.length + b.notes.length - 4)}
                     </span>
                   )}
                 </div>

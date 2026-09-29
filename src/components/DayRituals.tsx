@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Check, Moon, Sun } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { addDays, dateLocale, isSameDay, startOfDay } from '@/lib/date'
+import { eventsOn } from '@/lib/recur'
+import { addDays, dateLocale, startOfDay } from '@/lib/date'
 import { dayActivity, isHot, isOverdue, todayTasks } from '@/lib/selectors'
 import { SPACE_COLOR } from '@/lib/types'
 import type { Item } from '@/lib/types'
@@ -95,9 +96,7 @@ function PlanDay({ onClose }: { onClose: () => void }) {
     .sort(byUrgency)
   const today = todayTasks(data).filter((it) => it.status !== 'done' && !isOverdue(it)).sort(byUrgency)
   const hot = Object.values(data.items).filter((it) => isHot(it)).sort(byUrgency)
-  const events = Object.values(data.items).filter(
-    (it) => it.kind === 'event' && it.start && isSameDay(it.start, new Date()),
-  )
+  const events = eventsOn(data, new Date())
 
   function finish() {
     updateSettings({ lastPlanned: dateKey(new Date()) })

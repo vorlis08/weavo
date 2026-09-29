@@ -28,6 +28,7 @@ import {
   Select,
   cn,
 } from '@/components/ui'
+import { RemindersField, RepeatField } from '@/components/fields'
 import { Menu } from '@/components/overlays'
 import { ItemPicker } from '@/components/ItemPicker'
 import { Subtasks } from '@/components/Subtasks'
@@ -38,7 +39,7 @@ import { useT } from '@/lib/i18n'
 import { eventConflicts, noteLinks, subtasks as childSubtasks, suggestSlot } from '@/lib/selectors'
 import { dateLocale, fmtDue, fmtTime, toLocalInput } from '@/lib/date'
 import { SPACE_COLOR, SPACES } from '@/lib/types'
-import type { RepeatFreq, TaskPriority, TaskStatus } from '@/lib/types'
+import type { TaskPriority, TaskStatus } from '@/lib/types'
 
 
 const STATUS_COLOR: Record<TaskStatus, string> = {
@@ -49,7 +50,6 @@ const STATUS_COLOR: Record<TaskStatus, string> = {
 }
 const STATUS_ORDER: TaskStatus[] = ['todo', 'in_progress', 'blocked', 'done']
 const PRIORITY_ORDER: TaskPriority[] = ['high', 'medium', 'low']
-const REPEAT_ORDER: RepeatFreq[] = ['none', 'daily', 'weekly', 'monthly']
 
 function uid() {
   return crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2)
@@ -584,17 +584,7 @@ export function RecordDetail() {
                   </PropRow>
                   <Divider />
                   <PropRow label={t.detail.propRepeat}>
-                    <Select
-                      value={item.repeat ?? 'none'}
-                      onChange={(e) => updateItem(item.id, { repeat: e.target.value as RepeatFreq })}
-                      className="h-7"
-                    >
-                      {REPEAT_ORDER.map((r) => (
-                        <option key={r} value={r}>
-                          {t.repeat[r]}
-                        </option>
-                      ))}
-                    </Select>
+                    <RepeatField value={item.repeat} onChange={(repeat) => updateItem(item.id, { repeat })} />
                   </PropRow>
                   <Divider />
                 </>
@@ -694,64 +684,11 @@ export function RecordDetail() {
                   <Bell size={13} strokeWidth={1.6} className="text-ink-2" />
                   <h3 className="text-base">{t.detail.reminders}</h3>
                 </div>
-                {reminders.map((r) => (
-                  <div key={r.id} className="group flex items-center gap-2 border-t border-line py-2 first:border-0">
-                    <span className="flex-1 text-sm text-ink">
-                      {r.trigger.type === 'at'
-                        ? t.detail.remAt(new Date(r.trigger.at).toLocaleString(dateLocale(), { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }))
-                        : r.trigger.type === 'before_due'
-                          ? t.detail.remBeforeDue(humanMinutes(t, r.trigger.minutes))
-                          : t.detail.remBeforeStart(humanMinutes(t, r.trigger.minutes))}
-                      {r.firedAt && <span className="mono ml-1.5 text-xs text-amber">{t.detail.remFired}</span>}
-                    </span>
-                    <button
-                      onClick={() => deleteReminder(r.id)}
-                      className="text-ink-3 opacity-0 hover:text-rose group-hover:opacity-100"
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-                <Menu
-                  trigger={({ toggle }) => (
-                    <button onClick={toggle} className="mt-2 flex items-center gap-1.5 text-xs text-iris hover:text-ink">
-                      <Plus size={11} />
-                      {t.detail.addReminder}
-                    </button>
-                  )}
-                  items={[
-                    ...(item.due || item.start
-                      ? [10, 60, 120, 1440].map((m) => ({
-                          label:
-                            item.kind === 'event'
-                              ? t.detail.remBeforeStart(humanMinutes(t, m))
-                              : t.detail.remBeforeDue(humanMinutes(t, m)),
-                          onSelect: () =>
-                            addReminder({
-                              itemId: item.id,
-                              trigger: {
-                                type: item.kind === 'event' ? 'before_start' : 'before_due',
-                                minutes: m,
-                              },
-                              note:
-                                item.kind === 'event'
-                                  ? t.detail.remBeforeStart(humanMinutes(t, m))
-                                  : t.detail.remBeforeDue(humanMinutes(t, m)),
-                            }),
-                        }))
-                      : []),
-                    {
-                      label: t.detail.remCustom,
-                      onSelect: () => {
-                        const when = new Date(Date.now() + 3_600_000)
-                        addReminder({
-                          itemId: item.id,
-                          trigger: { type: 'at', at: when.toISOString() },
-                          note: t.detail.remCustom,
-                        })
-                      },
-                    },
-                  ]}
+                <RemindersField
+                  kind={item.kind}
+                  entries={reminders.map((r) => ({ id: r.id, trigger: r.trigger, firedAt: r.firedAt }))}
+                  onAdd={(trigger) => addReminder({ itemId: item.id, trigger })}
+                  onRemove={deleteReminder}
                 />
               </div>
             )}
@@ -779,8 +716,3 @@ function Divider() {
   return <div className="h-px bg-line" />
 }
 
-function humanMinutes(t: ReturnType<typeof useT>, m: number) {
-  if (m >= 1440) return t.detail.days(m / 1440)
-  if (m >= 60) return t.detail.hours(m / 60)
-  return t.detail.minutes(m)
-}

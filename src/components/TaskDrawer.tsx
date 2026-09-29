@@ -5,7 +5,8 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { addDays, fromLocalInput, startOfDay, toLocalInput } from '@/lib/date'
 import { SPACE_COLOR, SPACES } from '@/lib/types'
-import type { Item, RepeatFreq, TaskPriority } from '@/lib/types'
+import type { Item, TaskPriority } from '@/lib/types'
+import { RepeatField } from './fields'
 import { InlineBody, TagEditor, WaitingInput } from './editors'
 import { Steps } from './Steps'
 import { DueLabel } from './todo'
@@ -13,7 +14,6 @@ import { useConfirmDelete } from './useConfirmDelete'
 import { Button, Checkbox, ProjectGlyph, Segmented, Select, SpaceThread, cn } from './ui'
 
 const PRIORITIES: ('none' | TaskPriority)[] = ['none', 'low', 'medium', 'high']
-const REPEATS: RepeatFreq[] = ['none', 'daily', 'weekly', 'monthly']
 
 /** a task, opened beside the list instead of on a page of its own */
 export function TaskDrawer() {
@@ -251,17 +251,7 @@ function DrawerBody({ item, onClose }: { item: Item; onClose: () => void }) {
             <WaitingInput key={item.id} itemId={item.id} who={item.waitingFor?.who} since={item.waitingFor?.since} />
           </Row>
           <Row label={t.detail.propRepeat}>
-            <Select
-              value={item.repeat ?? 'none'}
-              onChange={(e) => updateItem(item.id, { repeat: e.target.value as RepeatFreq })}
-              className="h-8 max-w-[200px]"
-            >
-              {REPEATS.map((r) => (
-                <option key={r} value={r}>
-                  {t.repeat[r]}
-                </option>
-              ))}
-            </Select>
+            <RepeatField value={item.repeat} onChange={(repeat) => updateItem(item.id, { repeat })} />
           </Row>
         </dl>
 

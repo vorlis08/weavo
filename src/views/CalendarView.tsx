@@ -6,6 +6,7 @@ import { DayChip, WeekGrid, dayItems } from '@/components/WeekGrid'
 import { SpaceFilterSwitch, TodoList } from '@/components/todo'
 import { Button, Segmented, cn } from '@/components/ui'
 import { useStore } from '@/lib/store'
+import { eventsOn as eventsOnDay } from '@/lib/recur'
 import { useT } from '@/lib/i18n'
 import {
   addDays,
@@ -34,8 +35,9 @@ function weekNumber(d: Date) {
 export function CalendarView() {
   const t = useT()
   const navigate = useNavigate()
-  const items = useStore((s) => s.data.items)
-  const projects = useStore((s) => s.data.projects)
+  const data = useStore((s) => s.data)
+  const items = data.items
+  const projects = data.projects
   const weekStartsMonday = useStore((s) => s.data.settings.weekStartsMonday)
   const filter = useStore((s) => s.data.settings.spaceFilter)
   const space = filter === 'all' ? undefined : filter
@@ -60,15 +62,7 @@ export function CalendarView() {
     return cells
   }, [anchor, weekStartsMonday])
 
-  const timed = useMemo(
-    () =>
-      Object.values(items).filter(
-        (it) => it.kind === 'event' && it.start && !it.allDay && (!space || it.space === space),
-      ),
-    [items, space],
-  )
-  const eventsOn = (d: Date) =>
-    timed.filter((e) => isSameDay(e.start!, d)).sort((a, b) => (a.start! < b.start! ? -1 : 1))
+  const eventsOn = (d: Date) => eventsOnDay(data, d, space).filter((e) => !e.allDay)
 
   function step(dir: number) {
     setAnchor((a) => {
@@ -133,8 +127,8 @@ export function CalendarView() {
                 const inMonth = cell.getMonth() === anchor.getMonth()
                 const today = isSameDay(cell, new Date())
                 const evs = eventsOn(cell)
-                const { tasks, allDay } = dayItems(items, cell, space)
-                const all: Item[] = [...allDay, ...evs, ...tasks]
+                const { tasks, allDay, notes } = dayItems(items, cell, space)
+                const all: Item[] = [...allDay, ...evs, ...notes, ...tasks]
                 return (
                   <div
                     key={cell.toISOString()}
@@ -153,7 +147,7 @@ export function CalendarView() {
                       {cell.getDate()}
                     </span>
                     {all.slice(0, 3).map((it) =>
-                      it.kind === 'task' || it.allDay ? (
+                      it.kind === 'task' || it.kind === 'note' || it.allDay ? (
                         <DayChip key={it.id} item={it} />
                       ) : (
                         <button
@@ -192,25 +186,25 @@ function Agenda({ days, eventsOn }: { days: Date[]; eventsOn: (d: Date) => Item[
   const now = new Date()
   const sections = days
     .map((d) => ({ d, events: eventsOn(d), ...dayItems(items, d, space) }))
-    .filter((s) => s.events.length || s.tasks.length || s.allDay.length)
+    .filter((s) => s.events.length || s.tasks.length || s.allDay.length || s.notes.length)
 
   if (!sections.length) return <p className="py-6 text-base text-ink-3">{t.calendar.empty}</p>
   return (
     <div>
-      {sections.map(({ d, events, tasks, allDay }) => (
+      {sections.map(({ d, events, tasks, allDay, notes }) => (
         <section key={d.toISOString()} className="mb-7">
           <h2 className={cn('display mb-2 px-1 text-lg', isSameDay(d, now) ? 'text-iris-2' : 'text-ink')}>
             {isSameDay(d, now) ? t.calendar.today : isSameDay(d, addDays(now, 1)) ? t.calendar.tomorrow : fmtLongDate(d)}
           </h2>
-          {[...allDay, ...events].length > 0 && (
+          {[...allDay, ...events, ...notes].length > 0 && (
             <div className="mb-1.5 flex flex-col">
-              {[...allDay, ...events].map((ev) => (
+              {[...allDay, ...events, ...notes].map((ev) => (
                 <button
                   key={ev.id}
                   onClick={() => navigate(`/item/${ev.id}`)}
                   className="grid min-h-10 grid-cols-[48px_2px_1fr] items-center gap-3 rounded-lg px-1 text-left text-base"
                 >
-                  <span className="mono text-right text-sm text-ink-3">{ev.allDay ? '—' : fmtTime(ev.start!)}</span>
+                  <span className="mono text-right text-sm text-ink-3">{ev.allDay || !ev.start ? '—' : fmtTime(ev.start)}</span>
                   <span className="h-5 rounded-full" style={{ background: SPACE_COLOR[ev.space] }} />
                   <span className="truncate">{ev.title}</span>
                 </button>

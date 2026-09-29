@@ -11,7 +11,6 @@ import type {
   ProjectPhase,
   Reflection,
   Reminder,
-  RepeatFreq,
   Settings,
   Space,
   Tag,
@@ -19,6 +18,8 @@ import type {
   WeavoData,
 } from './types'
 import { TAG_COLORS } from './types'
+import { legacyRule, nextOccurrence } from './recur'
+import { DEFAULT_REMINDERS, defaultTriggers } from './reminders'
 
 const uid = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -37,6 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
   spaceFilter: 'all',
   todoMode: 'list',
   workGroup: 'urgency',
+  reminderDefaults: { ...DEFAULT_REMINDERS },
 }
 
 export const DEFAULT_GOOGLE: GoogleIntegration = {
@@ -48,7 +50,7 @@ export const DEFAULT_GOOGLE: GoogleIntegration = {
   space: 'personal',
 }
 
-const DATA_VERSION = 6
+const DATA_VERSION = 7
 
 const STARTER_TAGS: Record<Lang, [string, number?][]> = {
   cs: [['Škola'], ['Vaření'], ['Nákup', 2], ['Projekty'], ['Zdraví'], ['Domov']],
@@ -108,7 +110,10 @@ export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<
       ...it,
       space: it.space ?? (it.projectId && projects[it.projectId]?.space) ?? 'personal',
       tags: [...new Set((it.tags ?? []).map(tagId))],
+      // v7: repeat became a rule (was 'none' | 'daily' | 'weekly' | 'monthly')
+      repeat: legacyRule(it.repeat),
     }
+    if (!items[it.id].repeat) delete items[it.id].repeat
   }
   return { ...d, version: DATA_VERSION, projects, tags, items }
 }
@@ -126,15 +131,6 @@ function emptyData(): WeavoData {
     settings: { ...DEFAULT_SETTINGS },
     google: { ...DEFAULT_GOOGLE },
   }
-}
-
-/** next due date for a repeating task, keeping the original time of day */
-function nextOccurrence(due: string, freq: RepeatFreq): string {
-  const d = new Date(due)
-  if (freq === 'daily') d.setDate(d.getDate() + 1)
-  else if (freq === 'weekly') d.setDate(d.getDate() + 7)
-  else if (freq === 'monthly') d.setMonth(d.getMonth() + 1)
-  return d.toISOString()
 }
 
 export interface Toast {
@@ -167,7 +163,8 @@ interface Store {
   toast: (message: string, action?: Toast['action']) => void
   dismissToast: (id: string) => void
 
-  createItem: (partial: Partial<Item> & { kind: ItemKind; title: string }) => Item
+  /** `reminders: false` skips the default reminders (the editor sets its own) */
+  createItem: (partial: Partial<Item> & { kind: ItemKind; title: string }, opts?: { reminders?: boolean }) => Item
   updateItem: (id: string, patch: Partial<Item>) => void
   /** removes the item and any subtasks; returns a snapshot for undo */
   deleteItem: (id: string) => { items: Item[]; reminders: Reminder[] }
@@ -270,7 +267,7 @@ export const useStore = create<Store>()(
       dismissToast: (id) =>
         set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 
-      createItem: (partial) => {
+      createItem: (partial, opts) => {
         const ts = now()
         const project = partial.projectId ? get().data.projects[partial.projectId] : undefined
         const item: Item = {
@@ -284,8 +281,16 @@ export const useStore = create<Store>()(
           createdAt: ts,
           updatedAt: ts,
         }
+        const reminders = { ...get().data.reminders }
+        // dated items get the default reminders (imported and sub-items excluded)
+        if (opts?.reminders !== false && !item.parentId && !item.source) {
+          for (const trigger of defaultTriggers(item, get().data.settings.reminderDefaults)) {
+            const id = uid()
+            reminders[id] = { id, itemId: item.id, trigger }
+          }
+        }
         set((s) => ({
-          data: { ...s.data, items: { ...s.data.items, [item.id]: item } },
+          data: { ...s.data, items: { ...s.data.items, [item.id]: item }, reminders },
         }))
         return item
       },
@@ -368,8 +373,10 @@ export const useStore = create<Store>()(
               updatedAt: now(),
             },
           }
-          // completing a repeating task spins off the next occurrence
-          if (done && it.kind === 'task' && it.repeat && it.repeat !== 'none' && it.due) {
+          // completing a repeating task spins off the next occurrence, reminders included
+          const reminders = { ...s.data.reminders }
+          const nextDue = done && it.kind === 'task' && it.repeat && it.due ? nextOccurrence(it.due, it.repeat) : undefined
+          if (nextDue) {
             const nid = uid()
             items[nid] = {
               ...it,
@@ -378,13 +385,18 @@ export const useStore = create<Store>()(
               completedAt: undefined,
               flame: undefined,
               waitingFor: undefined,
-              due: nextOccurrence(it.due, it.repeat),
+              due: nextDue,
               checklist: it.checklist?.map((c) => ({ ...c, done: false })),
               createdAt: now(),
               updatedAt: now(),
             }
+            for (const r of Object.values(s.data.reminders)) {
+              if (r.itemId !== id || r.trigger.type === 'at') continue
+              const rid = uid()
+              reminders[rid] = { id: rid, itemId: nid, trigger: r.trigger, note: r.note }
+            }
           }
-          return { data: { ...s.data, items } }
+          return { data: { ...s.data, items, reminders } }
         }),
 
       setStatus: (id, status, order) =>
@@ -747,7 +759,7 @@ export const useStore = create<Store>()(
         }
         if (p?.data && version < 5) {
           p.data = normalizeData(p.data, true)
-        } else if (p?.data && version < 6) {
+        } else if (p?.data && version < 7) {
           p.data = normalizeData(p.data)
         }
         return p as { data: WeavoData }
@@ -759,7 +771,11 @@ export const useStore = create<Store>()(
           data: {
             ...emptyData(),
             ...(p?.data ?? {}),
-            settings: { ...DEFAULT_SETTINGS, ...(p?.data?.settings ?? {}) },
+            settings: {
+              ...DEFAULT_SETTINGS,
+              ...(p?.data?.settings ?? {}),
+              reminderDefaults: { ...DEFAULT_REMINDERS, ...(p?.data?.settings?.reminderDefaults ?? {}) },
+            },
             google: { ...DEFAULT_GOOGLE, ...(p?.data?.google ?? {}) },
           },
         }
