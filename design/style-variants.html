@@ -1,0 +1,387 @@
+<!doctype html>
+<!-- Weavo style variants A/B/C (29. 9. 2026) — design reference. Live: https://claude.ai/artifact/GXR4mzaCgdLqtXZxrCZERr -->
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Varianty vzhledu Weavo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Geist:wght@400;500;600&display=swap">
+<style>
+/* Layout: a comparison bench — variant switch on top, the same To-do screen with its editor underneath, type specimens at the end.
+   One committed dark look (Weavo is a dark app). The palette is shared by all three variants so only type, density and shape differ. */
+:root{
+  color-scheme:dark;
+  --bg:#0b0c0e;          /* page behind the frame */
+  --app:#0e0f11;         /* app ground */
+  --side:#111214;
+  --panel:#141518;
+  --raised:#1a1b1f;
+  --hover:#1c1e22;
+  --line:rgba(255,255,255,.07);
+  --line2:rgba(255,255,255,.12);
+  --fg:#e8e9ec; --fg2:#a2a6ae; --fg3:#7a7f88; --fg4:#52565e;
+  --accent:#7c83ef; --accent-soft:rgba(124,131,239,.14);
+  --danger:#e3707c; --flame:#ec7a4b; --ok:#5fb98c;
+  --inter:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --plex:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --geist:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{margin:0;font-family:var(--inter);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+svg.i{width:15px;height:15px;flex:none;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:24px;padding-block:28px 60px}
+
+/* ---------- bench chrome ---------- */
+.bench-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px 24px;margin-bottom:18px}
+.bench-head h1{margin:0;font-size:22px;font-weight:600;letter-spacing:-.015em}
+.bench-head p{margin:4px 0 0;color:var(--fg3);font-size:13.5px;max-width:62ch}
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:176px;padding:9px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--panel);text-align:left;transition:border-color .15s,background .15s}
+.pick button:hover{border-color:rgba(255,255,255,.2)}
+.pick button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pick b{font-size:13.5px;font-weight:600}
+.pick small{font-size:12px;color:var(--fg3)}
+.pick kbd{font-family:inherit;font-size:11px;color:var(--fg4);margin-left:6px}
+
+/* ---------- the app frame ---------- */
+.frame{display:grid;grid-template-columns:var(--side-w) minmax(0,1fr) var(--ed-w);height:720px;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--app);font-family:var(--font);font-size:var(--fs);color:var(--fg)}
+.side{background:var(--side);border-right:1px solid var(--line);padding:var(--side-pad);display:flex;flex-direction:column;gap:1px;overflow:hidden}
+.brand{display:flex;align-items:center;gap:9px;padding:4px 8px 14px;font-weight:600;font-size:calc(var(--fs) + 1px);letter-spacing:-.01em}
+.brand i{width:18px;height:18px;border-radius:5px;background:linear-gradient(135deg,#8a90f2,#5f66d6)}
+.new{display:flex;align-items:center;gap:8px;height:var(--ctl-h);padding:0 10px;border-radius:var(--r);border:1px solid var(--line2);color:var(--fg2);margin-bottom:12px}
+.new .k{margin-left:auto;font-size:11px;color:var(--fg4);border:1px solid var(--line2);border-radius:4px;padding:0 5px}
+.nav{display:flex;align-items:center;gap:10px;height:var(--nav-h);padding:0 8px;border-radius:var(--r);color:var(--fg2);font-weight:500}
+.nav:hover{background:var(--hover);color:var(--fg)}
+.nav.on{background:var(--raised);color:var(--fg)}
+.nav .c{margin-left:auto;color:var(--fg4);font-size:12px;font-weight:400}
+.sl{padding:16px 8px 4px;font-size:var(--label-fs);color:var(--fg4);font-weight:var(--label-w);text-transform:var(--label-tt);letter-spacing:var(--label-ls)}
+.pn{display:flex;align-items:center;gap:9px;height:calc(var(--nav-h) - 2px);padding:0 8px;border-radius:var(--r);color:var(--fg2)}
+.pn i{width:7px;height:7px;border-radius:50%;flex:none}
+
+.main{min-width:0;overflow-y:auto;padding:var(--main-pad)}
+.eyebrow{font-size:12.5px;color:var(--fg3)}
+.title{margin:2px 0 0;font-size:var(--h1);font-weight:600;letter-spacing:var(--h1-ls);line-height:1.15}
+.tabs{display:flex;gap:4px;margin:var(--tabs-m);border-bottom:1px solid var(--line)}
+.tab{position:relative;display:flex;align-items:center;gap:7px;height:34px;padding:0 10px;color:var(--fg3);font-weight:500}
+.tab.on{color:var(--fg)}
+.tab.on::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:var(--fg);border-radius:2px}
+.tab .c{font-size:12px;color:var(--fg4);font-weight:400}
+.add{display:flex;align-items:center;gap:9px;height:var(--add-h);padding:0 10px;border-radius:var(--r);border:1px solid var(--line);background:var(--panel);color:var(--fg3);margin-bottom:var(--sec-gap)}
+.add input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--fg)}
+.add input::placeholder{color:var(--fg3)}
+
+.sec{margin-bottom:var(--sec-gap)}
+.sh{display:flex;align-items:baseline;gap:8px;padding:0 var(--row-px) 6px;font-size:var(--label-fs);font-weight:var(--label-w);text-transform:var(--label-tt);letter-spacing:var(--label-ls);color:var(--fg3)}
+.sh.danger{color:var(--danger)}
+.sh .n{color:var(--fg4);font-weight:400}
+.sh .hint{margin-left:auto;text-transform:none;letter-spacing:0;font-weight:400;color:var(--fg4);font-size:12px}
+.rows{display:flex;flex-direction:column;border-top:var(--rows-bt)}
+.row{position:relative;display:flex;align-items:center;gap:10px;min-height:var(--row-h);padding:var(--row-py) var(--row-px);border-radius:var(--row-r);cursor:pointer;border-bottom:var(--row-bb)}
+.row:hover{background:var(--hover)}
+.row.sel{background:var(--raised)}
+.ck{width:var(--ck);height:var(--ck);border-radius:var(--ck-r);border:1.5px solid var(--fg4);flex:none;display:grid;place-items:center;transition:background .15s,border-color .15s}
+.ck:hover{border-color:var(--fg2)}
+.ck svg{width:10px;height:10px;stroke:transparent;stroke-width:3;fill:none}
+.row.done .ck{background:var(--fg3);border-color:var(--fg3)}
+.row.done .ck svg{stroke:var(--app)}
+.body{flex:1;min-width:0;display:var(--row-display);align-items:baseline;gap:12px}
+.ti{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.row.done .ti{color:var(--fg3);text-decoration:line-through}
+.pri{color:var(--danger);font-weight:600;margin-right:4px}
+.meta{display:flex;align-items:center;gap:10px;font-size:var(--meta-fs);color:var(--fg3);white-space:nowrap;margin-top:var(--meta-mt)}
+.meta .pr{display:inline-flex;align-items:center;gap:6px}
+.meta .pr i{width:6px;height:6px;border-radius:50%}
+.meta .late{color:var(--danger)}
+.meta .lead{color:var(--ok)}
+.fl{color:var(--flame);display:flex}
+.fl svg{width:14px;height:14px}
+
+/* editor */
+.ed{border-left:1px solid var(--line);background:var(--side);display:flex;flex-direction:column;min-width:0}
+.ed-top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--fg3)}
+.ed-top .sp{margin-left:auto;display:flex;gap:2px}
+.ed-top button{width:26px;height:26px;border-radius:var(--r);display:grid;place-items:center;color:var(--fg3)}
+.ed-body{flex:1;overflow-y:auto;padding:var(--ed-pad)}
+.ed-title{display:flex;gap:10px;align-items:flex-start}
+.ed-title .ck{margin-top:4px}
+.ed-title textarea{flex:1;min-width:0;resize:none;border:0;outline:0;background:none;font-size:var(--ed-h);font-weight:600;letter-spacing:-.012em;line-height:1.3;color:var(--fg);padding:0;height:auto}
+.kind{display:flex;gap:2px;padding:2px;border:1px solid var(--line);border-radius:calc(var(--r) + 2px);margin:14px 0 6px;width:max-content}
+.kind button{height:calc(var(--ctl-h) - 6px);padding:0 10px;border-radius:var(--r);color:var(--fg3);font-size:12.5px;font-weight:500}
+.kind button.on{background:var(--raised);color:var(--fg)}
+.fields{display:grid;grid-template-columns:var(--lab-w) minmax(0,1fr);gap:var(--field-gap) 10px;margin:12px 0 18px;align-items:center}
+.fields dt{font-size:12.5px;color:var(--fg3)}
+.fields dd{margin:0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-width:0}
+.ctl{display:inline-flex;align-items:center;gap:6px;height:var(--ctl-h);padding:0 9px;border-radius:var(--r);border:1px solid var(--line2);background:var(--panel);font-size:12.5px;color:var(--fg);white-space:nowrap}
+.ctl.ghost{border-style:dashed;background:none;color:var(--fg3)}
+.ctl .x{color:var(--fg4);margin-left:2px}
+.ctl .chev{color:var(--fg4);margin-left:2px}
+.sw{width:28px;height:16px;border-radius:9px;background:var(--line2);position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:12px;height:12px;border-radius:50%;background:var(--fg3);transition:transform .15s}
+.sw.on{background:rgba(236,122,75,.35)}
+.sw.on::after{transform:translateX(12px);background:var(--flame)}
+.ed-h{font-size:12.5px;font-weight:600;color:var(--fg2);margin:0 0 6px}
+.step{display:flex;align-items:center;gap:9px;min-height:30px;font-size:13px}
+.step .ck{width:14px;height:14px}
+.step.done span{color:var(--fg3);text-decoration:line-through}
+.step.done .ck{background:var(--fg3);border-color:var(--fg3)}
+.step.done .ck svg{stroke:var(--app)}
+.note{width:100%;min-height:78px;resize:vertical;border:1px solid var(--line);border-radius:var(--r);background:var(--panel);padding:9px 10px;color:var(--fg);font-size:13px;line-height:1.55;outline:0;margin-bottom:6px}
+.ed-foot{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line)}
+.btn{height:var(--ctl-h);padding:0 12px;border-radius:var(--r);border:1px solid var(--line2);font-size:12.5px;font-weight:500;color:var(--fg2)}
+.btn.pri{background:var(--accent);border-color:transparent;color:#fff}
+.hint{font-size:11.5px;color:var(--fg4)}
+
+/* ---------- variant tokens ---------- */
+.v-a{ /* Kompaktní — Inter, one-line rows like Linear */
+  --font:var(--inter); --fs:13px; --side-w:212px; --ed-w:340px; --side-pad:12px 8px; --main-pad:22px 28px;
+  --r:6px; --nav-h:30px; --ctl-h:28px; --add-h:34px;
+  --h1:20px; --h1-ls:-.015em; --tabs-m:14px 0 14px; --sec-gap:18px;
+  --label-fs:12px; --label-w:500; --label-tt:none; --label-ls:0;
+  --row-h:34px; --row-py:4px; --row-px:10px; --row-r:6px; --rows-bt:none; --row-bb:none;
+  --row-display:flex; --meta-fs:12px; --meta-mt:0;
+  --ck:14px; --ck-r:4px;
+  --ed-pad:16px 18px; --ed-h:16px; --lab-w:86px; --field-gap:8px;
+}
+.v-b{ /* Věcná — IBM Plex Sans, ruled two-line rows, square shapes */
+  --font:var(--plex); --fs:14px; --side-w:224px; --ed-w:360px; --side-pad:14px 10px; --main-pad:26px 32px;
+  --r:4px; --nav-h:32px; --ctl-h:30px; --add-h:38px;
+  --h1:22px; --h1-ls:-.01em; --tabs-m:16px 0 18px; --sec-gap:22px;
+  --label-fs:11px; --label-w:600; --label-tt:uppercase; --label-ls:.07em;
+  --row-h:46px; --row-py:6px; --row-px:10px; --row-r:0; --rows-bt:1px solid var(--line); --row-bb:1px solid var(--line);
+  --row-display:block; --meta-fs:12px; --meta-mt:1px;
+  --ck:15px; --ck-r:3px;
+  --ed-pad:18px 20px; --ed-h:18px; --lab-w:92px; --field-gap:9px;
+}
+.v-c{ /* Vzdušná — Geist, calm and spacious like Things 3 */
+  --font:var(--geist); --fs:14px; --side-w:232px; --ed-w:370px; --side-pad:16px 12px; --main-pad:32px 40px;
+  --r:8px; --nav-h:34px; --ctl-h:32px; --add-h:42px;
+  --h1:24px; --h1-ls:-.02em; --tabs-m:18px 0 20px; --sec-gap:28px;
+  --label-fs:13px; --label-w:600; --label-tt:none; --label-ls:0;
+  --row-h:52px; --row-py:8px; --row-px:12px; --row-r:8px; --rows-bt:none; --row-bb:none;
+  --row-display:block; --meta-fs:12.5px; --meta-mt:2px;
+  --ck:17px; --ck-r:50%;
+  --ed-pad:22px 22px; --ed-h:19px; --lab-w:96px; --field-gap:10px;
+}
+
+/* ---------- notes & specimens ---------- */
+.below{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:28px;margin-top:26px}
+.about h2,.spec h2{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--fg2)}
+.about ul{margin:0;padding-left:18px;color:var(--fg2);font-size:13.5px;display:flex;flex-direction:column;gap:6px;max-width:60ch}
+.about li b{color:var(--fg);font-weight:600}
+.specs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.spec-card{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--panel);min-width:0;cursor:pointer;transition:border-color .15s}
+.spec-card.on{border-color:var(--accent)}
+.spec-card .nm{font-size:11.5px;color:var(--fg3);margin-bottom:10px;font-family:var(--inter)}
+.spec-card .h{font-size:22px;font-weight:600;letter-spacing:-.015em;line-height:1.15}
+.spec-card .l{font-size:14px;margin-top:8px}
+.spec-card .m{font-size:12px;color:var(--fg3);margin-top:3px}
+.spec-card .d{font-size:13px;color:var(--fg2);margin-top:10px;word-break:break-all}
+
+@media (max-width:1100px){
+  .frame{grid-template-columns:var(--side-w) minmax(0,1fr);height:auto}
+  .ed{grid-column:1 / -1;border-left:0;border-top:1px solid var(--line)}
+  .main{max-height:640px}
+  .below{grid-template-columns:1fr}
+}
+@media (max-width:720px){
+  .wrap{padding-inline:16px}
+  .frame{grid-template-columns:minmax(0,1fr)}
+  .side{display:none}
+  .main{max-height:none;padding:18px 14px}
+  .specs{grid-template-columns:1fr}
+  .pick button{min-width:0;flex:1 1 150px}
+  .v-a .body{display:block}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <div class="bench-head">
+    <div>
+      <h1>Varianty vzhledu</h1>
+      <p>Stejná obrazovka Úkolů s editorem záznamu ve třech stylech. Barvy jsou u všech stejné, liší se písmo, hustota a tvary. Klikni na úkol a v editoru vpravo uvidíš jeho pole. Přepínat můžeš i klávesami 1, 2, 3.</p>
+    </div>
+    <div class="pick" id="pick"></div>
+  </div>
+  <div class="frame" id="frame"></div>
+  <div class="below">
+    <div class="about" id="about"></div>
+    <div class="spec"><h2>Písmo s češtinou</h2><div class="specs" id="specs"></div></div>
+  </div>
+</div>
+
+<script>
+const V = {
+  a: { name: 'A · Kompaktní', font: 'Inter', sub: 'Inter, hustá, jako Linear', notes: [
+    '<b>Jeden řádek na úkol.</b> Projekt a termín stojí vpravo ve sloupcích, takže se na obrazovku vejde nejvíc úkolů.',
+    '<b>Inter</b> je neutrální pracovní písmo, které používá většina profesionálních nástrojů. Čte se dobře i v malé velikosti.',
+    'Malá zaoblení (6 px), hranatý checkbox, nadpis 20 px.',
+    'Hodí se, pokud máš úkolů hodně a chceš je rychle projíždět.'] },
+  b: { name: 'B · Věcná', font: 'IBM Plex Sans', sub: 'IBM Plex Sans, linkovaná', notes: [
+    '<b>Dva řádky na úkol</b> oddělené linkami, jako v tabulce nebo diáři.',
+    '<b>IBM Plex Sans</b> je technické, trochu „inženýrské“ písmo s výraznou češtinou a číslicemi.',
+    'Nejostřejší tvary (4 px), nadpisy sekcí velkými písmeny.',
+    'Působí nejvíc jako nástroj do práce. Nejméně „aplikačně“.'] },
+  c: { name: 'C · Vzdušná', font: 'Geist', sub: 'Geist, klidná, jako Things', notes: [
+    '<b>Víc místa kolem každého úkolu</b> a měkčí tvary (8 px, kulatý checkbox), ale bez hravosti.',
+    '<b>Geist</b> je moderní geometrické písmo, čisté a přesné, s klidnějším rytmem.',
+    'Nadpis 24 px, sekce bez velkých písmen.',
+    'Hodí se, pokud chceš spíš klidný osobní plánovač než pracovní konzoli.'] },
+}
+
+const P = {
+  zapocet: { name: 'Zápočet z mikroekonomie', c: '#6f98d4' },
+  domov: { name: 'Domácnost', c: '#74ad8a' },
+  mama: { name: 'Narozeniny mámy', c: '#cf876c' },
+  stehovani: { name: 'Stěhování', c: '#9d87d6' },
+}
+const T = [
+  { id: 1, sec: 'late', title: 'Zaplatit nájem', proj: 'domov', due: 'včera', late: true, pri: true, flame: true, rem: ['V 9:00'], note: 'Trvalý příkaz zatím nemám, poslat ručně.' },
+  { id: 2, sec: 'skola', title: 'Odevzdat seminárku z ekonomie', proj: 'zapocet', due: 'dnes 17:00', date: '29. 9. 2026', time: '17:00', pri: true, rem: ['30 min předem', 'V čas termínu'], status: 'Rozpracováno',
+    steps: [['Doplnit zdroje', true], ['Zkontrolovat citace', false], ['Nahrát do Moodlu', false]], note: 'Rozsah 8–10 stran. Odevzdává se přes Moodle, soubor PDF.' },
+  { id: 3, sec: 'skola', title: 'Nastudovat kapitoly 4–5', proj: 'zapocet', due: 'zítra', date: '30. 9. 2026' },
+  { id: 4, sec: 'nakup', title: 'Nakoupit na grilovačku', due: 'na čtvrtek · čt 1. 10.', lead: true, date: '1. 10. 2026', tags: ['#nákup'] },
+  { id: 5, sec: 'rep', title: 'Posilovna — nohy', due: 'dnes 18:00 · po a čt', date: '29. 9. 2026', time: '18:00', repeat: 'Každý týden v po a čt', rem: ['5 min předem'], tags: ['#zdraví'] },
+  { id: 6, sec: 'rep', title: 'Vitamíny', due: 'denně', done: true, repeat: 'Denně', tags: ['#zdraví'] },
+  { id: 7, sec: 'week', title: 'Objednat se k zubaři', due: 'pá 2. 10.', date: '2. 10. 2026', tags: ['#zdraví'] },
+  { id: 8, sec: 'week', title: 'Koupit dárek', proj: 'mama', due: 'so 3. 10.', date: '3. 10. 2026' },
+  { id: 9, sec: 'wait', title: 'Krabice z práce', proj: 'stehovani', due: 'Ondra · 2 dny', waiting: 'Ondra' },
+]
+const SECS = [
+  ['late', 'Po termínu', 'danger'],
+  ['skola', 'Škola'],
+  ['nakup', 'Nákup', '', 'zobrazuje se 2 dny předem'],
+  ['rep', 'Opakované'],
+  ['week', 'Tento týden'],
+  ['wait', 'Čeká na odpověď'],
+]
+const CK = '<svg viewBox="0 0 24 24"><path d="m5.5 12.5 4.2 4.2L18.5 8"/></svg>'
+const I = {
+  flame: '<path d="M12 21c-3.9 0-6.5-2.6-6.5-6.1 0-3.3 2.5-5.3 3.5-8.6.5 1.8 1.6 2.9 2.7 3.3.1-2.8 1.4-5 3.4-6.2-.2 2.5.9 4.5 2.3 6.2 1.4 1.7 2.3 3.4 2.3 5.4C19.7 18.5 16.2 21 12 21z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  exp: '<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  chev: '<path d="m6 9 6 6 6-6"/>',
+  home: '<path d="M3.5 10.2 12 3.5l8.5 6.7V19a1.5 1.5 0 0 1-1.5 1.5h-4.5v-6h-5v6H5A1.5 1.5 0 0 1 3.5 19z"/>',
+  todo: '<path d="M9 6.5h11M9 12h11M9 17.5h11"/><path d="m3.5 6.5 1.2 1.2L7 5.3M3.5 12l1.2 1.2L7 10.8"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  proj: '<path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>',
+  book: '<path d="M5 4.5h11a2 2 0 0 1 2 2V20H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11"/>',
+}
+const ic = (n) => `<svg class="i" viewBox="0 0 24 24">${I[n]}</svg>`
+
+let variant = 'a'
+let sel = 2
+try { variant = localStorage.getItem('weavo-style') || 'a' } catch {}
+if (!V[variant]) variant = 'a'
+
+function row(t) {
+  const p = t.proj ? P[t.proj] : null
+  const meta = [
+    p ? `<span class="pr"><i style="background:${p.c}"></i>${p.name}</span>` : '',
+    (t.tags || []).join(' '),
+    t.due ? `<span class="${t.late ? 'late' : t.lead ? 'lead' : ''}">${t.late ? 'po termínu · ' : ''}${t.due}</span>` : '',
+  ].filter(Boolean).join('')
+  return `<div class="row ${t.done ? 'done' : ''} ${t.id === sel ? 'sel' : ''}" data-id="${t.id}">
+    <button class="ck" data-done="${t.id}" aria-label="${t.done ? 'Vrátit' : 'Hotovo'}">${CK}</button>
+    <div class="body"><div class="ti">${t.pri && !t.done ? '<span class="pri">!</span>' : ''}${t.title}</div><div class="meta">${meta}</div></div>
+    ${t.flame ? `<span class="fl" title="Hoří">${ic('flame')}</span>` : ''}
+  </div>`
+}
+
+function editor(t) {
+  const p = t.proj ? P[t.proj] : null
+  const f = (k, v) => `<dt>${k}</dt><dd>${v}</dd>`
+  const ctl = (v, cls = '') => `<span class="ctl ${cls}">${v}</span>`
+  const sel = (v) => ctl(`${v}<span class="chev">${ic('chev')}</span>`)
+  return `
+  <div class="ed-top">${p ? `<span style="display:inline-flex;align-items:center;gap:6px"><i style="width:7px;height:7px;border-radius:50%;background:${p.c}"></i>${p.name}</span>` : 'Osobní'}
+    <span class="sp"><button title="Otevřít na celou stránku">${ic('exp')}</button><button title="Zavřít">${ic('x')}</button></span></div>
+  <div class="ed-body">
+    <div class="ed-title"><span class="ck">${CK}</span><textarea id="ed-title" rows="2">${t.title}</textarea></div>
+    <div class="kind"><button class="on">Úkol</button><button>Událost</button><button>Poznámka</button></div>
+    <dl class="fields">
+      ${f('Termín', `${ctl(t.date || 'Bez termínu', t.date ? '' : 'ghost')}${t.date ? ctl(t.time || '+ čas', t.time ? '' : 'ghost') : ''}`)}
+      ${f('Opakování', sel(t.repeat || 'Neopakovat'))}
+      ${f('Připomenutí', `${(t.rem || []).map((r) => ctl(`${r}<span class="x">${ic('x')}</span>`)).join('')}${ctl('+ Přidat', 'ghost')}`)}
+      ${f('Stav', sel(t.status || 'K udělání'))}
+      ${f('Priorita', sel(t.pri ? 'Vysoká' : 'Střední'))}
+      ${f('Hoří', `<span class="sw ${t.flame ? 'on' : ''}"></span>`)}
+      ${f('Prostor', ctl('Osobní'))}
+      ${f('Projekt', sel(p ? p.name : 'Bez projektu'))}
+      ${f('Štítky', t.tags ? t.tags.map((x) => ctl(x)).join('') + ctl('+', 'ghost') : ctl('+ Přidat', 'ghost'))}
+      ${f('Čeká na', t.waiting ? ctl(t.waiting) : ctl('Nikoho', 'ghost'))}
+    </dl>
+    <h4 class="ed-h">Kroky</h4>
+    <div style="margin-bottom:16px">${(t.steps || []).map((s) => `<div class="step ${s[1] ? 'done' : ''}"><span class="ck">${CK}</span><span>${s[0]}</span></div>`).join('')}
+      <div class="step" style="color:var(--fg3)"><span class="ck" style="border-style:dashed"></span>Přidat krok</div></div>
+    <h4 class="ed-h">Poznámka</h4>
+    <textarea class="note" id="ed-note" placeholder="Kontext, odkazy, co domluvit…">${t.note || ''}</textarea>
+  </div>
+  <div class="ed-foot"><button class="btn">Smazat</button><span class="hint" style="margin-left:auto">Ctrl + Enter</span><button class="btn pri">Uložit</button></div>`
+}
+
+function render() {
+  const f = document.getElementById('frame')
+  f.className = 'frame v-' + variant
+  const t = T.find((x) => x.id === sel)
+  f.innerHTML = `
+  <aside class="side">
+    <div class="brand"><i></i>Weavo</div>
+    <button class="new">${ic('plus')}Nový záznam<span class="k">C</span></button>
+    <button class="nav">${ic('home')}Přehled</button>
+    <button class="nav on">${ic('todo')}Úkoly<span class="c">5</span></button>
+    <button class="nav">${ic('cal')}Kalendář</button>
+    <button class="nav">${ic('proj')}Projekty</button>
+    <button class="nav">${ic('book')}Deník</button>
+    <div class="sl">Osobní</div>
+    ${['zapocet', 'domov', 'mama', 'stehovani'].map((k) => `<button class="pn"><i style="background:${P[k].c}"></i>${P[k].name}</button>`).join('')}
+    <div class="sl">Práce</div>
+    <button class="pn"><i style="background:#b9a15f"></i>Klient Alfa</button>
+    <button class="pn"><i style="background:#8f98aa"></i>Reporting Q4</button>
+  </aside>
+  <section class="main">
+    <div class="eyebrow">Úterý 29. září</div>
+    <h2 class="title">Úkoly</h2>
+    <div class="tabs"><button class="tab on">Osobní <span class="c">5</span></button><button class="tab">Pracovní <span class="c">3</span></button></div>
+    <label class="add">${ic('plus')}<input id="add" placeholder="Přidat úkol, třeba „zítra 14:00 #škola“"></label>
+    ${SECS.map(([k, name, cls, hint]) => {
+      const list = T.filter((x) => x.sec === k)
+      return `<div class="sec"><div class="sh ${cls || ''}">${name}<span class="n">${list.filter((x) => !x.done).length}</span>${hint ? `<span class="hint">${hint}</span>` : ''}</div>
+        <div class="rows">${list.map(row).join('')}</div></div>`
+    }).join('')}
+  </section>
+  <aside class="ed">${editor(t)}</aside>`
+
+  document.getElementById('pick').innerHTML = Object.entries(V).map(([k, v], i) =>
+    `<button aria-pressed="${k === variant}" data-v="${k}"><b>${v.name}<kbd>${i + 1}</kbd></b><small>${v.sub}</small></button>`).join('')
+  document.getElementById('about').innerHTML = `<h2>${V[variant].name}</h2><ul>${V[variant].notes.map((n) => `<li>${n}</li>`).join('')}</ul>`
+  document.getElementById('specs').innerHTML = Object.entries(V).map(([k, v]) => `
+    <div class="spec-card ${k === variant ? 'on' : ''}" data-v="${k}" style="font-family:'${v.font}',system-ui,sans-serif">
+      <div class="nm">${v.font}</div>
+      <div class="h">Úkoly na úterý</div>
+      <div class="l">Odevzdat seminárku z ekonomie</div>
+      <div class="m">čt 1. 10. · 17:00 · Zápočet z mikroekonomie</div>
+      <div class="d">ěščřžýáíéůú ĚŠČŘŽÝÁÍÉŮÚ 0123456789</div>
+    </div>`).join('')
+}
+
+document.addEventListener('click', (e) => {
+  const v = e.target.closest('[data-v]')
+  if (v) { variant = v.dataset.v; try { localStorage.setItem('weavo-style', variant) } catch {} render(); return }
+  const d = e.target.closest('[data-done]')
+  if (d) { const t = T.find((x) => x.id === +d.dataset.done); t.done = !t.done; render(); return }
+  const r = e.target.closest('.row')
+  if (r) { sel = +r.dataset.id; render() }
+})
+document.addEventListener('keydown', (e) => {
+  if (/INPUT|TEXTAREA/.test(e.target.tagName)) return
+  const k = { '1': 'a', '2': 'b', '3': 'c' }[e.key]
+  if (k) { variant = k; try { localStorage.setItem('weavo-style', variant) } catch {} render() }
+})
+render()
+</script>
+</body></html>
