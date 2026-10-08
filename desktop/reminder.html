@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'" />
+<title>Weavo — upomínka</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+    background: #14141a; color: #ecebf5;
+    border: 2px solid #ff7a59; border-radius: 0;
+    display: flex; flex-direction: column; padding: 34px 38px 28px;
+    -webkit-user-select: none; user-select: none;
+    -webkit-app-region: drag;
+  }
+  button, .actions, .snooze { -webkit-app-region: no-drag; }
+  .head { display: flex; align-items: center; gap: 10px; color: #ff7a59; font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+  .bell { width: 18px; height: 18px; animation: ring 1.2s ease-in-out infinite; transform-origin: 50% 8%; }
+  @keyframes ring { 0%,60%,100% { transform: rotate(0) } 10% { transform: rotate(14deg) } 20% { transform: rotate(-12deg) } 30% { transform: rotate(8deg) } 40% { transform: rotate(-6deg) } }
+  h1 { margin-top: 22px; font-size: 38px; line-height: 1.15; font-weight: 700; letter-spacing: -.02em; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  p { margin-top: 12px; font-size: 18px; color: #a9a7bd; overflow-wrap: anywhere; }
+  .spacer { flex: 1; }
+  .actions { display: flex; gap: 10px; margin-bottom: 20px; }
+  button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid #34343f; background: #1d1d26; color: #ecebf5; height: 34px; padding: 0 14px; font-size: 14px; font-weight: 500; }
+  button:hover { background: #272733; border-color: #4a4a58; }
+  button.big { height: 46px; padding: 0 24px; font-size: 17px; font-weight: 600; }
+  button.primary { background: #ff7a59; border-color: #ff7a59; color: #1a0f0b; }
+  button.primary:hover { background: #ff9073; }
+  .snooze { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 16px; border-top: 1px solid #2a2a34; }
+  .snooze span { color: #8a889e; font-size: 14px; margin-right: 4px; }
+</style>
+</head>
+<body>
+  <div class="head">
+    <svg class="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    <span id="heading"></span>
+  </div>
+  <h1 id="title"></h1>
+  <p id="body"></p>
+  <div class="spacer"></div>
+  <div class="actions" id="actions"></div>
+  <div class="snooze" id="snooze"></div>
+
+<script>
+  let data = null
+  let timer = null
+
+  function chime() {
+    try {
+      window.__ctx = window.__ctx || new AudioContext()
+      const ctx = window.__ctx
+      if (ctx.state === 'suspended') ctx.resume()
+      const t0 = ctx.currentTime
+      ;[880, 1174.66, 1318.5].forEach((f, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain()
+        o.type = 'sine'; o.frequency.value = f
+        const s = t0 + i * 0.16
+        g.gain.setValueAtTime(0.0001, s)
+        g.gain.exponentialRampToValueAtTime(0.22, s + 0.02)
+        g.gain.exponentialRampToValueAtTime(0.0001, s + 0.5)
+        o.connect(g).connect(ctx.destination)
+        o.start(s); o.stop(s + 0.55)
+      })
+    } catch (e) {}
+  }
+
+  function button(label, cls, onClick) {
+    const b = document.createElement('button')
+    b.textContent = label
+    b.className = cls || ''
+    b.addEventListener('click', onClick)
+    return b
+  }
+
+  function act(extra) {
+    clearInterval(timer)
+    window.alertApi.act(Object.assign({ reminderId: data.reminderId, itemId: data.itemId }, extra))
+  }
+
+  window.alertApi.onData((a) => {
+    data = a
+    document.getElementById('heading').textContent = a.labels.heading
+    document.getElementById('title').textContent = a.title
+    document.getElementById('body').textContent = a.body || ''
+    const actions = document.getElementById('actions')
+    if (a.labels.showDone) actions.append(button('✓  ' + a.labels.done, 'big primary', () => act({ action: 'done' })))
+    actions.append(button(a.labels.open, 'big', () => act({ action: 'open' })))
+    const snooze = document.getElementById('snooze')
+    const label = document.createElement('span')
+    label.textContent = a.labels.snooze
+    snooze.append(label)
+    a.snoozes.forEach((s) => snooze.append(button(s.label, '', () => act({ action: 'snooze', minutes: s.minutes, tomorrow: s.tomorrow }))))
+    chime()
+    timer = setInterval(chime, 6000)
+  })
+</script>
+</body>
+</html>

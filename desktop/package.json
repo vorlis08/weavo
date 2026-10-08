@@ -1,0 +1,30 @@
+{
+  "name": "weavo-desktop",
+  "productName": "Weavo",
+  "version": "0.1.0",
+  "description": "Weavo desktop shell — runs in the tray and pops up big reminders",
+  "main": "main.cjs",
+  "private": true,
+  "author": "Honza Vorel",
+  "scripts": {
+    "start": "electron .",
+    "icon": "electron scripts/make-icon.cjs",
+    "dist": "electron-builder --win -c.directories.output=C:/weavo-release"
+  },
+  "devDependencies": {
+    "electron": "^39.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "cz.weavo.desktop",
+    "productName": "Weavo",
+    "directories": { "output": "release" },
+    "files": ["main.cjs", "preload.cjs", "alert-preload.cjs", "reminder.html", "offline.html", "icon.png", "package.json"],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": { "oneClick": true, "perMachine": false, "deleteAppDataOnUninstall": false }
+  }
+}
