@@ -525,6 +525,7 @@ function ItemForm({ m }: { m: Model }) {
 function defaultSpaceFor(pathname: string, data: WeavoData): Space {
   const projectMatch = pathname.match(/^\/project\/([^/]+)/)
   if (pathname.startsWith('/todo/work')) return 'work'
+  if (pathname.startsWith('/todo/andulka')) return 'andulka'
   if (projectMatch && data.projects[projectMatch[1]]) return data.projects[projectMatch[1]].space
   if (pathname.startsWith('/todo') || data.settings.spaceFilter !== 'work') return 'personal'
   return 'work'

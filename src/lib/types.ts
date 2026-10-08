@@ -20,12 +20,12 @@ export interface RepeatRule {
   until?: string
 }
 
-/** top-level partition: personal and work items live in separate to-do lists */
-export type Space = 'personal' | 'work'
-export const SPACES: Space[] = ['personal', 'work']
+/** top-level partition: personal, work and Andulka items live in separate to-do lists */
+export type Space = 'personal' | 'work' | 'andulka'
+export const SPACES: Space[] = ['personal', 'work', 'andulka']
 export type SpaceFilter = 'all' | Space
-/** the two threads — personal jade, work ochre */
-export const SPACE_COLOR: Record<Space, string> = { personal: '#5fb98c', work: '#d6a45a' }
+/** the threads — personal jade, work ochre, Andulka rose */
+export const SPACE_COLOR: Record<Space, string> = { personal: '#5fb98c', work: '#d6a45a', andulka: '#d28aad' }
 
 export type AccentName = 'cornflower' | 'terracotta' | 'lavender' | 'pink' | 'leaf' | 'sky' | 'sand' | 'slate'
 
@@ -130,6 +130,20 @@ export interface Reflection {
   note?: string
   createdAt: string
   updatedAt: string
+}
+
+/** a photo kept in the Andulka space — the image itself lives in IndexedDB (lib/photos.ts) under the same id */
+export interface Photo {
+  id: string
+  space: Space
+  /** ISO datetime it was taken / received */
+  takenAt: string
+  caption?: string
+  /** the task it belongs to, if any (e.g. the weekly cleaning check) */
+  itemId?: string
+  width: number
+  height: number
+  createdAt: string
 }
 
 export interface Contact {
@@ -270,6 +284,7 @@ export interface WeavoData {
   reflections: Record<string, Reflection>
   contacts: Record<string, Contact>
   reminders: Record<string, Reminder>
+  photos: Record<string, Photo>
   settings: Settings
   google: GoogleIntegration
 }

@@ -11,6 +11,7 @@ import type {
   ProjectPhase,
   Reflection,
   Reminder,
+  Photo,
   Settings,
   Space,
   Tag,
@@ -21,6 +22,7 @@ import { TAG_COLORS } from './types'
 import { legacyRule, nextOccurrence } from './recur'
 import { DEFAULT_REMINDERS, defaultTriggers } from './reminders'
 import { reminderTimes } from './selectors'
+import type { ReminderAlert } from './desktop'
 
 const uid = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -129,6 +131,7 @@ function emptyData(): WeavoData {
     reflections: {},
     contacts: {},
     reminders: {},
+    photos: {},
     settings: { ...DEFAULT_SETTINGS },
     google: { ...DEFAULT_GOOGLE },
   }
@@ -161,6 +164,8 @@ interface Store {
   peekId: string | null
   tourOpen: boolean
   toasts: Toast[]
+  /** reminders on screen right now (the in-app big reminder; the desktop shell shows its own windows) */
+  alerts: ReminderAlert[]
 
   openCapture: (kind?: ItemKind, text?: string, preset?: Partial<Item>) => void
   closeCapture: () => void
@@ -173,6 +178,8 @@ interface Store {
   endTour: () => void
   toast: (message: string, action?: Toast['action']) => void
   dismissToast: (id: string) => void
+  pushAlert: (a: ReminderAlert) => void
+  dismissAlert: (reminderId: string) => void
 
   /** `reminders: false` skips the default reminders (the editor sets its own) */
   createItem: (partial: Partial<Item> & { kind: ItemKind; title: string }, opts?: { reminders?: boolean }) => Item
@@ -217,6 +224,9 @@ interface Store {
   updateReminder: (id: string, patch: Partial<Reminder>) => void
   deleteReminder: (id: string) => void
   snoozeReminder: (id: string, minutes: number) => void
+  addPhoto: (p: Omit<Photo, 'id' | 'createdAt'> & { id?: string }) => Photo
+  updatePhoto: (id: string, patch: Partial<Pick<Photo, 'caption' | 'takenAt' | 'itemId'>>) => void
+  deletePhoto: (id: string) => void
 
   updateSettings: (patch: Partial<Settings>) => void
   updateGoogle: (patch: Partial<GoogleIntegration>) => void
@@ -251,6 +261,7 @@ export const useStore = create<Store>()(
       peekId: null,
       tourOpen: false,
       toasts: [],
+      alerts: [],
 
       openCapture: (kind, text, preset) =>
         set((s) => ({
@@ -277,6 +288,9 @@ export const useStore = create<Store>()(
         set((s) => ({ toasts: [...s.toasts, { id, message, action }] }))
         setTimeout(() => get().dismissToast(id), 5000)
       },
+      pushAlert: (a) =>
+        set((s) => ({ alerts: [...s.alerts.filter((x) => x.reminderId !== a.reminderId), a] })),
+      dismissAlert: (reminderId) => set((s) => ({ alerts: s.alerts.filter((x) => x.reminderId !== reminderId) })),
       dismissToast: (id) =>
         set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
 
@@ -644,6 +658,22 @@ export const useStore = create<Store>()(
             },
           },
         })),
+
+      addPhoto: (p) => {
+        const photo: Photo = { ...p, id: p.id ?? uid(), createdAt: now() }
+        set((s) => ({ data: { ...s.data, photos: { ...s.data.photos, [photo.id]: photo } } }))
+        return photo
+      },
+      updatePhoto: (id, patch) =>
+        set((s) =>
+          s.data.photos[id] ? { data: { ...s.data, photos: { ...s.data.photos, [id]: { ...s.data.photos[id], ...patch } } } } : s,
+        ),
+      deletePhoto: (id) =>
+        set((s) => {
+          const photos = { ...s.data.photos }
+          delete photos[id]
+          return { data: { ...s.data, photos } }
+        }),
 
       updateSettings: (patch) =>
         set((s) => ({ data: { ...s.data, settings: { ...s.data.settings, ...patch } } })),

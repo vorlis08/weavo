@@ -219,6 +219,7 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
     reflections: {},
     contacts,
     reminders,
+    photos: {},
     settings: { ...DEFAULT_SETTINGS, lang, displayName: x.you, tourSeen: true },
     google: { ...DEFAULT_GOOGLE },
   }

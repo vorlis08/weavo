@@ -1,6 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Bell, BookOpen, Download, Sparkles, Trash2, Upload } from 'lucide-react'
+import { Bell, BellRing, BookOpen, Download, Sparkles, Trash2, Upload } from 'lucide-react'
 import { Page } from '@/components/Page'
 import { Button, Select } from '@/components/ui'
 import { ConfirmDialog } from '@/components/overlays'
@@ -11,6 +11,8 @@ import { LANGS, useT } from '@/lib/i18n'
 import type { Lang, WeavoData } from '@/lib/types'
 import { makeSampleData } from '@/lib/sampleData'
 import { ensureNotificationPermission } from '@/lib/notify'
+import { buildAlert, showAlert } from '@/lib/alerts'
+import { desktop } from '@/lib/desktop'
 
 function Group({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -227,6 +229,7 @@ export function SettingsView() {
             {notifPerm === 'granted' ? t.settings.enabled : t.settings.enable}
           </Button>
         </Row>
+        <BigReminderRows />
       </Group>
 
       <Group title={t.settings.gIntegrations}>
@@ -287,5 +290,37 @@ export function SettingsView() {
         onCancel={() => setConfirmClear(false)}
       />
     </Page>
+  )
+}
+
+/** try the big reminder; the desktop app also offers starting with Windows */
+function BigReminderRows() {
+  const t = useT()
+  const [autostart, setAutostart] = useState<boolean>()
+  const d = desktop()
+  useEffect(() => {
+    d?.getAutostart().then(setAutostart, () => undefined)
+  }, [d])
+  return (
+    <>
+      <Row label={t.bigReminder.testRow} hint={t.bigReminder.testHint}>
+        <Button
+          onClick={() => {
+            const id = `test-${Date.now()}`
+            showAlert(buildAlert({ id, itemId: '' }, t.bigReminder.testTitle, t.bigReminder.testBody, false))
+          }}
+        >
+          <BellRing size={13} />
+          {t.bigReminder.testBtn}
+        </Button>
+      </Row>
+      {d && (
+        <Row label={t.bigReminder.autostartRow} hint={t.bigReminder.autostartHint}>
+          <Button onClick={() => d.setAutostart(!autostart).then(setAutostart)}>
+            {autostart ? t.settings.enabled : t.settings.enable}
+          </Button>
+        </Row>
+      )}
+    </>
   )
 }

@@ -324,6 +324,13 @@ export function ProgressBar({ items, split }: { items: Item[]; split?: boolean }
               background: SPACE_COLOR.work,
             }}
           />
+          <i
+            className="h-full transition-[width] duration-500"
+            style={{
+              width: `${(doneOf('andulka') / n) * 100}%`,
+              background: SPACE_COLOR.andulka,
+            }}
+          />
         </>
       ) : (
         <i className="h-full bg-ink-3 transition-[width] duration-500" style={{ width: `${(doneOf() / n) * 100}%` }} />
@@ -356,6 +363,15 @@ export function SpaceFilterSwitch() {
             <>
               <SpaceThread color={SPACE_COLOR.work} />
               {t.spaces.work}
+            </>
+          ),
+        },
+        {
+          value: 'andulka',
+          label: (
+            <>
+              <SpaceThread color={SPACE_COLOR.andulka} />
+              {t.spaces.andulka}
             </>
           ),
         },

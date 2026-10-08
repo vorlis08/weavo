@@ -95,7 +95,7 @@ export function Home() {
               <span className="text-lg text-ink-3">{t.home.doneOf(today.length)}</span>
             </div>
             <div className="mt-4 flex flex-col gap-2.5">
-              {(['personal', 'work'] as Space[])
+              {(['personal', 'work', 'andulka'] as Space[])
                 .filter((sp) => !space || sp === space)
                 .map((sp) => {
                   const s = split(sp)

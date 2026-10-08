@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react'
-import { NavLink, useParams } from 'react-router-dom'
-import { ArrowRight, Clock9, Columns3, Flame, Hourglass, List, Plus, Repeat, Trash2 } from 'lucide-react'
+import { NavLink, useParams, useSearchParams } from 'react-router-dom'
+import { ArrowRight, Clock9, Columns3, Flame, Hourglass, Image as ImageIcon, List, ListChecks, Plus, Repeat, Trash2 } from 'lucide-react'
 import { Page } from '@/components/Page'
+import { PhotosPanel } from '@/components/Photos'
 import { ProgressBar, TodoSection, byUrgency } from '@/components/todo'
 import { Kbd, ProjectGlyph, Segmented, cn } from '@/components/ui'
 import { useConfirmDelete } from '@/components/useConfirmDelete'
@@ -20,7 +21,9 @@ const isOpen = (it: Item) => it.status !== 'done'
 export function TodoView() {
   const t = useT()
   const params = useParams()
-  const space: Space = params.space === 'work' ? 'work' : 'personal'
+  const space: Space = params.space === 'work' ? 'work' : params.space === 'andulka' ? 'andulka' : 'personal'
+  const [search, setSearch] = useSearchParams()
+  const photosTab = space === 'andulka' && search.get('view') === 'photos'
   const data = useStore((s) => s.data)
   const { todoMode, workGroup } = data.settings
   const updateSettings = useStore((s) => s.updateSettings)
@@ -53,6 +56,7 @@ export function TodoView() {
 
   const actions = (
     <>
+      {space === 'andulka' && <AndulkaViews photos={false} onChange={setSearch} />}
       {space === 'work' && todoMode === 'list' && (
         <Segmented
           options={[
@@ -75,6 +79,14 @@ export function TodoView() {
   )
 
   const tabs = <SpaceTabs space={space} />
+
+  if (photosTab)
+    return (
+      <Page eyebrow={fmtLongDate(now)} title={t.todo.title} actions={<AndulkaViews photos onChange={setSearch} />}>
+        {tabs}
+        <PhotosPanel space={space} />
+      </Page>
+    )
 
   if (todoMode === 'kanban')
     return (
@@ -104,8 +116,8 @@ export function TodoView() {
         </div>
       )}
 
-      {space === 'personal' ? (
-        <PersonalSections today={today} />
+      {space !== 'work' ? (
+        <PersonalSections today={today} space={space} />
       ) : workGroup === 'project' ? (
         <WorkByProject mine={mine} today={today} />
       ) : (
@@ -115,7 +127,7 @@ export function TodoView() {
       {!(space === 'work' && workGroup === 'project') && (
         <TodoSection title={space === 'work' ? t.todo.thisWeek : t.todo.upcoming} items={upcoming} />
       )}
-      {space === 'personal' && (
+      {space !== 'work' && (
         <TodoSection
           title={t.todo.waiting}
           icon={<Hourglass size={14} />}
@@ -141,17 +153,17 @@ function SpaceTabs({ space }: { space: Space }) {
     ]).size
   return (
     <div className="mb-6 flex gap-7 border-b border-line" data-tour="todo-space">
-      {(['personal', 'work'] as Space[]).map((sp) => (
+      {(['personal', 'work', 'andulka'] as Space[]).map((sp) => (
         <NavLink
           key={sp}
-          to={sp === 'work' ? '/todo/work' : '/todo'}
+          to={sp === 'personal' ? '/todo' : `/todo/${sp}`}
           end
           className={cn(
             'display relative flex items-center gap-2.5 px-0.5 pb-3 text-xl tracking-[-0.02em] transition-colors',
             space === sp ? 'text-ink' : 'text-ink-3 hover:text-ink-2',
           )}
         >
-          {sp === 'work' ? t.spaces.workTodo : t.spaces.personal}
+          {sp === 'work' ? t.spaces.workTodo : t.spaces[sp]}
           <span className="rounded-full bg-surface-2 px-2 py-px font-sans text-sm font-semibold tracking-normal text-ink-2">
             {count(sp)}
           </span>
@@ -165,6 +177,21 @@ function SpaceTabs({ space }: { space: Space }) {
         </NavLink>
       ))}
     </div>
+  )
+}
+
+/** Andulka's two views: the task list and the photo log */
+function AndulkaViews({ photos, onChange }: { photos: boolean; onChange: (p: URLSearchParams) => void }) {
+  const t = useT()
+  return (
+    <Segmented
+      options={[
+        { value: 'tasks', label: <><ListChecks size={15} />{t.photos.tabTasks}</> },
+        { value: 'photos', label: <><ImageIcon size={15} />{t.photos.tabPhotos}</> },
+      ]}
+      value={photos ? 'photos' : 'tasks'}
+      onChange={(v) => onChange(v === 'photos' ? new URLSearchParams({ view: 'photos' }) : new URLSearchParams())}
+    />
   )
 }
 
@@ -219,11 +246,11 @@ function EventPill({ item }: { item: Item }) {
   )
 }
 
-function PersonalSections({ today }: { today: Item[] }) {
+function PersonalSections({ today, space }: { today: Item[]; space: Space }) {
   const t = useT()
   const { tags, projects } = useStore((s) => s.data)
   const tagOrder = Object.values(tags)
-    .filter((tg) => tg.space === 'personal')
+    .filter((tg) => tg.space === space)
     .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
 
   const overdue = today.filter((it) => isOverdue(it))

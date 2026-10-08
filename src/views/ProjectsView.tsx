@@ -118,7 +118,7 @@ export function ProjectsView() {
             <span>{t.project.colProgress}</span>
             <span className="text-right">{t.project.colSignals}</span>
           </div>
-          {(filter === 'all' ? (['work', 'personal'] as Space[]) : [filter]).map((sp) =>
+          {(filter === 'all' ? (['work', 'personal', 'andulka'] as Space[]) : [filter]).map((sp) =>
             group(
               sp,
               <>

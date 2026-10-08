@@ -5,6 +5,8 @@ import { dict } from '@/lib/i18n'
 import { reminderTimes } from '@/lib/selectors'
 import { showNotification } from '@/lib/notify'
 import { fmtDue } from '@/lib/date'
+import { buildAlert, showAlert } from '@/lib/alerts'
+import { desktop } from '@/lib/desktop'
 
 /** don't replay reminders that came due long ago (the app was closed) */
 const GRACE_MS = 12 * 3_600_000
@@ -29,13 +31,15 @@ export function useReminderEngine(navigate: NavigateFunction) {
         const dueMs = reminderTimes(r, item, nowMs - GRACE_MS, nowMs).find((ms) => ms <= nowMs && ms >= nowMs - GRACE_MS && firedMs < ms)
         if (dueMs == null) continue
         updateReminder(r.id, { firedAt: new Date().toISOString(), snoozedUntil: undefined })
-        showNotification(item.title, r.note || fmtDue(item.due ?? item.start)?.label || t.dashboard.reminderFallback, () =>
-          useStore.getState().openPeek(item.id),
-        )
-        toast(t.reminderToast(item.title), {
-          label: t.common.open,
-          run: () => useStore.getState().openPeek(item.id),
-        })
+        const body = r.note || fmtDue(item.due ?? item.start)?.label || t.dashboard.reminderFallback
+        showAlert(buildAlert(r, item.title, body, item.kind === 'task' && item.status !== 'done'))
+        if (!desktop()) {
+          showNotification(item.title, body, () => useStore.getState().openPeek(item.id))
+          toast(t.reminderToast(item.title), {
+            label: t.common.open,
+            run: () => useStore.getState().openPeek(item.id),
+          })
+        }
       }
     }
     tick()

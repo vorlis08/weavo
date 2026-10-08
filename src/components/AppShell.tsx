@@ -4,6 +4,9 @@ import { Sparkles, X } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { useReminderEngine } from '@/hooks/useReminderEngine'
+import { BigReminder } from './BigReminder'
+import { handleAlertAction } from '@/lib/alerts'
+import { desktop } from '@/lib/desktop'
 import { useGoogleSync } from '@/hooks/useGoogleSync'
 import { setDateLang } from '@/lib/date'
 import { Sidebar } from './Sidebar'
@@ -79,6 +82,7 @@ export function AppShell() {
   const closeMenu = useCallback(() => setMenuOpen(false), [])
   const lang = useStore((s) => s.data.settings.lang)
   useReminderEngine(navigate)
+  useEffect(() => desktop()?.onAlertAction(handleAlertAction), [])
   useGoogleSync()
 
   useEffect(() => {
@@ -140,6 +144,7 @@ export function AppShell() {
       <CaptureDialog />
       <CommandPalette />
       <Toaster />
+      <BigReminder />
       <TourNudge />
       <Tour />
       <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title={t.shortcutsModal.title} width={360}>
