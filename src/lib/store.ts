@@ -12,14 +12,18 @@ import type {
   Reflection,
   Reminder,
   Photo,
+  House,
+  Visit,
   Settings,
   Space,
   Tag,
   TaskStatus,
   WeavoData,
 } from './types'
-import { TAG_COLORS } from './types'
-import { legacyRule, nextOccurrence } from './recur'
+import { DEFAULT_SPACE, TAG_COLORS } from './types'
+import { legacyRule, makeRule, nextOccurrence } from './recur'
+import { firstCleaning, visitId } from './houses'
+import { deletePhotoBlob } from './photos'
 import { DEFAULT_REMINDERS, defaultTriggers } from './reminders'
 import { reminderTimes } from './selectors'
 import type { ReminderAlert } from './desktop'
@@ -50,10 +54,10 @@ export const DEFAULT_GOOGLE: GoogleIntegration = {
   scopes: [],
   gmailQuery: 'is:starred',
   calendarSyncEnabled: true,
-  space: 'personal',
+  space: DEFAULT_SPACE,
 }
 
-const DATA_VERSION = 7
+const DATA_VERSION = 8
 
 const STARTER_TAGS: Record<Lang, [string, number?][]> = {
   cs: [['Škola'], ['Vaření'], ['Nákup', 2], ['Projekty'], ['Zdraví'], ['Domov']],
@@ -65,7 +69,7 @@ export function starterTags(lang: Lang = 'cs'): Record<string, Tag> {
   const ts = new Date().toISOString()
   const out: Record<string, Tag> = {}
   STARTER_TAGS[lang].forEach(([name, leadDays], i) => {
-    const t: Tag = { id: uid(), name, color: TAG_COLORS[i % TAG_COLORS.length], space: 'personal', createdAt: ts }
+    const t: Tag = { id: uid(), name, color: TAG_COLORS[i % TAG_COLORS.length], space: DEFAULT_SPACE, createdAt: ts }
     if (leadDays) t.leadDays = leadDays
     out[t.id] = t
   })
@@ -82,7 +86,7 @@ export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<
   for (const old of Object.values(d.projects ?? {})) {
     // v5 archived projects become "done"
     const { archived, ...p } = old as Project & { archived?: boolean }
-    projects[p.id] = { ...p, space: p.space ?? 'personal', status: p.status ?? (archived ? 'done' : 'active') }
+    projects[p.id] = { ...p, space: DEFAULT_SPACE, status: p.status ?? (archived ? 'done' : 'active') }
   }
 
   const tags: Record<string, Tag> = { ...(d.tags ?? {}) }
@@ -97,7 +101,7 @@ export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<
         id: uid(),
         name: raw,
         color: TAG_COLORS[Object.keys(tags).length % TAG_COLORS.length],
-        space: 'personal',
+        space: DEFAULT_SPACE,
         createdAt: new Date().toISOString(),
       }
       tags[t.id] = t
@@ -111,7 +115,7 @@ export function normalizeData(d: Partial<WeavoData>, seedTags = false): Partial<
   for (const it of Object.values(d.items ?? {})) {
     items[it.id] = {
       ...it,
-      space: it.space ?? (it.projectId && projects[it.projectId]?.space) ?? 'personal',
+      space: DEFAULT_SPACE,
       tags: [...new Set((it.tags ?? []).map(tagId))],
       // v7: repeat became a rule (was 'none' | 'daily' | 'weekly' | 'monthly')
       repeat: legacyRule(it.repeat),
@@ -132,6 +136,8 @@ function emptyData(): WeavoData {
     contacts: {},
     reminders: {},
     photos: {},
+    houses: {},
+    visits: {},
     settings: { ...DEFAULT_SETTINGS },
     google: { ...DEFAULT_GOOGLE },
   }
@@ -225,8 +231,14 @@ interface Store {
   deleteReminder: (id: string) => void
   snoozeReminder: (id: string, minutes: number) => void
   addPhoto: (p: Omit<Photo, 'id' | 'createdAt'> & { id?: string }) => Photo
-  updatePhoto: (id: string, patch: Partial<Pick<Photo, 'caption' | 'takenAt' | 'itemId'>>) => void
+  updatePhoto: (id: string, patch: Partial<Pick<Photo, 'caption' | 'takenAt'>>) => void
   deletePhoto: (id: string) => void
+  /** creates the house and the repeating calendar event that carries its schedule */
+  addHouse: (input: Pick<House, 'name' | 'partner' | 'startDate' | 'weekdays' | 'time'> & Partial<House>, eventTitle: string) => House
+  /** `eventTitle` renames the calendar event after the house */
+  updateHouse: (id: string, patch: Partial<Omit<House, 'id' | 'eventId' | 'createdAt'>>, eventTitle?: string) => void
+  deleteHouse: (id: string) => void
+  upsertVisit: (houseId: string, date: string, patch: Partial<Omit<Visit, 'id' | 'houseId' | 'date'>>) => void
 
   updateSettings: (patch: Partial<Settings>) => void
   updateGoogle: (patch: Partial<GoogleIntegration>) => void
@@ -296,14 +308,13 @@ export const useStore = create<Store>()(
 
       createItem: (partial, opts) => {
         const ts = now()
-        const project = partial.projectId ? get().data.projects[partial.projectId] : undefined
         const item: Item = {
           id: uid(),
           body: '',
           tags: [],
           ...partial,
           // an item always lives in its project's space
-          space: project?.space ?? partial.space ?? 'personal',
+          space: DEFAULT_SPACE,
           status: partial.kind === 'task' ? (partial.status ?? 'todo') : partial.status,
           createdAt: ts,
           updatedAt: ts,
@@ -448,7 +459,7 @@ export const useStore = create<Store>()(
           }
         }),
 
-      addProject: (name, color, space = 'personal', extra = {}) => {
+      addProject: (name, color, space = DEFAULT_SPACE, extra = {}) => {
         const p: Project = { id: uid(), name: name.trim(), color, space, status: 'active', createdAt: now(), ...extra }
         set((s) => ({ data: { ...s.data, projects: { ...s.data.projects, [p.id]: p } } }))
         return p
@@ -675,6 +686,73 @@ export const useStore = create<Store>()(
           return { data: { ...s.data, photos } }
         }),
 
+      addHouse: (input, eventTitle) => {
+        const id = uid()
+        const start = firstCleaning(input)
+        const event = get().createItem({
+          kind: 'event',
+          title: eventTitle,
+          body: input.partner,
+          start: start.toISOString(),
+          end: new Date(start.getTime() + 30 * 60_000).toISOString(),
+          houseId: id,
+          repeat: makeRule('weekly', {
+            days: input.weekdays,
+            until: input.endDate ? new Date(`${input.endDate}T12:00:00`).toISOString() : undefined,
+          }),
+        })
+        const house: House = { ...input, id, eventId: event.id, createdAt: now() }
+        set((s) => ({ data: { ...s.data, houses: { ...s.data.houses, [id]: house } } }))
+        return house
+      },
+      updateHouse: (id, patch, eventTitle) => {
+        const old = get().data.houses[id]
+        if (!old) return
+        const house = { ...old, ...patch }
+        if ('endDate' in patch && !patch.endDate) delete house.endDate
+        set((s) => ({ data: { ...s.data, houses: { ...s.data.houses, [id]: house } } }))
+        if (get().data.items[house.eventId]) {
+          const start = firstCleaning(house)
+          get().updateItem(house.eventId, {
+            ...(eventTitle ? { title: eventTitle } : {}),
+            body: house.partner,
+            start: start.toISOString(),
+            end: new Date(start.getTime() + 30 * 60_000).toISOString(),
+            repeat: makeRule('weekly', {
+              days: house.weekdays,
+              until: house.endDate ? new Date(`${house.endDate}T12:00:00`).toISOString() : undefined,
+            }),
+          })
+        }
+      },
+      deleteHouse: (id) => {
+        const house = get().data.houses[id]
+        if (!house) return
+        get().deleteItem(house.eventId)
+        const visitIds = new Set(Object.values(get().data.visits).filter((v) => v.houseId === id).map((v) => v.id))
+        set((s) => {
+          const houses = { ...s.data.houses }
+          delete houses[id]
+          const visits = Object.fromEntries(Object.entries(s.data.visits).filter(([k]) => !visitIds.has(k)))
+          const photos = Object.fromEntries(
+            Object.entries(s.data.photos).filter(([pid, p]) => {
+              if (p.visitId && visitIds.has(p.visitId)) {
+                deletePhotoBlob(pid).catch(() => undefined)
+                return false
+              }
+              return true
+            }),
+          )
+          return { data: { ...s.data, houses, visits, photos } }
+        })
+      },
+      upsertVisit: (houseId, date, patch) =>
+        set((s) => {
+          const id = visitId(houseId, date)
+          const prev = s.data.visits[id] ?? { id, houseId, date, updatedAt: now() }
+          return { data: { ...s.data, visits: { ...s.data.visits, [id]: { ...prev, ...patch, updatedAt: now() } } } }
+        }),
+
       updateSettings: (patch) =>
         set((s) => ({ data: { ...s.data, settings: { ...s.data.settings, ...patch } } })),
 
@@ -803,7 +881,13 @@ export const useStore = create<Store>()(
         }
         if (p?.data && version < 5) {
           p.data = normalizeData(p.data, true)
-        } else if (p?.data && version < 7) {
+        } else if (p?.data && version < 8) {
+          // v8: the Osobní / Pracovní spaces were merged into Andulka — keep a copy of what was there
+          try {
+            localStorage.setItem('weavo-v1-backup-v7', JSON.stringify(persisted))
+          } catch {
+            /* storage full — carry on */
+          }
           p.data = normalizeData(p.data)
         }
         return p as { data: WeavoData }

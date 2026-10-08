@@ -5,7 +5,7 @@ import { mainViews, moreViews } from '@/lib/nav'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { todayTasks } from '@/lib/selectors'
-import { PROJECT_COLORS, SPACE_COLOR } from '@/lib/types'
+import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import type { Space } from '@/lib/types'
 import { WeavoLogo } from './brand'
 import { Avatar, Badge, Kbd, ProjectGlyph, SpaceThread, cn } from './ui'
@@ -126,7 +126,7 @@ export function Sidebar({ onNavigate, className }: { onNavigate?: () => void; cl
       </nav>
 
       <div data-tour="projects">
-        {(['work', 'personal'] as Space[]).map((space) => {
+        {SPACES.map((space) => {
           const list = projects.filter((p) => p.space === space)
           return (
             <div key={space}>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
-import { SPACE_COLOR, SPACES, TAG_COLORS } from '@/lib/types'
+import { DEFAULT_SPACE, SPACE_COLOR, SPACES, TAG_COLORS } from '@/lib/types'
 import type { Space, Tag } from '@/lib/types'
 import { ConfirmDialog } from './overlays'
 import { Dot, Segmented, cn } from './ui'
@@ -55,7 +55,7 @@ export function TagSettings() {
   const tags = useStore((s) => s.data.tags)
   const addTag = useStore((s) => s.addTag)
   const deleteTag = useStore((s) => s.deleteTag)
-  const [space, setSpace] = useState<Space>('personal')
+  const [space, setSpace] = useState<Space>(DEFAULT_SPACE)
   const [draft, setDraft] = useState('')
   const [toDelete, setToDelete] = useState<Tag | null>(null)
   const list = Object.values(tags)

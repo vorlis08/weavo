@@ -4,7 +4,7 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { daysUntil, fmtRelDay, fmtShort, fmtTime } from '@/lib/date'
 import { isOnToday } from '@/lib/selectors'
-import { PRIORITY_RANK, SPACE_COLOR } from '@/lib/types'
+import { PRIORITY_RANK, SPACES, SPACE_COLOR } from '@/lib/types'
 import type { Item, Space, TaskPriority, WeavoData } from '@/lib/types'
 import { SourceBadge } from './items'
 import { Checkbox, ProjectGlyph, Segmented, SpaceThread, cn } from './ui'
@@ -342,6 +342,7 @@ export function ProgressBar({ items, split }: { items: Item[]; split?: boolean }
 /** Vše / Osobní / Práce — shared by Home and Calendar */
 export function SpaceFilterSwitch() {
   const t = useT()
+  if (SPACES.length < 2) return null
   const value = useStore((s) => s.data.settings.spaceFilter)
   const updateSettings = useStore((s) => s.updateSettings)
   return (

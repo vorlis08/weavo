@@ -238,7 +238,7 @@ function PropChips({ project }: { project: Project }) {
 
   return (
     <div className="-mt-2 flex flex-wrap gap-2">
-      <Menu
+      {SPACES.length > 1 && <Menu
         trigger={({ toggle }) => (
           <Chip onClick={toggle}>
             <SpaceThread color={SPACE_COLOR[project.space]} className="w-3.5" />
@@ -250,7 +250,7 @@ function PropChips({ project }: { project: Project }) {
           icon: <SpaceThread color={SPACE_COLOR[sp]} />,
           onSelect: () => updateProject(project.id, { space: sp }),
         }))}
-      />
+      />}
       <Menu
         trigger={({ toggle }) => (
           <Chip onClick={toggle}>

@@ -514,7 +514,7 @@ export function RecordDetail() {
           {/* side */}
           <div className="flex w-full shrink-0 flex-col gap-3.5 lg:w-[300px]">
             <div className="rounded-md border border-line bg-surface px-[15px] py-2.5">
-              <PropRow label={t.spaces.label}>
+              {SPACES.length > 1 && <PropRow label={t.spaces.label}>
                 <Segmented
                   options={SPACES.map((sp) => ({
                     value: sp,
@@ -531,7 +531,7 @@ export function RecordDetail() {
                     })
                   }}
                 />
-              </PropRow>
+              </PropRow>}
               <Divider />
               {item.kind === 'task' && (
                 <>

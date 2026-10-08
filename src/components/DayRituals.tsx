@@ -145,8 +145,7 @@ function PlanDay({ onClose }: { onClose: () => void }) {
               [todayTasks(data).filter((it) => it.status !== 'done').length, t.rituals.tasks],
               [hot.length, t.rituals.burning],
               [events.length, t.rituals.events],
-              [events.filter((e) => e.space === 'work').length, t.rituals.meetings],
-            ].map(([n, label]) => (
+                          ].map(([n, label]) => (
               <span key={label}>
                 <b className="block text-xl font-semibold text-ink">{n}</b>
                 {label}

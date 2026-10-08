@@ -22,7 +22,9 @@ export interface RepeatRule {
 
 /** top-level partition: personal, work and Andulka items live in separate to-do lists */
 export type Space = 'personal' | 'work' | 'andulka'
-export const SPACES: Space[] = ['personal', 'work', 'andulka']
+/** the spaces the UI offers — for now only Andulka (Osobní/Pracovní were merged into it) */
+export const SPACES: Space[] = ['andulka']
+export const DEFAULT_SPACE: Space = 'andulka'
 export type SpaceFilter = 'all' | Space
 /** the threads — personal jade, work ochre, Andulka rose */
 export const SPACE_COLOR: Record<Space, string> = { personal: '#5fb98c', work: '#d6a45a', andulka: '#d28aad' }
@@ -139,11 +141,48 @@ export interface Photo {
   /** ISO datetime it was taken / received */
   takenAt: string
   caption?: string
-  /** the task it belongs to, if any (e.g. the weekly cleaning check) */
-  itemId?: string
+  /** the cleaning day it documents (a Visit id) */
+  visitId?: string
   width: number
   height: number
   createdAt: string
+}
+
+/** a house that is cleaned on a schedule — Weavo tracks the cleaning days, the photos the partner owes and the client's satisfaction */
+export interface House {
+  id: string
+  name: string
+  /** the partner who cleans it */
+  partner: string
+  /** YYYY-MM-DD — the first day photos are required */
+  startDate: string
+  /** YYYY-MM-DD — the last day photos are required; empty = still running */
+  endDate?: string
+  /** cleaning weekdays, 0 = Sunday … 6 = Saturday */
+  weekdays: number[]
+  /** HH:MM — when the reminder to call the partner fires */
+  time: string
+  notes?: string
+  /** the repeating calendar event that carries the schedule */
+  eventId: string
+  createdAt: string
+}
+
+/** one cleaning day of a house; id = `${houseId}:${date}` */
+export interface Visit {
+  id: string
+  houseId: string
+  /** YYYY-MM-DD */
+  date: string
+  /** the partner was called */
+  called?: boolean
+  /** what was wrong */
+  issues?: string
+  /** client satisfaction 1 (worst) – 10 (best) */
+  rating?: number
+  /** the photos arrived */
+  photosReceived?: boolean
+  updatedAt: string
 }
 
 export interface Contact {
@@ -206,6 +245,9 @@ export interface Item {
   end?: string
   allDay?: boolean
   contactIds?: string[]
+  /** the house whose cleaning schedule this event is */
+  houseId?: string
+
   /** event — where it takes place, and a link to join (meeting URL) */
   place?: string
   link?: string
@@ -285,6 +327,8 @@ export interface WeavoData {
   contacts: Record<string, Contact>
   reminders: Record<string, Reminder>
   photos: Record<string, Photo>
+  houses: Record<string, House>
+  visits: Record<string, Visit>
   settings: Settings
   google: GoogleIntegration
 }

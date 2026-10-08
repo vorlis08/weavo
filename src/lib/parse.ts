@@ -43,8 +43,6 @@ export interface ParseResult {
 }
 
 const SPACE_WORDS: Record<string, Space> = {
-  práce: 'work', prace: 'work', pracovní: 'work', pracovni: 'work', work: 'work',
-  osobní: 'personal', osobni: 'personal', personal: 'personal',
   andulka: 'andulka',
 }
 

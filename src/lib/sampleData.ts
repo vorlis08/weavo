@@ -130,17 +130,17 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   const phCopy = phase(x.phCopy, -2, 3)
   const phLaunch = phase(x.phLaunch, 4, 6)
   const pLaunch = {
-    id: uid(), name: x.pLaunch, color: '#e07a5f', space: 'work' as const, status: 'active' as const,
+    id: uid(), name: x.pLaunch, color: '#e07a5f', space: 'andulka' as const, status: 'active' as const,
     description: x.launchBrief,
     start: addDays(startOfDay(now), -10).toISOString(),
     due: addDays(startOfDay(now), 6).toISOString(),
     phases: [phPrep, phCopy, phLaunch],
   }
   const pSite = {
-    id: uid(), name: x.pSite, color: '#b794f4', space: 'work' as const, status: 'active' as const,
+    id: uid(), name: x.pSite, color: '#b794f4', space: 'andulka' as const, status: 'active' as const,
     due: addDays(startOfDay(now), 18).toISOString(),
   }
-  const pHome = { id: uid(), name: x.pHome, color: '#8bc47a', space: 'personal' as const, status: 'active' as const }
+  const pHome = { id: uid(), name: x.pHome, color: '#8bc47a', space: 'andulka' as const, status: 'active' as const }
 
   const tags = starterTags(lang)
   const tagNamed = (i: number) => Object.values(tags)[i].id
@@ -158,7 +158,7 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
   const items: Item[] = []
   const ts = startOfDay(now).toISOString()
   const spaceOf = (projectId?: string) =>
-    [pLaunch, pSite, pHome].find((p) => p.id === projectId)?.space ?? 'personal'
+    [pLaunch, pSite, pHome].find((p) => p.id === projectId)?.space ?? 'andulka'
   const push = (it: Partial<Item> & Pick<Item, 'kind' | 'title'>) => {
     const full: Item = { id: uid(), tags: [], body: '', createdAt: ts, updatedAt: ts, space: spaceOf(it.projectId), ...it }
     items.push(full)
@@ -220,6 +220,8 @@ export function makeSampleData(now = new Date(), lang: Lang = 'cs'): WeavoData {
     contacts,
     reminders,
     photos: {},
+    houses: {},
+    visits: {},
     settings: { ...DEFAULT_SETTINGS, lang, displayName: x.you, tourSeen: true },
     google: { ...DEFAULT_GOOGLE },
   }

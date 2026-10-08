@@ -10,7 +10,7 @@ import { useStore } from '@/lib/store'
 import { useT } from '@/lib/i18n'
 import { addDays, daysUntil, fmtCountdown, fmtRelDay, fmtShort, startOfDay } from '@/lib/date'
 import { currentPhase, isOverdue, projectNextStep, projectSignals, projectStats } from '@/lib/selectors'
-import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
+import { DEFAULT_SPACE, PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import type { Project, Space } from '@/lib/types'
 
 const COLS = 'md:grid-cols-[minmax(0,1fr)_180px_128px_160px_72px]'
@@ -118,7 +118,7 @@ export function ProjectsView() {
             <span>{t.project.colProgress}</span>
             <span className="text-right">{t.project.colSignals}</span>
           </div>
-          {(filter === 'all' ? (['work', 'personal', 'andulka'] as Space[]) : [filter]).map((sp) =>
+          {(filter === 'all' ? SPACES : [filter]).map((sp) =>
             group(
               sp,
               <>
@@ -297,7 +297,7 @@ function NewProjectDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const addProject = useStore((s) => s.addProject)
   const projectCount = useStore((s) => Object.keys(s.data.projects).length)
   const [name, setName] = useState('')
-  const [space, setSpace] = useState<Space>('personal')
+  const [space, setSpace] = useState<Space>(DEFAULT_SPACE)
   const [color, setColor] = useState<string | null>(null)
   const [due, setDue] = useState('')
   const [template, setTemplate] = useState('none')
@@ -331,6 +331,7 @@ function NewProjectDialog({ open, onClose }: { open: boolean; onClose: () => voi
           className="display w-full bg-transparent text-2xl text-ink outline-none placeholder:text-ink-4"
         />
         <div className="flex flex-wrap items-center gap-3">
+          {SPACES.length > 1 && (
           <Segmented
             size="md"
             options={SPACES.map((sp) => ({
@@ -345,6 +346,7 @@ function NewProjectDialog({ open, onClose }: { open: boolean; onClose: () => voi
             value={space}
             onChange={setSpace}
           />
+          )}
           <div className="flex gap-1.5">
             {PROJECT_COLORS.map((c) => (
               <button

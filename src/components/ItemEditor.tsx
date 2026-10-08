@@ -22,7 +22,7 @@ import { addDays, overlaps, startOfDay, toLocalInput } from '@/lib/date'
 import { eventsOn } from '@/lib/recur'
 import { defaultTriggers, hasTimeOfDay } from '@/lib/reminders'
 import type { Item, ItemKind, ReminderTrigger, Space, TaskPriority, TaskStatus, WeavoData } from '@/lib/types'
-import { PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
+import { DEFAULT_SPACE, PROJECT_COLORS, SPACE_COLOR, SPACES } from '@/lib/types'
 import { RemindersField, RepeatField, type ReminderEntry } from './fields'
 import { TagEditor } from './editors'
 import { Modal } from './overlays'
@@ -378,7 +378,7 @@ function ItemForm({ m }: { m: Model }) {
           </>
         )}
 
-        <Row label={t.spaces.label}>
+        {SPACES.length > 1 && <Row label={t.spaces.label}>
           <Segmented
             options={SPACES.map((sp) => ({
               value: sp,
@@ -389,10 +389,10 @@ function ItemForm({ m }: { m: Model }) {
                 </>
               ),
             }))}
-            value={v.space ?? 'personal'}
+            value={v.space ?? DEFAULT_SPACE}
             onChange={m.setSpace}
           />
-        </Row>
+        </Row>}
 
         <Row label={t.detail.propProject} wide>
           <Select
@@ -439,7 +439,7 @@ function ItemForm({ m }: { m: Model }) {
         ) : null}
 
         <Row label={t.detail.propTags} wide>
-          <TagEditor tags={v.tags ?? []} space={v.space ?? 'personal'} onChange={(tags) => set({ tags })} />
+          <TagEditor tags={v.tags ?? []} space={v.space ?? DEFAULT_SPACE} onChange={(tags) => set({ tags })} />
         </Row>
 
         {isTask && (
@@ -524,11 +524,8 @@ function ItemForm({ m }: { m: Model }) {
 
 function defaultSpaceFor(pathname: string, data: WeavoData): Space {
   const projectMatch = pathname.match(/^\/project\/([^/]+)/)
-  if (pathname.startsWith('/todo/work')) return 'work'
-  if (pathname.startsWith('/todo/andulka')) return 'andulka'
   if (projectMatch && data.projects[projectMatch[1]]) return data.projects[projectMatch[1]].space
-  if (pathname.startsWith('/todo') || data.settings.spaceFilter !== 'work') return 'personal'
-  return 'work'
+  return DEFAULT_SPACE
 }
 
 /** what the quick line contributes, for a given type */
@@ -650,7 +647,7 @@ function CaptureBody() {
       projectId = addProject(
         newProject,
         PROJECT_COLORS[Object.keys(data.projects).length % PROJECT_COLORS.length].value,
-        v.space ?? 'personal',
+        v.space ?? DEFAULT_SPACE,
       ).id
     }
     const payload: Draft = { ...v, title, projectId }
@@ -847,7 +844,14 @@ function EditBody({ item, onClose }: { item: Item; onClose: () => void }) {
   return (
     <>
       <div className="flex items-center gap-2 border-b border-line py-2.5 pl-4 pr-2.5 pt-[calc(10px+env(safe-area-inset-top,0px))] text-sm text-ink-3">
-        {project ? (
+        {item.houseId && data.houses[item.houseId] ? (
+          <button
+            onClick={() => navigate(`/domy/${item.houseId}`)}
+            className="flex min-w-0 items-center gap-2 font-medium text-iris-2 hover:text-iris"
+          >
+            {t.houses.openHouse}: {data.houses[item.houseId].name}
+          </button>
+        ) : project ? (
           <button
             onClick={() => navigate(`/project/${project.id}`)}
             className="flex min-w-0 items-center gap-2 hover:text-ink"

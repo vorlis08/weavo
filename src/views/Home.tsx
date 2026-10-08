@@ -10,7 +10,7 @@ import { useT } from '@/lib/i18n'
 import { eventsOn } from '@/lib/recur'
 import { fmtCountdown, fmtLongDate, fmtShort, fmtTime } from '@/lib/date'
 import { isHot, projectStats, todayTasks, waitingTasks } from '@/lib/selectors'
-import { SPACE_COLOR } from '@/lib/types'
+import { SPACE_COLOR, SPACES } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 
 const MoreLink = ({ to, children }: { to: string; children: string }) => (
@@ -95,7 +95,7 @@ export function Home() {
               <span className="text-lg text-ink-3">{t.home.doneOf(today.length)}</span>
             </div>
             <div className="mt-4 flex flex-col gap-2.5">
-              {(['personal', 'work', 'andulka'] as Space[])
+              {SPACES
                 .filter((sp) => !space || sp === space)
                 .map((sp) => {
                   const s = split(sp)

@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
+import { HouseView } from './views/Houses'
 import { AppShell } from './components/AppShell'
 import { Home } from './views/Home'
 import { TodoView } from './views/TodoView'
@@ -23,7 +24,8 @@ export default function App() {
       <Route element={<AppShell />}>
         <Route index element={<Home />} />
         <Route path="todo" element={<TodoView />} />
-        <Route path="todo/:space" element={<TodoView />} />
+        <Route path="todo/:space" element={<Navigate to="/todo" replace />} />
+        <Route path="domy/:id" element={<HouseView />} />
         <Route path="calendar" element={<CalendarView />} />
         <Route path="board" element={<Board />} />
         <Route path="timeline" element={<Timeline />} />

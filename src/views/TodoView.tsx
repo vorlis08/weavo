@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { NavLink, useParams, useSearchParams } from 'react-router-dom'
-import { ArrowRight, Clock9, Columns3, Flame, Hourglass, Image as ImageIcon, List, ListChecks, Plus, Repeat, Trash2 } from 'lucide-react'
+import { NavLink, useSearchParams } from 'react-router-dom'
+import { ArrowRight, Clock9, Columns3, Flame, Hourglass, Home, List, ListChecks, Plus, Repeat, Trash2 } from 'lucide-react'
 import { Page } from '@/components/Page'
-import { PhotosPanel } from '@/components/Photos'
+import { HousesPanel } from './Houses'
 import { ProgressBar, TodoSection, byUrgency } from '@/components/todo'
 import { Kbd, ProjectGlyph, Segmented, cn } from '@/components/ui'
 import { useConfirmDelete } from '@/components/useConfirmDelete'
@@ -13,17 +13,16 @@ import { addDays, fmtLongDate, fmtTime, startOfDay } from '@/lib/date'
 import { isHot, isOnToday, isOverdue, todayTasks, waitingTasks } from '@/lib/selectors'
 import { taskFromLine } from '@/lib/capture'
 import { eventsOn } from '@/lib/recur'
-import { SPACE_COLOR } from '@/lib/types'
+import { DEFAULT_SPACE, SPACES, SPACE_COLOR } from '@/lib/types'
 import type { Item, Space } from '@/lib/types'
 
 const isOpen = (it: Item) => it.status !== 'done'
 
 export function TodoView() {
   const t = useT()
-  const params = useParams()
-  const space: Space = params.space === 'work' ? 'work' : params.space === 'andulka' ? 'andulka' : 'personal'
+  const space: Space = DEFAULT_SPACE
   const [search, setSearch] = useSearchParams()
-  const photosTab = space === 'andulka' && search.get('view') === 'photos'
+  const photosTab = search.get('view') === 'houses'
   const data = useStore((s) => s.data)
   const { todoMode, workGroup } = data.settings
   const updateSettings = useStore((s) => s.updateSettings)
@@ -56,7 +55,7 @@ export function TodoView() {
 
   const actions = (
     <>
-      {space === 'andulka' && <AndulkaViews photos={false} onChange={setSearch} />}
+      <AndulkaViews photos={false} onChange={setSearch} />
       {space === 'work' && todoMode === 'list' && (
         <Segmented
           options={[
@@ -84,7 +83,7 @@ export function TodoView() {
     return (
       <Page eyebrow={fmtLongDate(now)} title={t.todo.title} actions={<AndulkaViews photos onChange={setSearch} />}>
         {tabs}
-        <PhotosPanel space={space} />
+        <HousesPanel />
       </Page>
     )
 
@@ -145,6 +144,7 @@ export function TodoView() {
 function SpaceTabs({ space }: { space: Space }) {
   const t = useT()
   const data = useStore((s) => s.data)
+  if (SPACES.length < 2) return null
   // what needs attention: open tasks for today plus anything burning
   const count = (sp: Space) =>
     new Set([
@@ -153,7 +153,7 @@ function SpaceTabs({ space }: { space: Space }) {
     ]).size
   return (
     <div className="mb-6 flex gap-7 border-b border-line" data-tour="todo-space">
-      {(['personal', 'work', 'andulka'] as Space[]).map((sp) => (
+      {SPACES.map((sp) => (
         <NavLink
           key={sp}
           to={sp === 'personal' ? '/todo' : `/todo/${sp}`}
@@ -187,10 +187,10 @@ function AndulkaViews({ photos, onChange }: { photos: boolean; onChange: (p: URL
     <Segmented
       options={[
         { value: 'tasks', label: <><ListChecks size={15} />{t.photos.tabTasks}</> },
-        { value: 'photos', label: <><ImageIcon size={15} />{t.photos.tabPhotos}</> },
+        { value: 'houses', label: <><Home size={15} />{t.houses.tab}</> },
       ]}
-      value={photos ? 'photos' : 'tasks'}
-      onChange={(v) => onChange(v === 'photos' ? new URLSearchParams({ view: 'photos' }) : new URLSearchParams())}
+      value={photos ? 'houses' : 'tasks'}
+      onChange={(v) => onChange(v === 'houses' ? new URLSearchParams({ view: 'houses' }) : new URLSearchParams())}
     />
   )
 }
